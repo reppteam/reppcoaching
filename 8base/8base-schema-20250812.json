@@ -1,0 +1,4305 @@
+{
+  "tables": [
+    {
+      "id": "687a2c7139f48b0002f93d4e",
+      "name": "Coach",
+      "displayName": "Coach",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "687a2c7139f48b0002f93d4f",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a2c7139f48b0002f93d50",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a2c7139f48b0002f93d51",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a2c7139f48b0002f93d53",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "687a2c8e2834cc0002651cbc",
+          "name": "fullName",
+          "displayName": "fullName",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a2c982834cc0002651ced",
+          "name": "email",
+          "displayName": "email",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a2ca157e243000263283f",
+          "name": "bio",
+          "displayName": "bio",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a2cade2f5ac0002a9a890",
+          "name": "profileImage",
+          "displayName": "profileImage",
+          "description": null,
+          "fieldType": "FILE",
+          "fieldTypeAttributes": {
+            "format": "FILE",
+            "maxSize": null,
+            "typeRestrictions": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a2d6be2f5ac0002a9a919",
+          "name": "assignedStudent",
+          "displayName": "assignedStudent",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "assignedCoach",
+            "refFieldDisplayName": "assignedCoach",
+            "relationTableName": "CoachUser1",
+            "relationFieldName": "coachAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "687a2de15cf76000025f6c9d",
+          "name": "user",
+          "displayName": "user",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "coach",
+            "refFieldDisplayName": "coach",
+            "relationTableName": "CoachUser",
+            "relationFieldName": "coachAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "687a2e9de172db0002f968d9",
+          "name": "session",
+          "displayName": "session",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": true,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "coachSession",
+            "refFieldDisplayName": "coachSession",
+            "relationTableName": "CoachesSession",
+            "relationFieldName": "coachAId",
+            "refTable": {
+              "id": "687a2e03f19bdb0002a94109",
+              "name": "Session",
+              "displayName": "Session"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "687a329bfb01000002a317cf",
+          "name": "assignmentCoash",
+          "displayName": "assignmentCoash",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "coach",
+            "refFieldDisplayName": "coach",
+            "relationTableName": "AssignmentCoach",
+            "relationFieldName": "coachBId",
+            "refTable": {
+              "id": "687a325efbffd80002953300",
+              "name": "Assignment",
+              "displayName": "Assignment"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "687a3338a82fdf0002a3e605",
+          "name": "coachNote",
+          "displayName": "coachNote",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "coach",
+            "refFieldDisplayName": "coach",
+            "relationTableName": "CoachNote",
+            "relationFieldName": "coachAId",
+            "refTable": {
+              "id": "687a3304a287d60002164782",
+              "name": "Note",
+              "displayName": "Note"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "687a2cb7ff9eee00029966e1",
+      "name": "Student",
+      "displayName": "Student",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "687a2cb7ff9eee00029966e2",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a2cb7ff9eee00029966e3",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a2cb7ff9eee00029966e4",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a2cb7ff9eee00029966e6",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "687a2cee16448d00021b765e",
+          "name": "phone",
+          "displayName": "phone",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a2d8da287d600021646a9",
+          "name": "user",
+          "displayName": "user",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "student",
+            "refFieldDisplayName": "student",
+            "relationTableName": "StudentUser",
+            "relationFieldName": "studentAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "688b135178e4180002068468",
+          "name": "business_name",
+          "displayName": "business_name",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1366d00f5c00025cef4e",
+          "name": "location",
+          "displayName": "location",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1376c0bcc40002893089",
+          "name": "target_market",
+          "displayName": "target_market",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1381d00f5c00025cef4f",
+          "name": "strengths",
+          "displayName": "strengths",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1391d00f5c00025cef50",
+          "name": "challenges",
+          "displayName": "challenges",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b139bd00f5c00025cef51",
+          "name": "goals",
+          "displayName": "goals",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b13a5d00f5c00025cef52",
+          "name": "preferred_contact_method",
+          "displayName": "preferred_contact_method",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b13afd00f5c00025cef53",
+          "name": "availability",
+          "displayName": "availability",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b13c08a5fd60002b84362",
+          "name": "notes",
+          "displayName": "notes",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        }
+      ]
+    },
+    {
+      "id": "687a2e03f19bdb0002a94109",
+      "name": "Session",
+      "displayName": "Session",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "687a2e03f19bdb0002a9410a",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a2e03f19bdb0002a9410b",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a2e03f19bdb0002a9410c",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a2e03f19bdb0002a9410e",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "687a2e12b6ede90002fe394e",
+          "name": "title",
+          "displayName": "title",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a2e2eb6ede90002fe397f",
+          "name": "description",
+          "displayName": "description",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 10000
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a2e82d930a90002a376f2",
+          "name": "studentSession",
+          "displayName": "studentSession",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "session",
+            "refFieldDisplayName": "session",
+            "relationTableName": "SessionUsers",
+            "relationFieldName": "sessionAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "687a2e9de172db0002f968da",
+          "name": "coachSession",
+          "displayName": "coachSession",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "session",
+            "refFieldDisplayName": "session",
+            "relationTableName": "CoachesSession",
+            "relationFieldName": "sessionBId",
+            "refTable": {
+              "id": "687a2c7139f48b0002f93d4e",
+              "name": "Coach",
+              "displayName": "Coach"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "687a2ed0884c20000259c03f",
+          "name": "dateTime",
+          "displayName": "dateTime",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a2ede579d0c0002f92760",
+          "name": "zoomLink",
+          "displayName": "zoomLink",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 1000
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a2efb136ba0000216b79c",
+          "name": "status",
+          "displayName": "status",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "Scheduled",
+              "Completed",
+              "Cancelled"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        }
+      ]
+    },
+    {
+      "id": "687a325efbffd80002953300",
+      "name": "Assignment",
+      "displayName": "Assignment",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "687a325efbffd80002953301",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a325efbffd80002953302",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a325efbffd80002953303",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a325efbffd80002953305",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "687a3270fb01000002a317cc",
+          "name": "title",
+          "displayName": "title",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a327afb01000002a317cd",
+          "name": "instructions",
+          "displayName": "instructions",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a329bfb01000002a317ce",
+          "name": "coach",
+          "displayName": "coach",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "assignmentCoash",
+            "refFieldDisplayName": "assignmentCoash",
+            "relationTableName": "AssignmentCoach",
+            "relationFieldName": "assignmentAId",
+            "refTable": {
+              "id": "687a2c7139f48b0002f93d4e",
+              "name": "Coach",
+              "displayName": "Coach"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "687a32c056d09a00027279fc",
+          "name": "student",
+          "displayName": "student",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "assignmentStudent",
+            "refFieldDisplayName": "assignmentStudent",
+            "relationTableName": "AssignmentUser",
+            "relationFieldName": "assignmentAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "687a32cca810ae000222175b",
+          "name": "dueDate",
+          "displayName": "dueDate",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a32e84955570002a425a0",
+          "name": "status",
+          "displayName": "status",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "Pending",
+              "Submitted",
+              "Reviewed"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a32faa287d60002164781",
+          "name": "submissionLink",
+          "displayName": "submissionLink",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 1000
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        }
+      ]
+    },
+    {
+      "id": "687a3304a287d60002164782",
+      "name": "Note",
+      "displayName": "Note",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "687a3304a287d60002164783",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a3304a287d60002164784",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a3304a287d60002164785",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a3304a287d60002164787",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "687a3316580d8f00027bcad1",
+          "name": "title",
+          "displayName": "title",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a3320a82fdf0002a3e5b7",
+          "name": "content",
+          "displayName": "content",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a3338a82fdf0002a3e604",
+          "name": "coach",
+          "displayName": "coach",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "coachNote",
+            "refFieldDisplayName": "coachNote",
+            "relationTableName": "CoachNote",
+            "relationFieldName": "noteBId",
+            "refTable": {
+              "id": "687a2c7139f48b0002f93d4e",
+              "name": "Coach",
+              "displayName": "Coach"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "687a335039f48b0002f93fcc",
+          "name": "student",
+          "displayName": "student",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "studentNote",
+            "refFieldDisplayName": "studentNote",
+            "relationTableName": "NoteUser",
+            "relationFieldName": "noteAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "689c3d6affb0e50002e436f6",
+          "name": "target_type",
+          "displayName": "target_type",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c3d97ffb0e50002e436f7",
+          "name": "visibility",
+          "displayName": "visibility",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        }
+      ]
+    },
+    {
+      "id": "687a338ab149320002e89203",
+      "name": "Payment",
+      "displayName": "Payment",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "687a338ab149320002e89204",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a338ab149320002e89205",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a338ab149320002e89206",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "687a338ab149320002e89208",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "687a33c7d4f08900028584c7",
+          "name": "amount",
+          "displayName": "amount",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a33de8663aa0002c5f090",
+          "name": "status",
+          "displayName": "status",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "Active",
+              "Failed",
+              "Cancelled"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a33e9fb0b880002cbe416",
+          "name": "stripeCustomerId",
+          "displayName": "stripeCustomerId",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "687a33f58831a200029a56b8",
+          "name": "stripeSubscriptionId",
+          "displayName": "stripeSubscriptionId",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        }
+      ]
+    },
+    {
+      "id": "688b13c6d00f5c00025cef54",
+      "name": "WeeklyReport",
+      "displayName": "WeeklyReport",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b13c6d00f5c00025cef55",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b13c6d00f5c00025cef56",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b13c6d00f5c00025cef57",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b13c6d00f5c00025cef59",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b13fc20026a000259ed9f",
+          "name": "start_date",
+          "displayName": "start_date",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b14064a46b800026ade18",
+          "name": "end_date",
+          "displayName": "end_date",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b141513148e00020d5d9c",
+          "name": "new_clients",
+          "displayName": "new_clients",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b142417d8d30002de4191",
+          "name": "paid_shoots",
+          "displayName": "paid_shoots",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b142e17d8d30002de4192",
+          "name": "free_shoots",
+          "displayName": "free_shoots",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1437f75bcf0002fb6eec",
+          "name": "unique_clients",
+          "displayName": "unique_clients",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1441f75bcf0002fb6eed",
+          "name": "aov",
+          "displayName": "aov",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b145b17d8d30002de41e1",
+          "name": "revenue",
+          "displayName": "revenue",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b146ce909370002f6de9e",
+          "name": "expenses",
+          "displayName": "expenses",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b147fd00f5c00025cef5e",
+          "name": "editing_cost",
+          "displayName": "editing_cost",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b148ed00f5c00025cefaf",
+          "name": "net_profit",
+          "displayName": "net_profit",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b14a820026a000259edd0",
+          "name": "status",
+          "displayName": "status",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "active",
+              "completed"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b150de909370002f6deef",
+          "name": "student",
+          "displayName": "student",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "weekly_Report",
+            "refFieldDisplayName": "weekly_Report",
+            "relationTableName": "UsersWeeklyReport",
+            "relationFieldName": "weeklyReportBId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "688b153fcbb0440002fdf8ed",
+      "name": "Goal",
+      "displayName": "Goal",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b153fcbb0440002fdf8ee",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b153fcbb0440002fdf8ef",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b153fcbb0440002fdf8f0",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b153fcbb0440002fdf8f2",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b1643102bed0002d9c560",
+          "name": "student",
+          "displayName": "student",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "goal",
+            "refFieldDisplayName": "goal",
+            "relationTableName": "GoalUsers",
+            "relationFieldName": "goalAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "689077ed6e1dbb0002467444",
+          "name": "title",
+          "displayName": "title",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68907c61688e780002e03f2c",
+          "name": "description",
+          "displayName": "description",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 500
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68907c8a1ffd2200028cd851",
+          "name": "target_value",
+          "displayName": "target_value",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68907c941ffd2200028cd852",
+          "name": "current_value",
+          "displayName": "current_value",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68907ca7bc07aa0002390661",
+          "name": "goal_type",
+          "displayName": "goal_type",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68907cbbfda8c60002b52f6d",
+          "name": "deadline",
+          "displayName": "deadline",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68907cc429646d0002acb614",
+          "name": "priority",
+          "displayName": "priority",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68907cce1ffd2200028cd8af",
+          "name": "status",
+          "displayName": "status",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c38fcd7f31100026c9f55",
+          "name": "month_start",
+          "displayName": "month_start",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c390ad7f31100026c9fd4",
+          "name": "low_goal_shoots",
+          "displayName": "low_goal_shoots",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c39188687f80002534f95",
+          "name": "success_goal_shoots",
+          "displayName": "success_goal_shoots",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c39232467400002ced8af",
+          "name": "actual_shoots",
+          "displayName": "actual_shoots",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c3a253bbc490002c3cbde",
+          "name": "low_goal_revenue",
+          "displayName": "low_goal_revenue",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c3a333bbc490002c3cbdf",
+          "name": "success_goal_revenue",
+          "displayName": "success_goal_revenue",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c3a413bbc490002c3cbe0",
+          "name": "actual_revenue",
+          "displayName": "actual_revenue",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c3a553bbc490002c3cbe1",
+          "name": "aov",
+          "displayName": "aov",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        }
+      ]
+    },
+    {
+      "id": "688b1783102bed0002d9c5cc",
+      "name": "Pricing",
+      "displayName": "Pricing",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b1783102bed0002d9c5cd",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b1783102bed0002d9c5ce",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b1783102bed0002d9c5cf",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b1783102bed0002d9c5d1",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b17b78ae301000238e835",
+          "name": "user",
+          "displayName": "user",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "price",
+            "refFieldDisplayName": "price",
+            "relationTableName": "PricingUsers",
+            "relationFieldName": "pricingAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68931c7ea41a300002755edd",
+          "name": "category",
+          "displayName": "Category",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68931ca6032b9f0002f6eea8",
+          "name": "description",
+          "displayName": "Description",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 500
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68931da5547b5000023ce6c6",
+          "name": "packageFeatures",
+          "displayName": "Package Features",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": true,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68935622232cdb00020c1dde",
+          "name": "status",
+          "displayName": "status",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68946d4c3700ab00020aa530",
+          "name": "name",
+          "displayName": "name",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "6894800cf04b70000260181f",
+          "name": "duration_weeks",
+          "displayName": "duration_weeks",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689481e304d6bd0002665c53",
+          "name": "price",
+          "displayName": "Price",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c387cbfa635000277928c",
+          "name": "service_name",
+          "displayName": "service_name",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c388ab01b1100025f439d",
+          "name": "your_price",
+          "displayName": "your_price",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c38a3ae2ddb0002fbfd47",
+          "name": "competitor_price",
+          "displayName": "competitor_price",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c38b4ae2ddb0002fbfd48",
+          "name": "estimated_cost",
+          "displayName": "estimated_cost",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "689c38c38687f80002534f46",
+          "name": "estimated_profit",
+          "displayName": "estimated_profit",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        }
+      ]
+    },
+    {
+      "id": "688b183217d8d30002de43be",
+      "name": "Lead",
+      "displayName": "Lead",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b183217d8d30002de43bf",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b183217d8d30002de43c0",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b183217d8d30002de43c1",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b183217d8d30002de43c3",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b185417d8d30002de43c8",
+          "name": "user",
+          "displayName": "user",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "lead",
+            "refFieldDisplayName": "lead",
+            "relationTableName": "LeadUsers",
+            "relationFieldName": "leadAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "688b185f17d8d30002de43fa",
+          "name": "lead_name",
+          "displayName": "lead_name",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1867e909370002f6df8d",
+          "name": "email",
+          "displayName": "email",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1872bd1089000268f329",
+          "name": "phone",
+          "displayName": "phone",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b187abd1089000268f37a",
+          "name": "instagram_handle",
+          "displayName": "instagram_handle",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1883c5ddf30002ab77a6",
+          "name": "lead_source",
+          "displayName": "lead_source",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b188fc5ddf30002ab77a7",
+          "name": "initial_call_outcome",
+          "displayName": "initial_call_outcome",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 1000
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b18b0c5ddf30002ab77a8",
+          "name": "date_of_initial_call",
+          "displayName": "date_of_initial_call",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b18bac5ddf30002ab77a9",
+          "name": "last_followup_outcome",
+          "displayName": "last_followup_outcome",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b18c9c5ddf30002ab77aa",
+          "name": "date_of_last_followup",
+          "displayName": "date_of_last_followup",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b18d4c5ddf30002ab77ab",
+          "name": "next_followup_date",
+          "displayName": "next_followup_date",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1904c5ddf30002ab77ac",
+          "name": "message_sent",
+          "displayName": "message_sent",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "YES_NO",
+            "listOptions": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1919bd1089000268f3cb",
+          "name": "followed_back",
+          "displayName": "followed_back",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "YES_NO",
+            "listOptions": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1926cb7e9e00023b2726",
+          "name": "followed_up",
+          "displayName": "followed_up",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "YES_NO",
+            "listOptions": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1951c0bcc400028932bd",
+          "name": "status",
+          "displayName": "status",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "new",
+              "contacted",
+              "qualified",
+              "converted",
+              "lost"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1f5a4a46b800026ae058",
+          "name": "engagementTag",
+          "displayName": "EngagementTag",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": true,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "lead",
+            "refFieldDisplayName": "lead",
+            "relationTableName": "EngagementTagLeads",
+            "relationFieldName": "leadBId",
+            "refTable": {
+              "id": "688b1a058ae301000238e987",
+              "name": "EngagementTag",
+              "displayName": "EngagementTag"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "688b33f54b19920002cd93d7",
+          "name": "script_Component",
+          "displayName": "script_Component",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "lead",
+            "refFieldDisplayName": "lead",
+            "relationTableName": "LeadScriptComponent",
+            "relationFieldName": "leadAId",
+            "refTable": {
+              "id": "688b33644b19920002cd93ca",
+              "name": "ScriptComponents",
+              "displayName": "ScriptComponents"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "688b1a058ae301000238e987",
+      "name": "EngagementTag",
+      "displayName": "EngagementTag",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b1a058ae301000238e988",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b1a058ae301000238e989",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b1a058ae301000238e98a",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b1a058ae301000238e98c",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b1c02c0bcc400028932fa",
+          "name": "type",
+          "displayName": "type",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "follow_day_engagement",
+              "engagement_day_1",
+              "engagement_day_2",
+              "dm_sent",
+              "initial_call_done",
+              "follow_up_call_done",
+              "follow_up_dm_sent"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1c17a96b1500024c74e3",
+          "name": "completed_date",
+          "displayName": "completed_date",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b1f5a4a46b800026ae057",
+          "name": "lead",
+          "displayName": "lead",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "engagementTag",
+            "refFieldDisplayName": "EngagementTag",
+            "relationTableName": "EngagementTagLeads",
+            "relationFieldName": "engagementTagAId",
+            "refTable": {
+              "id": "688b183217d8d30002de43be",
+              "name": "Lead",
+              "displayName": "Lead"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "688b33644b19920002cd93ca",
+      "name": "ScriptComponents",
+      "displayName": "ScriptComponents",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b33644b19920002cd93cb",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b33644b19920002cd93cc",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b33644b19920002cd93cd",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b33644b19920002cd93cf",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b33763c697c00024fb1fd",
+          "name": "intro",
+          "displayName": "intro",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b33ae4b19920002cd93d4",
+          "name": "hook",
+          "displayName": "hook",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b33be4b19920002cd93d5",
+          "name": "body1",
+          "displayName": "body1",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 1000
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b33cbb118b40002bc5814",
+          "name": "body2",
+          "displayName": "body2",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 1000
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b33d4bd1089000268f5d4",
+          "name": "ending",
+          "displayName": "ending",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 1000
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b33f54b19920002cd93d6",
+          "name": "lead",
+          "displayName": "lead",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "script_Component",
+            "refFieldDisplayName": "script_Component",
+            "relationTableName": "LeadScriptComponent",
+            "relationFieldName": "scriptComponentBId",
+            "refTable": {
+              "id": "688b183217d8d30002de43be",
+              "name": "Lead",
+              "displayName": "Lead"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "688b3401e86e4800026a3c99",
+      "name": "CallLog",
+      "displayName": "CallLog",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b3401e86e4800026a3c9a",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b3401e86e4800026a3c9b",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b3401e86e4800026a3c9c",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b3401e86e4800026a3c9e",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b34405bd38b00020da360",
+          "name": "student",
+          "displayName": "student",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "call_Log",
+            "refFieldDisplayName": "call_Log",
+            "relationTableName": "CallLogUsers",
+            "relationFieldName": "callLogAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "688b34555bd38b00020da392",
+          "name": "call_date",
+          "displayName": "call_date",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b346dbd1089000268f5d5",
+          "name": "call_duration",
+          "displayName": "call_duration",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b348d12f6dc0002b2b2dc",
+          "name": "call_type",
+          "displayName": "call_type",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "scheduled",
+              "follow_up",
+              "emergency"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b34e212f6dc0002b2b373",
+          "name": "topics_discussed",
+          "displayName": "topics_discussed",
+          "description": null,
+          "fieldType": "JSON",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": "[]",
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b34f6441b4b00027fc2ec",
+          "name": "outcome",
+          "displayName": "outcome",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 1000
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b350412f6dc0002b2b374",
+          "name": "next_steps",
+          "displayName": "next_steps",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b352efdbf4400027515a4",
+          "name": "student_mood",
+          "displayName": "student_mood",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "positive",
+              "neutral",
+              "frustrated",
+              "motivated"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        }
+      ]
+    },
+    {
+      "id": "688b357c3c697c00024fb1ff",
+      "name": "MessageTemplate",
+      "displayName": "MessageTemplate",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b357c3c697c00024fb200",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b357c3c697c00024fb201",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b357c3c697c00024fb202",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b357c3c697c00024fb204",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b365c4b19920002cd9472",
+          "name": "type",
+          "displayName": "type",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "intro",
+              "hook",
+              "body1",
+              "body2",
+              "ending"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b3667fdbf4400027516d3",
+          "name": "content",
+          "displayName": "content",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b36746c129d000275acd9",
+          "name": "category",
+          "displayName": "category",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b368eafc3890002acf79f",
+          "name": "variation_number",
+          "displayName": "variation_number",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b369f441b4b00027fc2ed",
+          "name": "is_active",
+          "displayName": "is_active",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "YES_NO",
+            "listOptions": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        }
+      ]
+    },
+    {
+      "id": "688b371a4b19920002cd9473",
+      "name": "GlobalVariables",
+      "displayName": "GlobalVariables",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b371a4b19920002cd9474",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b371a4b19920002cd9475",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b371a4b19920002cd9476",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b371a4b19920002cd9478",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b372e4b19920002cd947d",
+          "name": "hourly_pay",
+          "displayName": "hourly_pay",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b37384b19920002cd947e",
+          "name": "cost_per_photo",
+          "displayName": "cost_per_photo",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b37457077e10002a1bffc",
+          "name": "target_profit_margin",
+          "displayName": "target_profit_margin",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b3776e86e4800026a3ca3",
+          "name": "user",
+          "displayName": "user",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "globalVariable",
+            "refFieldDisplayName": "GlobalVariable",
+            "relationTableName": "GlobalVariableUser",
+            "relationFieldName": "globalVariableAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "688b37c1e86e4800026a3ca5",
+      "name": "Product",
+      "displayName": "Product",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b37c1e86e4800026a3ca6",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b37c1e86e4800026a3ca7",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b37c1e86e4800026a3ca8",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b37c1e86e4800026a3caa",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b37d84b19920002cd947f",
+          "name": "name",
+          "displayName": "name",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b37e13c697c00024fb209",
+          "name": "price",
+          "displayName": "price",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b3808fdbf4400027517a0",
+          "name": "user",
+          "displayName": "user",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "product",
+            "refFieldDisplayName": "Product",
+            "relationTableName": "ProductUsers",
+            "relationFieldName": "productAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "688b3998afc3890002acf80b",
+          "name": "subitem",
+          "displayName": "subitem",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": true,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "product",
+            "refFieldDisplayName": "product",
+            "relationTableName": "ProductsSubitem",
+            "relationFieldName": "productAId",
+            "refTable": {
+              "id": "688b3815afc3890002acf7d0",
+              "name": "Subitem",
+              "displayName": "Subitem"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "688b3815afc3890002acf7d0",
+      "name": "Subitem",
+      "displayName": "Subitem",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "688b3815afc3890002acf7d1",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b3815afc3890002acf7d2",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b3815afc3890002acf7d3",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "688b3815afc3890002acf7d5",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
+          }
+        },
+        {
+          "id": "688b38f5a0f6440002d960ef",
+          "name": "type",
+          "displayName": "type",
+          "description": null,
+          "fieldType": "SWITCH",
+          "fieldTypeAttributes": {
+            "format": "CUSTOM",
+            "listOptions": [
+              "fixed",
+              "photo",
+              "labor"
+            ]
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b3938daaa9200024e2e06",
+          "name": "label",
+          "displayName": "label",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b3950441b4b00027fc2ee",
+          "name": "value",
+          "displayName": "value",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "688b3998afc3890002acf80a",
+          "name": "product",
+          "displayName": "product",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "subitem",
+            "refFieldDisplayName": "subitem",
+            "relationTableName": "ProductsSubitem",
+            "relationFieldName": "subitemBId",
+            "refTable": {
+              "id": "688b37c1e86e4800026a3ca5",
+              "name": "Product",
+              "displayName": "Product"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        }
+      ]
+    }
+  ],
+  "version": "0.1.0"
+}

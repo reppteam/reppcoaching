@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{title}}</title>
+    <link rel="icon" href="https://cdn.auth0.com/styleguide/components/1.0.8/media/logos/img/badge.png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+            <!-- Logo and Title -->
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center space-x-3 mb-4">
+                    <img src="https://cdn.auth0.com/styleguide/components/1.0.8/media/logos/img/badge.png" 
+                         alt="Real Estate Photographer Pro" 
+                         class="h-12 w-auto">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">
+                            REAL <span class="text-blue-600">ESTATE</span>
+                        </h1>
+                        <p class="text-sm text-blue-600 font-medium -mt-1">
+                            PHOTOGRAPHER PRO
+                        </p>
+                    </div>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-700">Welcome Back</h2>
+                <p class="text-gray-600 mt-2">Sign in to your account</p>
+            </div>
+
+            <!-- Auth0 Widget Container -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div id="auth0-login-container">
+                    <!-- Auth0 will inject the login form here -->
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center mt-6">
+                <p class="text-sm text-gray-500">
+                    Secure authentication powered by Auth0
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.auth0.com/js/lock/11.30/lock.min.js"></script>
+    <script>
+        // Auth0 Lock configuration
+        var lock = new Auth0Lock(
+            '{{clientId}}',
+            '{{domain}}',
+            {
+                auth: {
+                    redirectUrl: '{{callbackUrl}}',
+                    responseType: 'code',
+                    params: {
+                        scope: 'openid profile email'
+                    }
+                },
+                theme: {
+                    logo: 'https://cdn.auth0.com/styleguide/components/1.0.8/media/logos/img/badge.png',
+                    primaryColor: '#3B82F6',
+                    labeledSubmitButton: false
+                },
+                languageDictionary: {
+                    title: "Sign In",
+                    signUpLabel: "Create Account",
+                    forgotPasswordLabel: "Forgot Password?",
+                    loginLabel: "Sign In",
+                    passwordPlaceholder: "Enter your password",
+                    emailPlaceholder: "Enter your email"
+                },
+                allowSignUp: true,
+                allowForgotPassword: true,
+                allowShowPassword: true,
+                container: 'auth0-login-container'
+            }
+        );
+
+        // Show the login form
+        lock.show();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,260 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 14px;
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  /* Updated primary to match brand blue */
+  --primary: #1E88E5;
+  --primary-foreground: #ffffff;
+  /* Brand secondary blue for accents */
+  --secondary: #E3F2FD;
+  --secondary-foreground: #1565C0;
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --accent: #E3F2FD;
+  --accent-foreground: #1565C0;
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: transparent;
+  --input-background: #f3f3f5;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #1E88E5;
+  /* Updated chart colors to use brand palette */
+  --chart-1: #1E88E5;
+  --chart-2: #42A5F5;
+  --chart-3: #64B5F6;
+  --chart-4: #90CAF9;
+  --chart-5: #BBDEFB;
+  --radius: 0.625rem;
+  --sidebar: #F8F9FA;
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #1E88E5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #E3F2FD;
+  --sidebar-accent-foreground: #1565C0;
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: #1E88E5;
+  /* Brand colors */
+  --brand-blue: #1E88E5;
+  --brand-blue-light: #42A5F5;
+  --brand-blue-dark: #1565C0;
+  --brand-gray: #6B7280;
+  --brand-gray-light: #9CA3AF;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  /* Updated primary for dark mode */
+  --primary: #42A5F5;
+  --primary-foreground: #ffffff;
+  --secondary: #1E3A8A;
+  --secondary-foreground: #93C5FD;
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: #1E3A8A;
+  --accent-foreground: #93C5FD;
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: #42A5F5;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  /* Dark mode chart colors */
+  --chart-1: #42A5F5;
+  --chart-2: #64B5F6;
+  --chart-3: #90CAF9;
+  --chart-4: #BBDEFB;
+  --chart-5: #E3F2FD;
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #42A5F5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1E3A8A;
+  --sidebar-accent-foreground: #93C5FD;
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: #42A5F5;
+  /* Dark mode brand colors */
+  --brand-blue: #42A5F5;
+  --brand-blue-light: #64B5F6;
+  --brand-blue-dark: #1976D2;
+  --brand-gray: #9CA3AF;
+  --brand-gray-light: #D1D5DB;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* Brand color utilities */
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-light: var(--brand-blue-light);
+  --color-brand-blue-dark: var(--brand-blue-dark);
+  --color-brand-gray: var(--brand-gray);
+  --color-brand-gray-light: var(--brand-gray-light);
+}
+@layer base {
+  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+  
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    h5 {
+      font-size: var(--text-sm);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    p {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+    }
+
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+    }
+  }
+
+html {
+  font-size: var(--font-size);
+}
+
+/* Brand-specific utilities */
+@layer utilities {
+  .bg-background {
+    background-color: var(--background);
+  }
+  .text-brand-blue {
+    color: var(--brand-blue);
+  }
+  
+  .bg-brand-blue {
+    background-color: var(--brand-blue);
+  }
+  
+  .border-brand-blue {
+    border-color: var(--brand-blue);
+  }
+  
+  .text-brand-gray {
+    color: var(--brand-gray);
+  }
+  .bg-background { background-color: var(--background); }
+  .text-foreground { color: var(--foreground); }
+  .bg-card { background-color: var(--card); }
+  .text-card-foreground { color: var(--card-foreground); }
+  .bg-popover { background-color: var(--popover); }
+  .text-popover-foreground { color: var(--popover-foreground); }
+  .bg-primary { background-color: var(--primary); }
+  .text-primary-foreground { color: var(--primary-foreground); }
+  .bg-secondary { background-color: var(--secondary); }
+  .text-secondary-foreground { color: var(--secondary-foreground); }
+  .bg-muted { background-color: var(--muted); }
+  .text-muted-foreground { color: var(--muted-foreground); }
+  .bg-accent { background-color: var(--accent); }
+  .text-accent-foreground { color: var(--accent-foreground); }
+  .bg-destructive { background-color: var(--destructive); }
+  .text-destructive-foreground { color: var(--destructive-foreground); }
+  .border-custom { border-color: var(--border); }
+  .bg-input { background-color: var(--input-background); }
+  .bg-switch { background-color: var(--switch-background); }
+  .ring-custom { box-shadow: 0 0 0 2px var(--ring); }
+  .bg-sidebar { background-color: var(--sidebar); }
+  .text-sidebar-foreground { color: var(--sidebar-foreground); }
+  .bg-sidebar-primary { background-color: var(--sidebar-primary); }
+  .text-sidebar-primary-foreground { color: var(--sidebar-primary-foreground); }
+  .bg-sidebar-accent { background-color: var(--sidebar-accent); }
+  .text-sidebar-accent-foreground { color: var(--sidebar-accent-foreground); }
+  .border-sidebar-custom { border-color: var(--sidebar-border); }
+  .ring-sidebar-custom { box-shadow: 0 0 0 2px var(--sidebar-ring); }
+  .bg-brand-blue { background-color: var(--brand-blue); }
+  .bg-brand-blue-light { background-color: var(--brand-blue-light); }
+  .bg-brand-blue-dark { background-color: var(--brand-blue-dark); }
+  .text-brand-gray { color: var(--brand-gray); }
+  .text-brand-gray-light { color: var(--brand-gray-light); }
+}

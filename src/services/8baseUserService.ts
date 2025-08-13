@@ -1,0 +1,410 @@
+import { client } from '../8baseClient';
+import {
+  GET_ALL_8BASE_USERS,
+  GET_8BASE_USER_BY_ID,
+  GET_8BASE_USER_BY_EMAIL,
+  CREATE_8BASE_USER,
+  UPDATE_8BASE_USER,
+  DELETE_8BASE_USER,
+  ASSIGN_ROLE_TO_USER,
+  REMOVE_ROLE_FROM_USER,
+  GET_ALL_ROLES,
+  GET_USER_PERMISSIONS,
+  CREATE_USER_WITH_CUSTOM_FIELDS,
+  GET_USERS_WITH_CUSTOM_FIELDS
+} from '../graphql/8baseUser';
+
+export interface EightBaseUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  roles?: {
+    items: Array<{
+      id: string;
+      name: string;
+    }>;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EightBaseRole {
+  id: string;
+  name: string;
+  description?: string;
+  permissions?: {
+    items: Array<{
+      id: string;
+      name: string;
+      resource: string;
+      operation: string;
+    }>;
+  };
+}
+
+export interface CreateUserInput {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password?: string;
+  roles?: string[];
+}
+
+export interface UpdateUserInput {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  isActive?: boolean;
+  assigned_admin_id?: string;
+  access_start?: string;
+  access_end?: string;
+  has_paid?: boolean;
+}
+
+class EightBaseUserService {
+  // Get all 8base users
+  async getAllUsers(): Promise<EightBaseUser[]> {
+    try {
+      const { data } = await client.query({
+        query: GET_ALL_8BASE_USERS,
+        fetchPolicy: 'cache-first'
+      });
+
+      return data.usersList?.items || [];
+    } catch (error) {
+      console.error('Error fetching all 8base users:', error);
+      return [];
+    }
+  }
+
+  // Get 8base user by ID
+  async getUserById(id: string): Promise<EightBaseUser | null> {
+    try {
+      const { data } = await client.query({
+        query: GET_8BASE_USER_BY_ID,
+        variables: { id },
+        fetchPolicy: 'cache-first'
+      });
+
+      return data.user || null;
+    } catch (error) {
+      console.error('Error fetching 8base user by ID:', error);
+      return null;
+    }
+  }
+
+  // Get 8base user by email
+  async getUserByEmail(email: string): Promise<EightBaseUser | null> {
+    try {
+      const { data } = await client.query({
+        query: GET_8BASE_USER_BY_EMAIL,
+        variables: { email },
+        fetchPolicy: 'cache-first'
+      });
+
+      return data.usersList?.items?.[0] || null;
+    } catch (error) {
+      console.error('Error fetching 8base user by email:', error);
+      return null;
+    }
+  }
+
+  // Create new 8base user
+  async createUser(input: CreateUserInput): Promise<EightBaseUser> {
+    try {
+      const { data } = await client.mutate({
+        mutation: CREATE_8BASE_USER,
+        variables: { input },
+        refetchQueries: [{ query: GET_ALL_8BASE_USERS }]
+      });
+
+      return data.userCreate;
+    } catch (error) {
+      console.error('Error creating 8base user:', error);
+      throw new Error('Failed to create user');
+    }
+  }
+
+  // Create user with custom fields
+  async createUserWithCustomFields(input: CreateUserInput): Promise<EightBaseUser> {
+    try {
+      const { data } = await client.mutate({
+        mutation: CREATE_USER_WITH_CUSTOM_FIELDS,
+        variables: { input },
+        refetchQueries: [{ query: GET_ALL_8BASE_USERS }]
+      });
+
+      return data.userCreate;
+    } catch (error) {
+      console.error('Error creating 8base user with custom fields:', error);
+      throw new Error('Failed to create user with custom fields');
+    }
+  }
+
+  // Update 8base user
+  async updateUser(id: string, input: UpdateUserInput): Promise<EightBaseUser> {
+    try {
+      const { data } = await client.mutate({
+        mutation: UPDATE_8BASE_USER,
+        variables: { id, input },
+        refetchQueries: [{ query: GET_ALL_8BASE_USERS }]
+      });
+
+      return data.userUpdate;
+    } catch (error) {
+      console.error('Error updating 8base user:', error);
+      throw new Error('Failed to update user');
+    }
+  }
+
+  // Delete 8base user
+  async deleteUser(id: string): Promise<boolean> {
+    try {
+      await client.mutate({
+        mutation: DELETE_8BASE_USER,
+        variables: { id },
+        refetchQueries: [{ query: GET_ALL_8BASE_USERS }]
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting 8base user:', error);
+      throw new Error('Failed to delete user');
+    }
+  }
+
+  // Assign role to user
+  async assignRoleToUser(userId: string, roleId: string): Promise<EightBaseUser> {
+    try {
+      const { data } = await client.mutate({
+        mutation: ASSIGN_ROLE_TO_USER,
+        variables: { userId, roleId },
+        refetchQueries: [{ query: GET_ALL_8BASE_USERS }]
+      });
+
+      return data.userUpdate;
+    } catch (error) {
+      console.error('Error assigning role to user:', error);
+      throw new Error('Failed to assign role to user');
+    }
+  }
+
+  // Remove role from user
+  async removeRoleFromUser(userId: string, roleId: string): Promise<EightBaseUser> {
+    try {
+      const { data } = await client.mutate({
+        mutation: REMOVE_ROLE_FROM_USER,
+        variables: { userId, roleId },
+        refetchQueries: [{ query: GET_ALL_8BASE_USERS }]
+      });
+
+      return data.userUpdate;
+    } catch (error) {
+      console.error('Error removing role from user:', error);
+      throw new Error('Failed to remove role from user');
+    }
+  }
+
+  // Get all available roles
+  async getAllRoles(): Promise<EightBaseRole[]> {
+    try {
+      const { data } = await client.query({
+        query: GET_ALL_ROLES,
+        fetchPolicy: 'cache-first'
+      });
+
+      return data.rolesList?.items || [];
+    } catch (error) {
+      console.error('Error fetching all roles:', error);
+      return [];
+    }
+  }
+
+  // Get user's permissions
+  async getUserPermissions(userId: string) {
+    try {
+      const { data } = await client.query({
+        query: GET_USER_PERMISSIONS,
+        variables: { userId },
+        fetchPolicy: 'cache-first'
+      });
+
+      return data.user?.roles?.items || [];
+    } catch (error) {
+      console.error('Error fetching user permissions:', error);
+      return [];
+    }
+  }
+
+  // Create a student user
+  async createStudentUser(studentData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<EightBaseUser> {
+    try {
+      // First, get the student role ID
+      const roles = await this.getAllRoles();
+      const studentRole = roles.find(role => role.name === 'Student' || role.name === 'user');
+      
+      if (!studentRole) {
+        throw new Error('Student role not found');
+      }
+
+      // Create user input
+      const userInput: CreateUserInput = {
+        email: studentData.email,
+        firstName: studentData.firstName,
+        lastName: studentData.lastName,
+        roles: [studentRole.id]
+      };
+
+      return await this.createUser(userInput);
+    } catch (error) {
+      console.error('Error creating student user:', error);
+      throw new Error('Failed to create student user');
+    }
+  }
+
+  // Create a coach user
+  async createCoachUser(coachData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<EightBaseUser> {
+    try {
+      // First, get the coach role ID
+      const roles = await this.getAllRoles();
+      const coachRole = roles.find(role => role.name === 'Coach' || role.name === 'coach');
+      
+      if (!coachRole) {
+        throw new Error('Coach role not found');
+      }
+
+      // Create user input
+      const userInput: CreateUserInput = {
+        email: coachData.email,
+        firstName: coachData.firstName,
+        lastName: coachData.lastName,
+        roles: [coachRole.id]
+      };
+
+      return await this.createUser(userInput);
+    } catch (error) {
+      console.error('Error creating coach user:', error);
+      throw new Error('Failed to create coach user');
+    }
+  }
+
+  // Create a coach manager user
+  async createCoachManagerUser(managerData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<EightBaseUser> {
+    try {
+      // First, get the coach manager role ID
+      const roles = await this.getAllRoles();
+      const managerRole = roles.find(role => role.name === 'Coach Manager' || role.name === 'coach_manager');
+      
+      if (!managerRole) {
+        throw new Error('Coach Manager role not found');
+      }
+
+      // Create user input
+      const userInput: CreateUserInput = {
+        email: managerData.email,
+        firstName: managerData.firstName,
+        lastName: managerData.lastName,
+        roles: [managerRole.id]
+      };
+
+      return await this.createUser(userInput);
+    } catch (error) {
+      console.error('Error creating coach manager user:', error);
+      throw new Error('Failed to create coach manager user');
+    }
+  }
+
+  // Check if user has specific role
+  async userHasRole(userId: string, roleName: string): Promise<boolean> {
+    try {
+      const user = await this.getUserById(userId);
+      if (!user || !user.roles) return false;
+
+      return user.roles.items.some(role => role.name === roleName);
+    } catch (error) {
+      console.error('Error checking user role:', error);
+      return false;
+    }
+  }
+
+  // Get users by role
+  async getUsersByRole(roleName: string): Promise<EightBaseUser[]> {
+    try {
+      const allUsers = await this.getAllUsers();
+      return allUsers.filter(user => 
+        user.roles?.items.some(role => role.name === roleName)
+      );
+    } catch (error) {
+      console.error('Error getting users by role:', error);
+      return [];
+    }
+  }
+
+  // Get current authenticated user
+  async getCurrentUser(): Promise<EightBaseUser | null> {
+    try {
+      // This would typically use the current authentication context
+      // For now, we'll try to get the first user as a fallback
+      const allUsers = await this.getAllUsers();
+      return allUsers.length > 0 ? allUsers[0] : null;
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+  }
+
+  // Create a default student user if no users exist
+  async createDefaultStudent(): Promise<EightBaseUser | null> {
+    try {
+      const allUsers = await this.getAllUsers();
+      if (allUsers.length === 0) {
+        // Get available roles
+        const roles = await this.getAllRoles();
+        const studentRole = roles.find(role => 
+          role.name === 'Student' || role.name === 'user' || role.name === 'student'
+        );
+
+        if (studentRole) {
+          const defaultUser = await this.createUser({
+            email: 'student@example.com',
+            firstName: 'Demo',
+            lastName: 'Student',
+            roles: [studentRole.id]
+          });
+
+          console.log('Created default student user:', defaultUser);
+          return defaultUser;
+        } else {
+          // If no student role found, create user without role
+          const defaultUser = await this.createUser({
+            email: 'student@example.com',
+            firstName: 'Demo',
+            lastName: 'Student'
+          });
+
+          console.log('Created default student user (no role):', defaultUser);
+          return defaultUser;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error creating default student:', error);
+      return null;
+    }
+  }
+}
+
+export const eightBaseUserService = new EightBaseUserService(); 
