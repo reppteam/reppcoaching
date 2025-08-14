@@ -204,7 +204,9 @@ class EightBaseAuthService {
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
-        roles: studentRole ? [studentRole.id] : undefined,
+        roles: studentRole ? {
+          connect: { id: studentRole.id }
+        } : undefined,
       };
 
       const newUser = await eightBaseUserService.createUser(createUserInput);
@@ -232,7 +234,9 @@ class EightBaseAuthService {
           email: auth0User.email,
           firstName: auth0User.given_name || auth0User.name.split(' ')[0],
           lastName: auth0User.family_name || auth0User.name.split(' ').slice(1).join(' '),
-          roles: studentRole ? [studentRole.id] : undefined,
+          roles: studentRole ? {
+            connect: { id: studentRole.id }
+          } : undefined,
         };
 
         eightBaseUser = await eightBaseUserService.createUser(createUserInput);

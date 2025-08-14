@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { eightBaseUserService, CreateUserInput } from '../services/8baseUserService';
+import { userInvitationService, InvitationData } from '../services/userInvitationService';
+import { eightbaseService } from '../services/8baseService';
+import { STATIC_ROLES, mapApplicationRoleTo8baseRole } from '../config/staticRoles';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -10,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Checkbox } from './ui/checkbox';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
+import { Textarea } from './ui/textarea';
 import { 
   UserPlus, 
   Users, 
@@ -20,7 +23,9 @@ import {
   Calendar,
   DollarSign,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Mail,
+  Send
 } from 'lucide-react';
 
 interface AddUserModalProps {
@@ -35,37 +40,87 @@ interface Role {
   description?: string;
 }
 
+interface EightBaseRole {
+  id: string;
+  name: string;
+}
+
 export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModalProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [roles, setRoles] = useState<Role[]>([]);
+  const [eightbaseRoles, setEightbaseRoles] = useState<EightBaseRole[]>([]);
+  const [availableCoaches, setAvailableCoaches] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    role: '',
-    assigned_admin_id: '',
+    role: 'user', // Set a default role instead of empty string
+    selectedRoleId: '', // Store the actual 8base role ID
+    assigned_admin_id: 'none',
+    assigned_students: 'none',
     access_start: '',
     access_end: '',
     has_paid: false,
-    isActive: true
+    isActive: true,
+    custom_message: ''
   });
 
   useEffect(() => {
     if (open) {
       loadRoles();
+      loadEightbaseRoles();
+      loadAvailableCoaches();
     }
   }, [open]);
 
   const loadRoles = async () => {
     try {
-      const availableRoles = await eightBaseUserService.getAllRoles();
+      // Define available roles for the application
+      const availableRoles: Role[] = [
+        { id: 'user', name: 'Student', description: 'Regular student user' },
+        { id: 'coach', name: 'Coach', description: 'Coach who manages students' },
+        { id: 'coach_manager', name: 'Coach Manager', description: 'Manager who oversees coaches' },
+        { id: 'super_admin', name: 'Super Administrator', description: 'Full system access' }
+      ];
       setRoles(availableRoles);
     } catch (error) {
       console.error('Failed to load roles:', error);
       setError('Failed to load available roles');
+    }
+  };
+
+  const loadEightbaseRoles = async () => {
+    try {
+      // Use static roles instead of fetching from 8base
+      setEightbaseRoles(STATIC_ROLES);
+      
+      // Set default role ID for student
+      const defaultRole = STATIC_ROLES.find(role => 
+        role.name.toLowerCase() === 'student'
+      );
+      
+      if (defaultRole) {
+        setFormData(prev => ({
+          ...prev,
+          selectedRoleId: defaultRole.id
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to load static roles:', error);
+      setError('Failed to load roles');
+    }
+  };
+
+  const loadAvailableCoaches = async () => {
+    try {
+      const users = await eightbaseService.getAllUsersWithDetails();
+      const coaches = users.filter(u => u.role === 'coach' || u.role === 'coach_manager');
+      setAvailableCoaches(coaches);
+    } catch (error) {
+      console.error('Failed to load coaches:', error);
     }
   };
 
@@ -76,64 +131,55 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
     setSuccess('');
 
     try {
-      const userInput: CreateUserInput = {
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        roles: formData.role ? [formData.role] : undefined
-      };
+                     // Prepare invitation data
+        const invitationData: InvitationData = {
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          role: formData.role as 'user' | 'coach' | 'coach_manager' | 'super_admin',
+          selectedRoleId: formData.selectedRoleId, // Pass the 8base role ID
+          assigned_admin_id: formData.assigned_admin_id === 'none' ? undefined : formData.assigned_admin_id,
+          access_start: formData.access_start || undefined,
+          access_end: formData.access_end || undefined,
+          has_paid: formData.has_paid,
+          invited_by: user?.name || 'System Administrator',
+          custom_message: formData.custom_message || undefined
+        };
 
-      let createdUser;
-      
-      // Create user based on role
-      if (formData.role) {
-        const selectedRole = roles.find(r => r.id === formData.role);
-        if (selectedRole?.name === 'Student' || selectedRole?.name === 'user') {
-          createdUser = await eightBaseUserService.createStudentUser({
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName
+      // Create user with invitation
+      const result = await userInvitationService.createUserWithInvitation(invitationData);
+
+      if (result.success) {
+        setSuccess(`User created successfully! Invitation email ${result.emailSent ? 'sent' : 'failed to send'}.`);
+        onUserCreated?.(result.user);
+        
+                           // Reset form and set default role ID
+          const defaultRole = STATIC_ROLES.find(role => 
+            role.name.toLowerCase() === 'student'
+          );
+          
+          setFormData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            role: 'user', // Reset to default role
+            selectedRoleId: defaultRole?.id || '', // Set default role ID
+            assigned_admin_id: 'none',
+            assigned_students: 'none',
+            access_start: '',
+            access_end: '',
+            has_paid: false,
+            isActive: true,
+            custom_message: ''
           });
-        } else if (selectedRole?.name === 'Coach' || selectedRole?.name === 'coach') {
-          createdUser = await eightBaseUserService.createCoachUser({
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName
-          });
-        } else if (selectedRole?.name === 'Coach Manager' || selectedRole?.name === 'coach_manager') {
-          createdUser = await eightBaseUserService.createCoachManagerUser({
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName
-          });
-        } else {
-          createdUser = await eightBaseUserService.createUser(userInput);
-        }
+
+        // Close modal after a short delay
+        setTimeout(() => {
+          onOpenChange(false);
+        }, 3000);
       } else {
-        createdUser = await eightBaseUserService.createUser(userInput);
+        setError(result.error || 'Failed to create user and send invitation.');
       }
-
-      setSuccess('User created successfully!');
-      onUserCreated?.(createdUser);
-      
-      // Reset form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        role: '',
-        assigned_admin_id: '',
-        access_start: '',
-        access_end: '',
-        has_paid: false,
-        isActive: true
-      });
-
-      // Close modal after a short delay
-      setTimeout(() => {
-        onOpenChange(false);
-      }, 2000);
-
     } catch (error) {
       console.error('Failed to create user:', error);
       setError('Failed to create user. Please try again.');
@@ -146,6 +192,17 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleRoleChange = (roleId: string) => {
+    // Map application role to 8base role using static mapping
+    const targetRole = mapApplicationRoleTo8baseRole(roleId);
+
+    setFormData(prev => ({
+      ...prev,
+      role: roleId,
+      selectedRoleId: targetRole?.id || ''
     }));
   };
 
@@ -257,7 +314,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="role">User Role *</Label>
-                <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
+                                 <Select value={formData.role} onValueChange={handleRoleChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
@@ -281,8 +338,8 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
             </CardContent>
           </Card>
 
-          {/* Student-specific fields */}
-          {(formData.role && roles.find(r => r.id === formData.role)?.name === 'Student') && (
+                     {/* Student-specific fields */}
+           {formData.role === 'user' && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Student Information</CardTitle>
@@ -293,12 +350,25 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="assigned_admin_id">Assigned Coach</Label>
-                  <Input
-                    id="assigned_admin_id"
-                    value={formData.assigned_admin_id}
-                    onChange={(e) => handleInputChange('assigned_admin_id', e.target.value)}
-                    placeholder="Enter coach ID"
-                  />
+                  <Select value={formData.assigned_admin_id} onValueChange={(value) => handleInputChange('assigned_admin_id', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a coach (optional)" />
+                    </SelectTrigger>
+                                         <SelectContent>
+                       <SelectItem value="none">No coach assigned</SelectItem>
+                       {availableCoaches.map((coach) => (
+                        <SelectItem key={coach.id} value={coach.id}>
+                          <div className="flex items-center gap-2">
+                            <Shield className="h-4 w-4" />
+                            <span>{coach.name}</span>
+                            <Badge variant="outline" className="ml-auto">
+                              {coach.role === 'coach' ? 'Coach' : 'Manager'}
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -328,9 +398,70 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                   />
                   <Label htmlFor="has_paid">Has Paid Subscription</Label>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                           </CardContent>
+           </Card>
+         )}
+
+         {/* Coach-specific fields */}
+         {formData.role === 'coach' && (
+           <Card>
+             <CardHeader>
+               <CardTitle className="text-lg">Coach Information</CardTitle>
+               <CardDescription>
+                 Additional information for coach accounts
+               </CardDescription>
+             </CardHeader>
+             <CardContent className="space-y-4">
+               <div className="space-y-2">
+                 <Label htmlFor="assigned_students">Assigned Students (Optional)</Label>
+                 <Select 
+                   value={formData.assigned_students || 'none'} 
+                   onValueChange={(value) => handleInputChange('assigned_students', value)}
+                 >
+                   <SelectTrigger>
+                     <SelectValue placeholder="Select students to assign (optional)" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="none">No students assigned</SelectItem>
+                     {/* This would be populated with available students */}
+                     <SelectItem value="multiple">Assign multiple students</SelectItem>
+                   </SelectContent>
+                 </Select>
+                 <p className="text-xs text-muted-foreground">
+                   You can assign students to this coach after creation.
+                 </p>
+               </div>
+             </CardContent>
+           </Card>
+         )}
+
+          {/* Invitation Message */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Invitation Message
+              </CardTitle>
+              <CardDescription>
+                Add a custom message to the invitation email (optional)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Label htmlFor="custom_message">Custom Message</Label>
+                <Textarea
+                  id="custom_message"
+                  value={formData.custom_message}
+                  onChange={(e) => handleInputChange('custom_message', e.target.value)}
+                  placeholder="Add a personal message to include in the invitation email..."
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground">
+                  This message will be included in the invitation email sent to the user.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Account Status */}
           <Card>
@@ -378,7 +509,17 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating User...' : 'Create User'}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Send className="h-4 w-4 animate-pulse" />
+                  Creating User & Sending Invitation...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Create User & Send Invitation
+                </div>
+              )}
             </Button>
           </div>
         </form>

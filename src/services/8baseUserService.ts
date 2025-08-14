@@ -9,10 +9,13 @@ import {
   ASSIGN_ROLE_TO_USER,
   REMOVE_ROLE_FROM_USER,
   GET_ALL_ROLES,
-  GET_USER_PERMISSIONS,
+  GET_USER_ROLES,
+  CREATE_STUDENT_USER,
+  CREATE_COACH_USER,
   CREATE_USER_WITH_CUSTOM_FIELDS,
   GET_USERS_WITH_CUSTOM_FIELDS
 } from '../graphql/8baseUser';
+import { STATIC_ROLES, getRoleByName } from '../config/staticRoles';
 
 export interface EightBaseUser {
   id: string;
@@ -32,15 +35,6 @@ export interface EightBaseUser {
 export interface EightBaseRole {
   id: string;
   name: string;
-  description?: string;
-  permissions?: {
-    items: Array<{
-      id: string;
-      name: string;
-      resource: string;
-      operation: string;
-    }>;
-  };
 }
 
 export interface CreateUserInput {
@@ -48,7 +42,33 @@ export interface CreateUserInput {
   firstName: string;
   lastName: string;
   password?: string;
-  roles?: string[];
+  roles?: {
+    connect: { id: string };
+  };
+}
+
+export interface CreateStudentUserInput {
+  email: string;
+  firstName: string;
+  lastName: string;
+  roles: {
+    connect: { id: string };
+  };
+  assignedCoach?: {
+    connect: { id: string };
+  };
+}
+
+export interface CreateCoachUserInput {
+  email: string;
+  firstName: string;
+  lastName: string;
+  roles: {
+    connect: { id: string };
+  };
+  student?: {
+    connect: { id: string };
+  };
 }
 
 export interface UpdateUserInput {
@@ -123,6 +143,38 @@ class EightBaseUserService {
     } catch (error) {
       console.error('Error creating 8base user:', error);
       throw new Error('Failed to create user');
+    }
+  }
+
+  // Create student user with assigned coach
+  async createStudentUserWithCoach(input: CreateStudentUserInput): Promise<EightBaseUser> {
+    try {
+      const { data } = await client.mutate({
+        mutation: CREATE_STUDENT_USER,
+        variables: { data: input },
+        refetchQueries: [{ query: GET_ALL_8BASE_USERS }]
+      });
+
+      return data.userCreate;
+    } catch (error) {
+      console.error('Error creating student user with coach:', error);
+      throw new Error('Failed to create student user with coach');
+    }
+  }
+
+  // Create coach user with assigned students
+  async createCoachUserWithStudents(input: CreateCoachUserInput): Promise<EightBaseUser> {
+    try {
+      const { data } = await client.mutate({
+        mutation: CREATE_COACH_USER,
+        variables: { data: input },
+        refetchQueries: [{ query: GET_ALL_8BASE_USERS }]
+      });
+
+      return data.userCreate;
+    } catch (error) {
+      console.error('Error creating coach user with students:', error);
+      throw new Error('Failed to create coach user with students');
     }
   }
 
@@ -206,33 +258,29 @@ class EightBaseUserService {
     }
   }
 
-  // Get all available roles
+  // Get all available roles (using static roles)
   async getAllRoles(): Promise<EightBaseRole[]> {
     try {
-      const { data } = await client.query({
-        query: GET_ALL_ROLES,
-        fetchPolicy: 'cache-first'
-      });
-
-      return data.rolesList?.items || [];
+      // Return static roles instead of querying 8base
+      return STATIC_ROLES;
     } catch (error) {
-      console.error('Error fetching all roles:', error);
+      console.error('Error getting static roles:', error);
       return [];
     }
   }
 
-  // Get user's permissions
-  async getUserPermissions(userId: string) {
+  // Get user's roles
+  async getUserRoles(userId: string) {
     try {
       const { data } = await client.query({
-        query: GET_USER_PERMISSIONS,
+        query: GET_USER_ROLES,
         variables: { userId },
         fetchPolicy: 'cache-first'
       });
 
       return data.user?.roles?.items || [];
     } catch (error) {
-      console.error('Error fetching user permissions:', error);
+      console.error('Error fetching user roles:', error);
       return [];
     }
   }
@@ -244,9 +292,8 @@ class EightBaseUserService {
     lastName: string;
   }): Promise<EightBaseUser> {
     try {
-      // First, get the student role ID
-      const roles = await this.getAllRoles();
-      const studentRole = roles.find(role => role.name === 'Student' || role.name === 'user');
+      // Get the student role ID from static roles
+      const studentRole = getRoleByName('Student');
       
       if (!studentRole) {
         throw new Error('Student role not found');
@@ -257,7 +304,9 @@ class EightBaseUserService {
         email: studentData.email,
         firstName: studentData.firstName,
         lastName: studentData.lastName,
-        roles: [studentRole.id]
+        roles: {
+          connect: { id: studentRole.id }
+        }
       };
 
       return await this.createUser(userInput);
@@ -274,9 +323,8 @@ class EightBaseUserService {
     lastName: string;
   }): Promise<EightBaseUser> {
     try {
-      // First, get the coach role ID
-      const roles = await this.getAllRoles();
-      const coachRole = roles.find(role => role.name === 'Coach' || role.name === 'coach');
+      // Get the coach role ID from static roles
+      const coachRole = getRoleByName('Coach');
       
       if (!coachRole) {
         throw new Error('Coach role not found');
@@ -287,7 +335,9 @@ class EightBaseUserService {
         email: coachData.email,
         firstName: coachData.firstName,
         lastName: coachData.lastName,
-        roles: [coachRole.id]
+        roles: {
+          connect: { id: coachRole.id }
+        }
       };
 
       return await this.createUser(userInput);
@@ -304,9 +354,8 @@ class EightBaseUserService {
     lastName: string;
   }): Promise<EightBaseUser> {
     try {
-      // First, get the coach manager role ID
-      const roles = await this.getAllRoles();
-      const managerRole = roles.find(role => role.name === 'Coach Manager' || role.name === 'coach_manager');
+      // Get the coach manager role ID from static roles
+      const managerRole = getRoleByName('coach_manager');
       
       if (!managerRole) {
         throw new Error('Coach Manager role not found');
@@ -317,7 +366,9 @@ class EightBaseUserService {
         email: managerData.email,
         firstName: managerData.firstName,
         lastName: managerData.lastName,
-        roles: [managerRole.id]
+        roles: {
+          connect: { id: managerRole.id }
+        }
       };
 
       return await this.createUser(userInput);
@@ -371,18 +422,17 @@ class EightBaseUserService {
     try {
       const allUsers = await this.getAllUsers();
       if (allUsers.length === 0) {
-        // Get available roles
-        const roles = await this.getAllRoles();
-        const studentRole = roles.find(role => 
-          role.name === 'Student' || role.name === 'user' || role.name === 'student'
-        );
+        // Get student role from static roles
+        const studentRole = getRoleByName('Student');
 
         if (studentRole) {
           const defaultUser = await this.createUser({
             email: 'student@example.com',
             firstName: 'Demo',
             lastName: 'Student',
-            roles: [studentRole.id]
+            roles: {
+              connect: { id: studentRole.id }
+            }
           });
 
           console.log('Created default student user:', defaultUser);

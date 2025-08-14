@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { eightBaseUserService } from '../services/8baseUserService';
+import { eightbaseService } from '../services/8baseService';
 import { User } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -20,6 +20,8 @@ import { WeekTracker } from './WeekTracker';
 import { StudentSignUpModal } from './StudentSignUpModal';
 import { ConfirmationEmailModal } from './ConfirmationEmailModal';
 import { AddUserModal } from './AddUserModal';
+import { userInvitationService } from '../services/userInvitationService';
+import { SendGridReminder } from './SendGridReminder';
 import { 
   Users, 
   Plus, 
@@ -40,6 +42,8 @@ import {
   Crown,
   ShieldCheck,
   Users2,
+  Mail,
+  Loader2,
 } from 'lucide-react';
 
 interface CreateCoachFormData {
@@ -102,26 +106,9 @@ export function UserManagement() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const fetchedUsers = await eightBaseUserService.getAllUsers();
-      // Convert 8base users to our User type
-      const convertedUsers: User[] = fetchedUsers.map(eightBaseUser => {
-        const roleName = eightBaseUser.roles?.items?.[0]?.name?.toLowerCase() || 'user';
-        return {
-          id: eightBaseUser.id,
-          name: `${eightBaseUser.firstName} ${eightBaseUser.lastName}`,
-          email: eightBaseUser.email,
-          role: (roleName === 'user' || roleName === 'coach' || roleName === 'coach_manager' || roleName === 'super_admin') 
-            ? roleName as 'user' | 'coach' | 'coach_manager' | 'super_admin' 
-            : 'user',
-          access_start: new Date().toISOString().split('T')[0],
-          access_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-          has_paid: true,
-          created_at: eightBaseUser.createdAt,
-          coaching_term_start: null,
-          coaching_term_end: null
-        };
-      });
-      setUsers(convertedUsers);
+      const fetchedUsers = await eightbaseService.getAllUsersWithDetails();
+      console.log("🚀 ~ loadUsers ~ fetchedUsers:", fetchedUsers)
+      setUsers(fetchedUsers);
     } catch (error) {
       console.error('Failed to load users:', error);
     } finally {
@@ -155,41 +142,43 @@ export function UserManagement() {
     if (!user || (user.role !== 'coach_manager' && user.role !== 'super_admin')) return;
 
     try {
-      // Mock API call to create coach
-      const newCoach: User = {
-        id: Date.now().toString(),
-        name: coachFormData.name,
+      // Use the automated user creation system
+      const invitationData = {
         email: coachFormData.email,
-        role: 'coach',
-        access_start: new Date().toISOString().split('T')[0],
-        access_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+        firstName: coachFormData.name.split(' ')[0],
+        lastName: coachFormData.name.split(' ').slice(1).join(' ') || '',
+        role: 'coach' as const,
+        invited_by: user.name || 'System Administrator',
         has_paid: true,
-        created_at: new Date().toISOString(),
-        coaching_term_start: null,
-        coaching_term_end: null
+        access_start: new Date().toISOString().split('T')[0],
+        access_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]
       };
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const result = await userInvitationService.createUserWithInvitation(invitationData);
       
-      // Add to users list
-      setUsers(prev => [...prev, newCoach]);
-      
-      // Assign students if selected
-      if (coachFormData.assignedStudents.length > 0) {
-        for (const studentId of coachFormData.assignedStudents) {
-          // TODO: Implement 8base student assignment
-          console.log(`Assigning student ${studentId} to coach ${newCoach.id}`);
+      if (result.success && result.user) {
+        // Assign students if selected
+        if (coachFormData.assignedStudents.length > 0) {
+          for (const studentId of coachFormData.assignedStudents) {
+            try {
+              await eightbaseService.assignStudentToCoach(studentId, result.user!.id);
+            } catch (error) {
+              console.error(`Failed to assign student ${studentId} to coach:`, error);
+            }
+          }
         }
-      }
 
-      setCreatedUser(newCoach);
-      setCreateCoachDialogOpen(false);
-      setEmailConfirmationModalOpen(true);
-      resetCoachForm();
-      await loadUsers();
+        setCreatedUser(result.user);
+        setCreateCoachDialogOpen(false);
+        setEmailConfirmationModalOpen(true);
+        resetCoachForm();
+        await loadUsers();
+      } else {
+        throw new Error(result.error || 'Failed to create coach');
+      }
     } catch (error) {
       console.error('Failed to create coach:', error);
+      // You can add a toast notification here for better UX
     }
   };
 
@@ -198,34 +187,34 @@ export function UserManagement() {
     if (!user || (user.role !== 'coach_manager' && user.role !== 'super_admin')) return;
 
     try {
-      // Mock API call to create student
-      const newStudent: User = {
-        id: Date.now().toString(),
-        name: studentFormData.name,
+      // Use the automated user creation system
+      const invitationData = {
         email: studentFormData.email,
-        role: 'user',
-        assigned_admin_id: user.role === 'coach_manager' ? user.id : null,
+        firstName: studentFormData.name.split(' ')[0],
+        lastName: studentFormData.name.split(' ').slice(1).join(' ') || '',
+        role: 'user' as const,
+        assigned_admin_id: user.role === 'coach_manager' ? user.id : undefined,
+        invited_by: user.name || 'System Administrator',
+        has_paid: studentFormData.hasPaid,
         access_start: studentFormData.startDate,
         access_end: studentFormData.endDate,
-        has_paid: studentFormData.hasPaid,
-        created_at: new Date().toISOString(),
-        coaching_term_start: !studentFormData.hasPaid ? studentFormData.startDate : null,
-        coaching_term_end: !studentFormData.hasPaid ? studentFormData.endDate : null
+        custom_message: studentFormData.goals ? `Goals: ${studentFormData.goals}` : undefined
       };
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const result = await userInvitationService.createUserWithInvitation(invitationData);
       
-      // Add to users list
-      setUsers(prev => [...prev, newStudent]);
-
-      setCreatedUser(newStudent);
-      setCreateStudentDialogOpen(false);
-      setEmailConfirmationModalOpen(true);
-      resetStudentForm();
-      await loadUsers();
+      if (result.success && result.user) {
+        setCreatedUser(result.user);
+        setCreateStudentDialogOpen(false);
+        setEmailConfirmationModalOpen(true);
+        resetStudentForm();
+        await loadUsers();
+      } else {
+        throw new Error(result.error || 'Failed to create student');
+      }
     } catch (error) {
       console.error('Failed to create student:', error);
+      // You can add a toast notification here for better UX
     }
   };
 
@@ -334,6 +323,9 @@ export function UserManagement() {
 
   return (
     <div className="space-y-6">
+      {/* SendGrid Setup Reminder */}
+      <SendGridReminder />
+      
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -363,7 +355,22 @@ export function UserManagement() {
           {(user?.role === 'super_admin' || user?.role === 'coach_manager') && (
             <Button onClick={() => setAddUserModalOpen(true)}>
               <UserPlus className="mr-2 h-4 w-4" />
-              Add User (8base)
+              Add User (Automated)
+            </Button>
+          )}
+          
+          {/* Super Admin can create Coach Managers */}
+          {user?.role === 'super_admin' && (
+            <Button 
+              variant="outline"
+              onClick={() => {
+                // Open AddUserModal with coach_manager role pre-selected
+                setAddUserModalOpen(true);
+                // You can add logic here to pre-select coach_manager role
+              }}
+            >
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Add Coach Manager
             </Button>
           )}
           
@@ -420,7 +427,64 @@ export function UserManagement() {
         {/* Users Tab */}
         <TabsContent value="users" className="space-y-6">
           {/* User Lists */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Coach Managers List (Super Admin Only) */}
+            {user?.role === 'super_admin' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5" />
+                    Coach Managers ({coachManagers.length})
+                  </CardTitle>
+                  <CardDescription>
+                    Manage coach managers who can create and manage coaches
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {coachManagers.length === 0 ? (
+                    <div className="text-center py-8">
+                      <ShieldCheck className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground">No coach managers yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {coachManagers.map((manager) => {
+                        const managedCoaches = coaches.filter(c => c.assigned_admin_id === manager.id);
+                        return (
+                          <div key={manager.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex-1">
+                              <div className="font-medium">{manager.name}</div>
+                              <div className="text-sm text-muted-foreground">{manager.email}</div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {managedCoaches.length} coaches managed
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge className="bg-purple-100 text-purple-800">Manager</Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openEditUser(manager)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openDeleteConfirm(manager)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
         {/* Coaches List */}
         {canManageUsers && (
           <Card>

@@ -27,21 +27,49 @@ export const CURRENT_USER_QUERY = gql`
 
 // Query to get all 8base users
 export const GET_ALL_8BASE_USERS = gql`
-  query GetUsers {
+   query GetUsers {
     usersList {
       items {
         id
         email
+        status
+        origin
+        is8base
         firstName
         lastName
+        timezone
+        avatar {
+          downloadUrl
+        }
         roles {
           items {
             id
             name
           }
         }
+        assignedCoach {
+          id
+          fullName
+          email
+        }
         createdAt
         updatedAt
+        student {
+          id
+          phone
+          business_name
+          location
+          target_market
+          strengths
+          challenges
+          goals
+          preferred_contact_method
+          availability
+          notes
+        }
+        coach {
+          id
+        }
       }
     }
   }
@@ -260,44 +288,88 @@ export const GET_ALL_ROLES = gql`
       items {
         id
         name
-        description
-        permissions {
-          items {
-            id
-            name
-            resource
-            operation
-          }
-        }
       }
     }
   }
 `;
 
-// Query to get user's permissions
-export const GET_USER_PERMISSIONS = gql`
-  query GetUserPermissions($userId: ID!) {
+// Query to get user's roles
+export const GET_USER_ROLES = gql`
+  query GetUserRoles($userId: ID!) {
     user(id: $userId) {
       id
       roles {
         items {
           id
           name
-          permissions {
-            items {
-              id
-              name
-              resource
-              operation
-            }
-          }
+          description
         }
       }
     }
   }
 `;
 
-// Mutation to create user with custom fields
+// Mutation to create student user with assigned coach
+export const CREATE_STUDENT_USER = gql`
+  mutation CreateStudentUser($data: UserCreateInput!) {
+    userCreate(data: $data) {
+      id
+      email
+      firstName
+      lastName
+      roles {
+        items {
+          id
+          name
+        }
+      }
+      assignedCoach {
+        id
+        fullName
+        email
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// Mutation to create coach user with assigned students
+export const CREATE_COACH_USER = gql`
+  mutation CreateCoachUser($data: UserCreateInput!) {
+    userCreate(data: $data) {
+      id
+      email
+      firstName
+      lastName
+      roles {
+        items {
+          id
+          name
+        }
+      }
+      student {
+        items {
+          id
+          phone
+          business_name
+          location
+          target_market
+          strengths
+          challenges
+          goals
+          preferred_contact_method
+          availability
+          notes
+        }
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// Mutation to create user with custom fields (for other roles)
 export const CREATE_USER_WITH_CUSTOM_FIELDS = gql`
   mutation CreateUserWithCustomFields($input: UserCreateInput!) {
     userCreate(data: $input) {

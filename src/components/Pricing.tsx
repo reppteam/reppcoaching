@@ -113,8 +113,8 @@ export function Pricing() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
+          <div className="flex justify-between items-center">
+            <div>
           <h1 className="flex items-center gap-2">
             <DollarSign className="h-6 w-6 text-brand-blue" />
             Pricing Management
@@ -122,65 +122,65 @@ export function Pricing() {
           <p className="text-muted-foreground">
             Manage your service pricing and competitive analysis
           </p>
-        </div>
+            </div>
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
+                <DialogTrigger asChild>
+                  <Button>
               <Plus className="h-4 w-4 mr-2" />
               Add Pricing Package
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
                 {editingId ? 'Edit Pricing Package' : 'Add New Pricing Package'}
-              </DialogTitle>
-              <DialogDescription>
+                    </DialogTitle>
+                    <DialogDescription>
                 Configure your service pricing and competitive analysis
-              </DialogDescription>
-            </DialogHeader>
+                    </DialogDescription>
+                  </DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="service_name">Service Name</Label>
-                <Input
-                  id="service_name"
+                    <div>
+                      <Label htmlFor="service_name">Service Name</Label>
+                      <Input
+                        id="service_name"
                   value={packageFormData.service_name}
                   onChange={(e) => setPackageFormData({...packageFormData, service_name: e.target.value})}
                   placeholder="e.g., Standard Photo Shoot"
-                />
-              </div>
+                      />
+                    </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
                   <Label htmlFor="your_price">Your Price ($)</Label>
-                  <Input
-                    id="your_price"
-                    type="number"
+                        <Input
+                          id="your_price"
+                          type="number"
                     value={packageFormData.your_price}
                     onChange={(e) => setPackageFormData({...packageFormData, your_price: parseFloat(e.target.value) || 0})}
-                  />
-                </div>
-                <div>
+                        />
+                      </div>
+                      <div>
                   <Label htmlFor="competitor_price">Competitor Price ($)</Label>
-                  <Input
-                    id="competitor_price"
-                    type="number"
+                        <Input
+                          id="competitor_price"
+                          type="number"
                     value={packageFormData.competitor_price}
                     onChange={(e) => setPackageFormData({...packageFormData, competitor_price: parseFloat(e.target.value) || 0})}
-                  />
-                </div>
-              </div>
+                        />
+                      </div>
+                    </div>
               
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                    <div>
                   <Label htmlFor="estimated_cost">Estimated Cost ($)</Label>
-                  <Input
-                    id="estimated_cost"
-                    type="number"
+                      <Input
+                        id="estimated_cost"
+                        type="number"
                     value={packageFormData.estimated_cost}
                     onChange={(e) => setPackageFormData({...packageFormData, estimated_cost: parseFloat(e.target.value) || 0})}
-                  />
-                </div>
+                      />
+                    </div>
                 <div>
                   <Label htmlFor="estimated_profit">Estimated Profit ($)</Label>
                   <Input
@@ -192,34 +192,34 @@ export function Pricing() {
                 </div>
               </div>
               
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <Select
+                    <div>
+                      <Label htmlFor="status">Status</Label>
+                      <Select 
                   value={packageFormData.status}
                   onValueChange={(value: 'active' | 'inactive') => setPackageFormData({...packageFormData, status: value})}
-                >
-                  <SelectTrigger>
+                      >
+                        <SelectTrigger>
                     <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
               
-              <div className="flex justify-end space-x-2">
+                    <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                  Cancel
-                </Button>
+                        Cancel
+                      </Button>
                 <Button onClick={handleSave}>
                   {editingId ? 'Update Package' : 'Create Package'}
-                </Button>
-              </div>
+                      </Button>
+                    </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+                </DialogContent>
+              </Dialog>
+          </div>
 
       {/* Pricing Table */}
       <Card>
@@ -230,24 +230,24 @@ export function Pricing() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Service</TableHead>
-                <TableHead>Your Price</TableHead>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Your Price</TableHead>
                 <TableHead>Competitor Price</TableHead>
-                <TableHead>Cost</TableHead>
-                <TableHead>Profit</TableHead>
+                    <TableHead>Cost</TableHead>
+                    <TableHead>Profit</TableHead>
                 <TableHead>Margin</TableHead>
                 <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
               {pricingData.map((pricing) => {
                 const margin = pricing.your_price > 0 ? ((pricing.estimated_profit / pricing.your_price) * 100).toFixed(1) : '0';
                 const priceDifference = pricing.your_price - pricing.competitor_price;
-                
-                return (
+                    
+                    return (
                   <TableRow key={pricing.id}>
                     <TableCell>
                       <div>
@@ -272,22 +272,22 @@ export function Pricing() {
                         </div>
                       )}
                     </TableCell>
-                    <TableCell>
+                        <TableCell>
                       <div className="font-medium text-red-600">
                         ${pricing.estimated_cost.toLocaleString()}
-                      </div>
-                    </TableCell>
+                          </div>
+                        </TableCell>
                     <TableCell>
                       <div className="font-medium text-emerald-600">
                         ${pricing.estimated_profit.toLocaleString()}
                       </div>
-                    </TableCell>
-                    <TableCell>
+                        </TableCell>
+                        <TableCell>
                       <Badge className="bg-blue-100 text-blue-800">
                         {margin}%
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
+                          </Badge>
+                        </TableCell>
+                          <TableCell>
                       <div className="flex space-x-2">
                         <Button
                           size="sm"
@@ -297,21 +297,21 @@ export function Pricing() {
                           <Edit className="h-3 w-3 mr-1" />
                           Edit
                         </Button>
-                        <Button
-                          size="sm"
+                            <Button
+                              size="sm"
                           variant="outline"
                           onClick={() => handleDelete(pricing.id)}
-                        >
+                            >
                           <Trash2 className="h-3 w-3 mr-1" />
                           Delete
-                        </Button>
+                            </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                          </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
         </CardContent>
       </Card>
 

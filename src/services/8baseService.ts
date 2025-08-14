@@ -5,6 +5,25 @@ import {
   EngagementTag, StudentKPIData, CoachKPISummary, KPIBenchmarks, CoachPricingItem
 } from '../types';
 import * as queries from '../graphql';
+// Custom user creation mutation with roles support
+const CREATE_USER_WITH_ROLES = `
+  mutation CreateUserWithRoles($data: UserCreateInput!) {
+    userCreate(data: $data) {
+      id
+      email
+      firstName
+      lastName
+      roles {
+        items {
+          id
+          name
+        }
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
 
 // We'll use the authenticated Apollo Client from the context instead of creating our own
 let apolloClient: any = null;
@@ -81,15 +100,15 @@ const transformUser = (user: any): User => {
   }
 
   return {
-    id: user.id,
-    name: `${user.firstName} ${user.lastName}`,
-    email: user.email,
+  id: user.id,
+  name: `${user.firstName} ${user.lastName}`,
+  email: user.email,
     role: userRole,
     assigned_admin_id: user.assignedCoach?.id || null,
     access_start: new Date().toISOString().split('T')[0], // Default to today
     access_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0], // Default to 1 year from now
     has_paid: true, // Default to true
-    created_at: user.createdAt,
+  created_at: user.createdAt,
     coaching_term_start: null, // Not available in new schema
     coaching_term_end: null, // Not available in new schema
     is_active: true // Default to true
@@ -321,7 +340,7 @@ export const eightbaseService = {
   },
 
   async createUser(userData: any): Promise<User> {
-    const data = await executeMutation(queries.CREATE_USER, { data: userData });
+    const data = await executeMutation(CREATE_USER_WITH_ROLES, { data: userData });
     return transformUser(data.userCreate);
   },
 
@@ -335,8 +354,8 @@ export const eightbaseService = {
   },
 
   async assignStudentToCoach(studentId: string, coachId: string | null): Promise<User> {
-    const data = await executeMutation(queries.ASSIGN_STUDENT_TO_COACH, { 
-      id: studentId, 
+    const data = await executeMutation(queries.ASSIGN_STUDENT_TO_COACH, {
+      id: studentId,
       assignedCoachId: coachId 
     });
     return transformUser(data.userUpdate);
@@ -363,7 +382,7 @@ export const eightbaseService = {
 
   async updateStudentProfile(userId: string, updates: Partial<StudentProfile>): Promise<StudentProfile> {
     const existingProfile = await this.getStudentProfile(userId);
-    
+
     if (existingProfile) {
       const data = await executeMutation(queries.UPDATE_STUDENT_PROFILE, {
         id: existingProfile.id,
@@ -523,7 +542,7 @@ export const eightbaseService = {
     // Create script components if provided
     if (lead.script_components) {
       await executeMutation(queries.CREATE_SCRIPT_COMPONENTS, {
-        data: {
+      data: {
           ...lead.script_components,
           lead: { connect: { id: createdLead.id } }
         }
@@ -612,7 +631,7 @@ export const eightbaseService = {
     let filter: any = {};
     if (studentId) filter.student = { id: { equals: studentId } };
     if (coachId) filter.coach = { id: { equals: coachId } };
-    
+
     const data = await executeQuery(queries.GET_CALL_LOGS_BY_FILTER, { filter });
     return data.callLogsList.items.map(transformCallLog);
   },
@@ -710,10 +729,10 @@ export const eightbaseService = {
       });
       return data.globalVariablesUpdate;
     } else {
-      const data = await executeMutation(queries.CREATE_GLOBAL_VARIABLES, {
+    const data = await executeMutation(queries.CREATE_GLOBAL_VARIABLES, {
         data: { ...updates, student: { connect: { id: userId } } }
-      });
-      return data.globalVariablesCreate;
+    });
+    return data.globalVariablesCreate;
     }
   },
 
@@ -777,14 +796,14 @@ export const eightbaseService = {
     return data.usersList.items.map((user: any) => {
       const reports = user.weeklyReports?.items || [];
       const highestRevenue = reports.length > 0 ? Math.max(...reports.map((r: any) => r.revenue)) : 0;
-      const lastReportDate = reports.length > 0 
+      const lastReportDate = reports.length > 0
         ? Math.max(...reports.map((r: any) => new Date(r.createdAt).getTime()))
         : 0;
-      
+
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const isActive = lastReportDate > thirtyDaysAgo.getTime();
-      
+
       return {
         ...transformUser(user),
         highestRevenue,
@@ -797,7 +816,7 @@ export const eightbaseService = {
   // Random script generation
   async generateRandomScript(): Promise<{intro: string, hook: string, body1: string, body2: string, ending: string}> {
     const templates = await this.getMessageTemplates();
-    
+
     const getRandomTemplate = (type: string): string => {
       const typeTemplates = templates.filter(t => t.type === type);
       if (typeTemplates.length === 0) return '';

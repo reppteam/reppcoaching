@@ -54,12 +54,12 @@ export function WeekTracker({ user, variant = 'compact', showTotal = false, clas
 
   // Tooltip content with calculation explanation
   const tooltipContent = (
-    <div className="space-y-2 text-sm">
+    <div className="space-y-2 text-sm text-white">
       <p><strong>Week Calculation:</strong></p>
       <p>Start Date: {new Date(startDate).toLocaleDateString()}</p>
       <p>Week 1 Start: {weekInfo.week1Start.toLocaleDateString()}</p>
       <p>Today: {today.toLocaleDateString()}</p>
-      <p className="text-xs text-muted-foreground mt-2">
+      <p className="text-xs text-white mt-2">
         Weeks start on Monday. If start date isn't Monday, Week 1 begins the following Monday.
       </p>
     </div>

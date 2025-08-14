@@ -103,7 +103,7 @@ class Auth0Service {
         `client_id=${process.env.REACT_APP_AUTH0_CLIENT_ID}&` +
         `redirect_uri=${encodeURIComponent(`${window.location.origin}/auth/callback`)}&` +
         `scope=openid profile email&` +
-        `audience=${encodeURIComponent('http://localhost:3000')}&` +
+        `audience=${encodeURIComponent('https://reppcoaching.vercel.app')}&` +
         `state=${encodeURIComponent(window.location.origin)}`;
       
       window.location.href = auth0Url;
@@ -159,7 +159,9 @@ class Auth0Service {
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
-        roles: targetRole ? [targetRole.id] : undefined,
+        roles: targetRole ? {
+          connect: { id: targetRole.id }
+        } : undefined,
       };
 
       const newUser = await eightBaseUserService.createUser(createUserInput);
@@ -238,7 +240,9 @@ class Auth0Service {
           email: auth0User.email,
           firstName: auth0User.given_name || auth0User.name.split(' ')[0],
           lastName: auth0User.family_name || auth0User.name.split(' ').slice(1).join(' '),
-          roles: studentRole ? [studentRole.id] : undefined,
+          roles: studentRole ? {
+            connect: { id: studentRole.id }
+          } : undefined,
         };
 
         eightBaseUser = await eightBaseUserService.createUser(createUserInput);

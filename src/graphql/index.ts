@@ -196,8 +196,7 @@ export const ASSIGN_STUDENT_TO_COACH = `
       id
       assignedCoach {
         id
-        firstName
-        lastName
+        fullName
         email
       }
       updatedAt
@@ -391,7 +390,7 @@ export const GET_GOALS_BY_FILTER = `
   query GetGoalsByFilter($filter: GoalFilter) {
     goalsList(filter: $filter) {
       items {
-        id
+    id
         month_start
         low_goal_shoots
         success_goal_shoots
@@ -400,7 +399,7 @@ export const GET_GOALS_BY_FILTER = `
         success_goal_revenue
         actual_revenue
         aov
-        status
+    status
         createdAt
         updatedAt
         student {
@@ -414,7 +413,7 @@ export const GET_GOALS_BY_FILTER = `
 export const CREATE_GOAL = `
   mutation CreateGoal($data: GoalCreateInput!) {
     goalCreate(data: $data) {
-      id
+    id
       month_start
       low_goal_shoots
       success_goal_shoots
@@ -423,7 +422,7 @@ export const CREATE_GOAL = `
       success_goal_revenue
       actual_revenue
       aov
-      status
+    status
       createdAt
       updatedAt
     }
@@ -463,7 +462,7 @@ export const DELETE_GOAL = `
 export const GET_PRICING_BY_FILTER = `
   query GetPricingByFilter($filter: PricingFilter) {
     pricingsList(filter: $filter) {
-      items {
+       items {
         id
         service_name
         your_price
@@ -471,12 +470,12 @@ export const GET_PRICING_BY_FILTER = `
         estimated_cost
         estimated_profit
         status
-        createdAt
-        updatedAt
+      createdAt
+      updatedAt
         student {
-          id
-        }
+        id
       }
+    }
     }
   }
 `;
@@ -528,18 +527,18 @@ export const GET_COACH_PRICING_BY_FILTER = `
   query GetCoachPricingByFilter($filter: CoachPricingFilter) {
     coachPricingsList(filter: $filter) {
       items {
-        id
-        name
-        description
-        price
-        duration_weeks
+      id
+      name
+      description
+      price
+      duration_weeks
         category
-        packageFeatures
-        status
+      packageFeatures
+      status
         createdAt
         updatedAt
-        user {
-          id
+      user {
+        id
           firstName
           lastName
           email
@@ -1312,7 +1311,7 @@ export const GET_STUDENT_KPI_DATA_BY_FILTER = `
 export const GET_COACH_KPI_SUMMARY_BY_FILTER = `
   query GetCoachKPISummaryByFilter($filter: CoachKPISummaryFilter) {
     coachKPISummaryList(filter: $filter) {
-      items {
+          items {
         coach_id
         coach_name
         total_students
@@ -1379,7 +1378,7 @@ export const GET_STUDENT_ACTIVITY_SUMMARY = `
       recent_calls
       last_activity
       performance_score
-      status
+            status
       alerts
     }
   }
@@ -1520,7 +1519,7 @@ export const BULK_ASSIGN_STUDENTS_TO_COACH = `
       assignments {
         student_id
         coach_id
-        status
+            status
       }
     }
   }

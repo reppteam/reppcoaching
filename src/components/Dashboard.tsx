@@ -24,6 +24,7 @@ import { RolePermissionsManager } from "./RolePermissionsManager";
 import { RoleImplementationStatus } from "./RoleImplementationStatus";
 import { SubscriptionInfo } from "./SubscriptionInfo";
 import { UserTypes } from "./UserTypes";
+import { RoleTest } from "./RoleTest";
 import {
   Card,
   CardContent,
@@ -49,6 +50,7 @@ import {
   BarChart3,
   CheckCircle,
   CreditCard,
+  X,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -215,6 +217,12 @@ export function Dashboard() {
           label: "User Types Overview",
           icon: Users,
         },
+
+        {
+          id: "role-test",
+          label: "Role Test",
+          icon: Users,
+        },
       ];
     }
 
@@ -302,6 +310,9 @@ export function Dashboard() {
         return <RoleImplementationStatus />;
       case "user-types":
         return <UserTypes />;
+
+      case "role-test":
+        return <RoleTest />;
       default:
         return <div>Page not found</div>;
     }
@@ -428,8 +439,26 @@ export function Dashboard() {
         </div>
       </main>
 
-      {userRole === "user" && (
-        <EditOwnProfile />
+      {/* Edit Profile Modal/Overlay */}
+      {editProfileOpen && userRole === "user" && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">Edit Profile</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditProfileOpen(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <EditOwnProfile />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
