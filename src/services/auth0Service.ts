@@ -98,9 +98,9 @@ class Auth0Service {
   async login(): Promise<void> {
     try {
       // Redirect to Auth0 Universal Login
-      const auth0Url = `https://${process.env.REACT_APP_AUTH0_DOMAIN}/authorize?` +
+      const auth0Url = `https://${"dev-8lo26de64qqp1i28.us.auth0.com"}/authorize?` +
         `response_type=code&` +
-        `client_id=${process.env.REACT_APP_AUTH0_CLIENT_ID}&` +
+        `client_id=${"UplJIwoCM8CxUzwmUSefUhSD3Gbi6VR8"}&` +
         `redirect_uri=${encodeURIComponent(`${window.location.origin}/auth/callback`)}&` +
         `scope=openid profile email&` +
         `audience=${encodeURIComponent('https://reppcoaching.vercel.app')}&` +
