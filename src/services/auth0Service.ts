@@ -103,6 +103,7 @@ class Auth0Service {
         `client_id=${"UplJIwoCM8CxUzwmUSefUhSD3Gbi6VR8"}&` +
         `redirect_uri=${encodeURIComponent(`${window.location.origin}/auth/callback`)}&` +
         `scope=openid profile email&` +
+        `audience=${encodeURIComponent('https://reppcoaching.vercel.app')}&` +
         `state=${encodeURIComponent(window.location.origin)}`;
       
       window.location.href = auth0Url;
