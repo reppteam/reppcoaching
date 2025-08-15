@@ -114,7 +114,7 @@ export function CoachManagerDashboard() {
             Coach Manager Dashboard
         </h1>
           <p className="text-muted-foreground">
-          Manage coaches and students, assign relationships, and monitor performance
+          Manage coaches and students, assign relationships, and monitor performancegdsfsdfdsfsdfds
         </p>
       </div>
 
