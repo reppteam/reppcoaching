@@ -73,12 +73,6 @@ export function Dashboard() {
   // Use the internal role value for logic
   const userRole = user?.role || 'user';
 
-  console.log("🚀 ~ Dashboard ~ user:", user)
-  console.log("User role:", user?.role)
-  console.log("User role from getPrimaryRole:", user ? getPrimaryRole(user) : 'No user')
-  console.log("userRole for sidebar:", userRole)
-  console.log("userRoleDisplay for badge:", userRoleDisplay)
-
   const loadStudent = useCallback(async (studentId: string) => {
     try {
       const users = await eightbaseService.getUsers();
@@ -148,11 +142,6 @@ export function Dashboard() {
         },
         { id: "leads", label: "All Leads", icon: Users },
         {
-          id: "calculator",
-          label: "Profit Calculator",
-          icon: Calculator,
-        },
-        {
           id: "coach-pricing",
           label: "Pricing Management",
           icon: DollarSign,
@@ -181,11 +170,6 @@ export function Dashboard() {
           icon: ShieldCheck,
         },
         { id: "leads", label: "All Leads", icon: Users },
-        {
-          id: "calculator",
-          label: "Profit Calculator",
-          icon: Calculator,
-        },
         {
           id: "coach-pricing",
           label: "Pricing Management",
@@ -232,10 +216,6 @@ export function Dashboard() {
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
   };
-  console.log(user, "user name")
-  console.log("User role:", user?.role)
-  console.log("User role from getPrimaryRole:", user ? getPrimaryRole(user) : 'No user')
-
   const renderTabContent = () => {
     switch (activeTab) {
       case "home":
@@ -258,7 +238,7 @@ export function Dashboard() {
                   <h1 className="text-2xl font-bold text-brand-gray">
                     Welcome back,{" "}
                     <span className="text-brand-blue">
-                      {user?.name}
+                      {user?.firstName} {user?.lastName}
                     </span>
                   </h1>
                   <p className="text-muted-foreground mb-6">

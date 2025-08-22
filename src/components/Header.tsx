@@ -112,7 +112,7 @@ export function Header({
                   variant="outline"
                   className="bg-blue-50 text-blue-700 border-blue-200"
                 >
-                  Viewing as: {user.name}
+                  Viewing as: {user.firstName} {user.lastName}
                 </Badge>
                 <Button variant="ghost" size="sm" onClick={logout}>
                   <ArrowLeft className="mr-2 h-3 w-3" />
@@ -124,7 +124,7 @@ export function Header({
 
             {/* User Info */}
             <div className="hidden md:block text-right truncate max-w-[160px]">
-              <p className="text-sm font-medium truncate">{user.name}</p>
+              <p className="text-sm font-medium truncate">{user.firstName} {user.lastName}</p>
               <p className="text-xs text-muted-foreground truncate">
                 {user.email}
               </p>

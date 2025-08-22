@@ -23,7 +23,6 @@ const mapRole = (roleName: string): 'user' | 'coach' | 'coach_manager' | 'super_
 
 export function useAuth() {
   const { user, isInitialized, isAuthenticated, login, logout } = useAuthContext();
-  console.log("🚀 ~ useAuth ~ user:", user)
   
   // Convert the AuthContext user to the expected User type
   const convertedUser: User | null = useMemo(() => {
@@ -31,7 +30,8 @@ export function useAuth() {
     
     const converted: User = {
       id: user.id,
-      name: user.name,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
       email: user.email,
       role: mapRole(user.roles?.[0]?.name || 'user'), // Properly map the role
       access_start: new Date().toISOString().split('T')[0],
@@ -43,12 +43,9 @@ export function useAuth() {
     };
 
     return converted;
-  }, [user?.id, user?.name, user?.email, user?.roles, user?.createdAt]);
+  }, [user?.id, user?.firstName, user?.lastName, user?.email, user?.roles, user?.createdAt]);
 
   // Debug logging
-  console.log('AuthContext user:', user);
-  console.log('User roles from AuthContext:', user?.roles);
-  console.log('Mapped role:', convertedUser?.role);
 
   return {
     user: convertedUser,

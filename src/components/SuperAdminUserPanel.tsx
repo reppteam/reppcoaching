@@ -40,6 +40,7 @@ interface AssignCoachForm {
 export function SuperAdminUserPanel() {
   const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
+  const [coaches, setCoaches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -51,6 +52,18 @@ export function SuperAdminUserPanel() {
     studentId: '',
     coachId: ''
   });
+  
+  // Edit dialog states
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: '',
+    is_active: true,
+    has_paid: false
+  });
 
   useEffect(() => {
     loadUsers();
@@ -59,8 +72,12 @@ export function SuperAdminUserPanel() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const usersData = await eightbaseService.getAllUsersWithDetails();
-      setUsers(usersData);
+      const [fetchedUsers, fetchedCoaches] = await Promise.all([
+        eightbaseService.getAllUsersWithDetails(),
+        eightbaseService.getAllCoaches()
+      ]);
+      setUsers(fetchedUsers);
+      setCoaches(fetchedCoaches);
     } catch (error) {
       console.error('Failed to load users:', error);
     } finally {
@@ -70,7 +87,9 @@ export function SuperAdminUserPanel() {
 
   const handleAssignCoach = async () => {
     try {
-      await eightbaseService.assignStudentToCoach(assignCoachForm.studentId, assignCoachForm.coachId);
+      // If coachId is "none", we're unassigning the coach
+      const coachId = assignCoachForm.coachId === 'none' ? null : assignCoachForm.coachId;
+      await eightbaseService.assignStudentToCoach(assignCoachForm.studentId, coachId);
       setAssignCoachDialogOpen(false);
       setAssignCoachForm({ studentId: '', coachId: '' });
       await loadUsers();
@@ -79,8 +98,42 @@ export function SuperAdminUserPanel() {
     }
   };
 
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setEditForm({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      role: user.role || '',
+      is_active: user.is_active !== false,
+      has_paid: user.has_paid || false
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingUser) return;
+    
+    try {
+      await eightbaseService.updateUser(editingUser.id, editForm);
+      setEditDialogOpen(false);
+      setEditingUser(null);
+      setEditForm({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: '',
+        is_active: true,
+        has_paid: false
+      });
+      await loadUsers();
+    } catch (error) {
+      console.error('Failed to update user:', error);
+    }
+  };
+
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'all' || 
@@ -91,7 +144,7 @@ export function SuperAdminUserPanel() {
   });
 
   const students = users.filter(u => u.role === 'user');
-  const coaches = users.filter(u => u.role === 'coach' || u.role === 'coach_manager');
+  const coachManagers = users.filter(u => u.role === 'coach_manager');
   const superAdmins = users.filter(u => u.role === 'super_admin');
 
   if (loading) {
@@ -119,7 +172,7 @@ export function SuperAdminUserPanel() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
@@ -160,10 +213,22 @@ export function SuperAdminUserPanel() {
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Super Admins</p>
-                <p className="text-2xl font-bold text-purple-600">{superAdmins.length}</p>
+                <p className="text-xs text-muted-foreground">Coach Managers</p>
+                <p className="text-2xl font-bold text-purple-600">{coachManagers.length}</p>
               </div>
-              <Crown className="h-8 w-8 text-purple-600 opacity-60" />
+              <ShieldCheck className="h-8 w-8 text-purple-600 opacity-60" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Super Admins</p>
+                <p className="text-2xl font-bold text-orange-600">{superAdmins.length}</p>
+              </div>
+              <Crown className="h-8 w-8 text-orange-600 opacity-60" />
             </div>
           </CardContent>
         </Card>
@@ -235,7 +300,7 @@ export function SuperAdminUserPanel() {
                 <TableRow key={user.id}>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{user.name}</div>
+                      <div className="font-medium">{user.firstName} {user.lastName}</div>
                       <div className="text-sm text-muted-foreground">{user.email}</div>
                     </div>
                   </TableCell>
@@ -262,9 +327,9 @@ export function SuperAdminUserPanel() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {user.role === 'user' && user.assigned_admin_id ? (
+                    {user.role === 'user' && user.assignedCoach ? (
                       <span className="text-sm">
-                        {users.find(u => u.id === user.assigned_admin_id)?.name || 'Unknown Coach'}
+                        {user.assignedCoach.firstName ? user.assignedCoach.firstName : 'Coach Assigned'}
                       </span>
                     ) : (
                       <span className="text-sm text-muted-foreground">
@@ -274,12 +339,15 @@ export function SuperAdminUserPanel() {
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      {user.role === 'user' && (
+                      {user.role === 'user' && !user.assignedCoach && (
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => {
-                            setAssignCoachForm({ studentId: user.id, coachId: user.assigned_admin_id || '' });
+                            setAssignCoachForm({ 
+                              studentId: user.id, 
+                              coachId: '' 
+                            });
                             setAssignCoachDialogOpen(true);
                           }}
                         >
@@ -287,7 +355,28 @@ export function SuperAdminUserPanel() {
                           Assign Coach
                         </Button>
                       )}
-                      <Button size="sm" variant="outline">
+                      {user.role === 'user' && user.assignedCoach && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const coach = coaches.find(c => c.id === user.assignedCoach?.id);
+                            setAssignCoachForm({ 
+                              studentId: user.id, 
+                              coachId: coach ? coach.id : 'none' 
+                            });
+                            setAssignCoachDialogOpen(true);
+                          }}
+                        >
+                          <Shield className="h-3 w-3 mr-1" />
+                          Change Coach
+                        </Button>
+                      )}
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleEditUser(user)}
+                      >
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
@@ -319,7 +408,7 @@ export function SuperAdminUserPanel() {
                 <SelectContent>
                   {students.map(student => (
                     <SelectItem key={student.id} value={student.id}>
-                      {student.name} ({student.email})
+                      {student.firstName} {student.lastName} ({student.email})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -333,10 +422,10 @@ export function SuperAdminUserPanel() {
                   <SelectValue placeholder="Select coach" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unassign</SelectItem>
+                  <SelectItem value="none">Unassign</SelectItem>
                   {coaches.map(coach => (
                     <SelectItem key={coach.id} value={coach.id}>
-                      {coach.name} ({coach.email})
+                      {coach.firstName} {coach.lastName} ({coach.email})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -349,6 +438,93 @@ export function SuperAdminUserPanel() {
               </Button>
               <Button onClick={handleAssignCoach}>
                 Assign Coach
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update user information
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  value={editForm.firstName}
+                  onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={editForm.lastName}
+                  onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="role">Role</Label>
+              <Select value={editForm.role} onValueChange={(value) => setEditForm({...editForm, role: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Student</SelectItem>
+                  <SelectItem value="coach">Coach</SelectItem>
+                  <SelectItem value="coach_manager">Coach Manager</SelectItem>
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={editForm.is_active}
+                  onChange={(e) => setEditForm({...editForm, is_active: e.target.checked})}
+                />
+                <Label htmlFor="is_active">Active</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="has_paid"
+                  checked={editForm.has_paid}
+                  onChange={(e) => setEditForm({...editForm, has_paid: e.target.checked})}
+                />
+                <Label htmlFor="has_paid">Paid Account</Label>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit}>
+                Save Changes
               </Button>
             </div>
           </div>

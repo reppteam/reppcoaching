@@ -117,7 +117,8 @@ class UserInvitationService {
       // Transform to match our User interface
       return {
         id: createdUser.id,
-        name: createdUser.name,
+        firstName: createdUser.firstName,
+        lastName: createdUser.lastName,
         email: createdUser.email,
         role: invitationData.role,
         assigned_admin_id: invitationData.assigned_admin_id || null,

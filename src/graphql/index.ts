@@ -12,46 +12,27 @@ export const CURRENT_USER_QUERY = `
       email
       status
       origin
-      is8baseUser
+      is8base
       firstName
       lastName
       timezone
       avatar {
         downloadUrl
       }
-      role
-      assignedAdminId
-      accessStart
-      accessEnd
-      hasPaid
-      isActive
-      coachingTermStart
-      coachingTermEnd
-      createdAt
-      updatedAt
       roles {
         items {
           id
           name
         }
       }
-      student {
+      assignedCoach {
         id
-        phone
-        businessName
-        location
-        targetMarket
-        strengths
-        challenges
-        goals
-        preferredContactMethod
-        availability
-        notes
+        firstName
+        lastName
+        email
       }
-      coach {
-        id
-        isActive
-      }
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -83,27 +64,12 @@ export const GET_USERS = `
         }
         assignedCoach {
           id
-          fullName
+          firstName
+          lastName
           email
         }
         createdAt
         updatedAt
-        student {
-          id
-          phone
-          business_name
-          location
-          target_market
-          strengths
-          challenges
-          goals
-          preferred_contact_method
-          availability
-          notes
-        }
-        coach {
-          id
-        }
       }
     }
   }
@@ -132,27 +98,12 @@ export const GET_USER_BY_FILTER = `
         }
         assignedCoach {
           id
-          fullName
+          firstName
+          lastName
           email
         }
         createdAt
         updatedAt
-        student {
-          id
-          phone
-          business_name
-          location
-          target_market
-          strengths
-          challenges
-          goals
-          preferred_contact_method
-          availability
-          notes
-        }
-        coach {
-          id
-        }
       }
     }
   }
@@ -171,12 +122,78 @@ export const CREATE_USER = `
 `;
 
 export const UPDATE_USER = `
-  mutation UpdateUser($id: ID!, $data: UserUpdateInput!) {
-    userUpdate(id: $id, data: $data) {
+  mutation UpdateUser($filter: UserKeyFilter!, $data: UserUpdateInput!) {
+    userUpdate(filter: $filter, data: $data) {
       id
       email
       firstName
       lastName
+      status
+      origin
+      is8base
+      timezone
+      avatar {
+        downloadUrl
+      }
+      roles {
+        items {
+          id
+          name
+        }
+      }
+      assignedCoach {
+        id
+        firstName
+        lastName
+        email
+      }
+      coach {
+        id
+        firstName
+        lastName
+        email
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// New mutation for updating user with assignedCoach create operation
+export const UPDATE_USER_WITH_COACH = `
+  mutation UpdateUserWithCoach($filter: UserKeyFilter!, $data: UserUpdateInput!) {
+    userUpdate(
+      filter: $filter
+      data: $data
+    ) {
+      id
+      email
+      firstName
+      lastName
+      status
+      timezone
+      avatar {
+        downloadUrl
+      }
+      roles {
+        items {
+          id
+          name
+        }
+      }
+      assignedCoach {
+        id
+        firstName
+        lastName
+        email
+      }
+      coach {
+        id
+        firstName
+        lastName
+        email
+      }
+      createdAt
       updatedAt
     }
   }
@@ -191,14 +208,15 @@ export const DELETE_USER = `
 `;
 
 export const ASSIGN_STUDENT_TO_COACH = `
-  mutation AssignStudentToCoach($id: ID!, $assignedCoachId: String) {
-    userUpdate(id: $id, data: { assignedCoach: { connect: { id: $assignedCoachId } } }) {
+  mutation AssignStudentToCoach($filter: UserKeyFilter!, $assignedCoachId: String) {
+    userUpdate(filter: $filter, data: { 
+      assigned_admin_id: $assignedCoachId 
+    }) {
       id
-      assignedCoach {
-        id
-        fullName
-        email
-      }
+      assigned_admin_id
+      firstName
+      lastName
+      email
       updatedAt
     }
   }
@@ -218,6 +236,81 @@ export const ASSIGN_STUDENT_TO_COACH = `
 //     }
 //   }
 // `;
+
+// New mutation for creating assignedCoach relationship with create operation
+export const CREATE_ASSIGNED_COACH_RELATIONSHIP = `
+  mutation CreateAssignedCoachRelationship($userId: String!, $coachId: String!) {
+    userUpdate(
+      filter: {
+        id: $userId
+      }
+      data: {
+        assigned_admin_id: $coachId
+      }
+    ) {
+      id
+      assigned_admin_id
+      firstName
+      lastName
+      email
+      updatedAt
+    }
+  }
+`;
+
+// ========================================
+// COACH QUERIES AND MUTATIONS
+// ========================================
+
+export const GET_ALL_COACHES = `
+  query GetAllCoaches {
+    coachesList {
+      items {
+        id
+        firstName
+        lastName
+        email
+        bio
+        profileImage {
+          downloadUrl
+        }
+        user {
+          id
+          email
+          firstName
+          lastName
+        }
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export const GET_COACH_BY_USER_ID = `
+  query GetCoachByUserId($userId: String!) {
+    coachesList(filter: { user: { id: { equals: $userId } } }) {
+      items {
+        id
+        firstName
+        lastName
+        email
+        bio
+        profileImage {
+          downloadUrl
+        }
+        user {
+          id
+          email
+          firstName
+          lastName
+        }
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
 
 // ========================================
 // STUDENT PROFILE QUERIES AND MUTATIONS
@@ -332,6 +425,7 @@ export const GET_WEEKLY_REPORTS_BY_FILTER = `
 export const CREATE_WEEKLY_REPORT = `
   mutation CreateWeeklyReport($data: WeeklyReportCreateInput!) {
     weeklyReportCreate(data: $data) {
+      __typename
       id
       start_date
       end_date
@@ -347,6 +441,12 @@ export const CREATE_WEEKLY_REPORT = `
       status
       createdAt
       updatedAt
+      student {
+        id
+        firstName
+        lastName
+        email
+      }
     }
   }
 `;
@@ -390,20 +490,30 @@ export const GET_GOALS_BY_FILTER = `
   query GetGoalsByFilter($filter: GoalFilter) {
     goalsList(filter: $filter) {
       items {
-    id
+        id
+        title
+        description
+        target_value
+        current_value
+        goal_type
+        deadline
+        priority
+        status
         month_start
-        low_goal_shoots
-        success_goal_shoots
-        actual_shoots
         low_goal_revenue
         success_goal_revenue
         actual_revenue
+        low_goal_shoots
+        success_goal_shoots
+        actual_shoots
         aov
-    status
         createdAt
         updatedAt
         student {
           id
+          firstName
+          lastName
+          email
         }
       }
     }
@@ -413,44 +523,73 @@ export const GET_GOALS_BY_FILTER = `
 export const CREATE_GOAL = `
   mutation CreateGoal($data: GoalCreateInput!) {
     goalCreate(data: $data) {
-    id
+      __typename
+      id
+      title
+      description
+      target_value
+      current_value
+      goal_type
+      deadline
+      priority
+      status
       month_start
-      low_goal_shoots
-      success_goal_shoots
-      actual_shoots
       low_goal_revenue
       success_goal_revenue
       actual_revenue
+      low_goal_shoots
+      success_goal_shoots
+      actual_shoots
       aov
-    status
       createdAt
       updatedAt
+      student {
+        id
+        firstName
+        lastName
+        email
+      }
     }
   }
 `;
 
 export const UPDATE_GOAL = `
-  mutation UpdateGoal($id: ID!, $data: GoalUpdateInput!) {
-    goalUpdate(id: $id, data: $data) {
+  mutation UpdateGoal($filter: GoalKeyFilter!, $data: GoalUpdateInput!) {
+    goalUpdate(filter: $filter, data: $data) {
+      __typename
       id
+      title
+      description
+      target_value
+      current_value
+      goal_type
+      deadline
+      priority
+      status
       month_start
-      low_goal_shoots
-      success_goal_shoots
-      actual_shoots
       low_goal_revenue
       success_goal_revenue
       actual_revenue
+      low_goal_shoots
+      success_goal_shoots
+      actual_shoots
       aov
-      status
       updatedAt
+      student {
+        id
+        firstName
+        lastName
+        email
+      }
     }
   }
 `;
 
 export const DELETE_GOAL = `
-  mutation DeleteGoal($id: ID!) {
-    goalDestroy(id: $id) {
-      id
+  mutation DeleteGoal($data: GoalDeleteInput!) {
+    goalDelete(data: $data) {
+      __typename
+      success
     }
   }
 `;
@@ -697,8 +836,9 @@ export const CREATE_LEAD = `
 `;
 
 export const UPDATE_LEAD = `
-  mutation UpdateLead($id: ID!, $data: LeadUpdateInput!) {
-    leadUpdate(id: $id, data: $data) {
+  mutation UpdateLead($filter: LeadKeyFilter!, $data: LeadUpdateInput!) {
+    leadUpdate(filter: $filter, data: $data) {
+      __typename
       id
       lead_name
       email
@@ -812,7 +952,7 @@ export const DELETE_ENGAGEMENT_TAG = `
 // ========================================
 
 export const GET_SCRIPT_COMPONENTS_BY_FILTER = `
-  query GetScriptComponentsByFilter($filter: ScriptComponentsFilter) {
+  query GetScriptComponentsByFilter($filter: ScriptComponentFilter) {
     scriptComponentsList(filter: $filter) {
       items {
         id
@@ -831,8 +971,8 @@ export const GET_SCRIPT_COMPONENTS_BY_FILTER = `
 `;
 
 export const CREATE_SCRIPT_COMPONENTS = `
-  mutation CreateScriptComponents($data: ScriptComponentsCreateInput!) {
-    scriptComponentsCreate(data: $data) {
+  mutation CreateScriptComponents($data: ScriptComponentCreateInput!) {
+    scriptComponentCreate(data: $data) {
       id
       intro
       hook
@@ -848,8 +988,8 @@ export const CREATE_SCRIPT_COMPONENTS = `
 `;
 
 export const UPDATE_SCRIPT_COMPONENTS = `
-  mutation UpdateScriptComponents($id: ID!, $data: ScriptComponentsUpdateInput!) {
-    scriptComponentsUpdate(id: $id, data: $data) {
+  mutation UpdateScriptComponents($id: ID!, $data: ScriptComponentUpdateInput!) {
+    scriptComponentUpdate(id: $id, data: $data) {
       id
       intro
       hook
@@ -862,7 +1002,7 @@ export const UPDATE_SCRIPT_COMPONENTS = `
 
 export const DELETE_SCRIPT_COMPONENTS = `
   mutation DeleteScriptComponents($id: ID!) {
-    scriptComponentsDestroy(id: $id) {
+    scriptComponentDestroy(id: $id) {
       id
     }
   }

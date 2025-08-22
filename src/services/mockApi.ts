@@ -91,21 +91,9 @@ const defaultBenchmarks: KPIBenchmarks = {
 // Enhanced mock data with coaching term dates for free users
 let mockUsers: User[] = [
   {
-    id: '1',
-    name: 'John Student',
-    email: 'student@example.com',
-    role: 'user',
-    assigned_admin_id: '2',
-    access_start: '2024-01-01',
-    access_end: '2025-12-31',
-    has_paid: true,
-    created_at: '2024-01-01T00:00:00Z',
-    coaching_term_start: null,
-    coaching_term_end: null
-  },
-  {
     id: '2',
-    name: 'Sarah Coach',
+    firstName: 'Sarah',
+    lastName: 'Coach',
     email: 'coach@example.com',
     role: 'coach',
     access_start: '2024-01-01',
@@ -117,46 +105,9 @@ let mockUsers: User[] = [
     is_active: true
   },
   {
-    id: '3',
-    name: 'Mike SuperAdmin',
-    email: 'superadmin@example.com',
-    role: 'super_admin',
-    access_start: '2024-01-01',
-    access_end: '2025-12-31',
-    has_paid: true,
-    created_at: '2024-01-01T00:00:00Z',
-    coaching_term_start: null,
-    coaching_term_end: null
-  },
-  {
-    id: '4',
-    name: 'Emily Rodriguez',
-    email: 'emily.student@example.com',
-    role: 'user',
-    assigned_admin_id: '2',
-    access_start: '2024-02-01',
-    access_end: '2025-12-31',
-    has_paid: true,
-    created_at: '2024-02-01T00:00:00Z',
-    coaching_term_start: null,
-    coaching_term_end: null
-  },
-  {
-    id: '5',
-    name: 'David Thompson',
-    email: 'david.student@example.com',
-    role: 'user',
-    assigned_admin_id: '6',
-    access_start: '2024-03-01',
-    access_end: '2025-12-31',
-    has_paid: true,
-    created_at: '2024-03-01T00:00:00Z',
-    coaching_term_start: null,
-    coaching_term_end: null
-  },
-  {
     id: '6',
-    name: 'Lisa Chen',
+    firstName: 'Lisa',
+    lastName: 'Chen',
     email: 'lisa.coach@example.com',
     role: 'coach',
     access_start: '2024-01-15',
@@ -168,32 +119,9 @@ let mockUsers: User[] = [
     is_active: true
   },
   {
-    id: '7',
-    name: 'Marcus Johnson',
-    email: 'marcus.student@example.com',
-    role: 'user',
-    assigned_admin_id: '6',
-    access_start: '2024-04-01',
-    access_end: '2025-12-31',
-    has_paid: false, // Free user
-    created_at: '2024-04-01T00:00:00Z',
-    ...calculateCoachingTermDates('2024-04-01')
-  },
-  {
-    id: '8',
-    name: 'Anna Wilson',
-    email: 'anna.student@example.com',
-    role: 'user',
-    assigned_admin_id: null,
-    access_start: '2024-05-01',
-    access_end: '2025-12-31',
-    has_paid: false, // Free user
-    created_at: '2024-05-01T00:00:00Z',
-    ...calculateCoachingTermDates('2024-05-01')
-  },
-  {
     id: '9',
-    name: 'Robert Garcia',
+    firstName: 'Robert',
+    lastName: 'Garcia',
     email: 'robert.coach@example.com',
     role: 'coach',
     access_start: '2024-02-01',
@@ -204,10 +132,10 @@ let mockUsers: User[] = [
     coaching_term_end: null,
     is_active: true
   },
-  // Add some Coach Manager users
   {
     id: '13',
-    name: 'Alex Manager',
+    firstName: 'Alex',
+    lastName: 'Manager',
     email: 'alex.manager@example.com',
     role: 'coach_manager',
     access_start: '2024-01-01',
@@ -217,43 +145,6 @@ let mockUsers: User[] = [
     coaching_term_start: null,
     coaching_term_end: null,
     is_active: true
-  },
-  // Additional free users for testing with different coaching term dates
-  {
-    id: '10',
-    name: 'Jessica Martinez',
-    email: 'jessica.free@example.com',
-    role: 'user',
-    assigned_admin_id: '2',
-    access_start: '2024-06-01',
-    access_end: '2025-12-31',
-    has_paid: false, // Free user - current coaching term
-    created_at: '2024-06-01T00:00:00Z',
-    ...calculateCoachingTermDates('2024-06-01')
-  },
-  {
-    id: '11',
-    name: 'Tyler Brown',
-    email: 'tyler.expired@example.com',
-    role: 'user',
-    assigned_admin_id: '6',
-    access_start: '2023-12-01',
-    access_end: '2025-12-31',
-    has_paid: false, // Free user with expired term
-    created_at: '2023-12-01T00:00:00Z',
-    ...calculateCoachingTermDates('2023-12-01')
-  },
-  {
-    id: '12',
-    name: 'Sophie Chen',
-    email: 'sophie.upcoming@example.com',
-    role: 'user',
-    assigned_admin_id: '2',
-    access_start: '2025-01-01',
-    access_end: '2025-12-31',
-    has_paid: false, // Free user with upcoming term
-    created_at: '2024-12-01T00:00:00Z',
-    ...calculateCoachingTermDates('2025-01-01')
   }
 ];
 
@@ -1990,10 +1881,10 @@ export const mockApi = {
     
     return {
       student_id: studentId,
-      student_name: student.name,
+      student_name: `${student.firstName} ${student.lastName}`,
       student_email: student.email,
       assigned_coach_id: student.assigned_admin_id,
-      coach_name: coach?.name || null,
+      coach_name: coach ? `${coach.firstName} ${coach.lastName}` : null,
       is_paid_user: student.has_paid,
       
       // Lead Generation KPIs
@@ -2109,7 +2000,7 @@ export const mockApi = {
     
     return {
       coach_id: coachId,
-      coach_name: coach.name,
+      coach_name: `${coach.firstName} ${coach.lastName}`,
       total_students: students.length,
       active_students: activeStudents,
       paid_students: paidStudents,

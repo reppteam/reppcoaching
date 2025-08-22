@@ -37,7 +37,7 @@ export function RegistrationExample() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Welcome, {currentUser.name}!</CardTitle>
+            <CardTitle>Welcome, {currentUser.firstName} {currentUser.lastName}!</CardTitle>
             <CardDescription>
               You are logged in as a {currentUser.role === 'user' ? 'Student' : 'Coach'}
             </CardDescription>

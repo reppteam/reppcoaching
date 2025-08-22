@@ -137,17 +137,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("No Auth0 user email available");
         return null;
       }
-
-      console.log("Attempting to fetch user with email:", auth0User.email);
-
       // Query 8base for user by email
       const { data, error } = await apolloClient.query({
         query: GET_8BASE_USER_BY_EMAIL,
         variables: { email: auth0User.email },
         errorPolicy: "all",
       });
-
-      console.log("GraphQL query result:", { data, error });
 
       if (error) {
         console.error("Error fetching user:", error);
@@ -159,13 +154,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
 
-      console.log("GraphQL response data:", data);
-
       const users = data.usersList?.items;
-      console.log("Users found:", users);
 
       if (!users || users.length === 0) {
-        console.error("No user found with email:", auth0User.email);
         console.log("Creating new user in 8base...");
 
         // Try to create a new user in 8base
@@ -196,7 +187,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const extractedUser = extractUser(users[0]);
-      console.log("Extracted user:", extractedUser);
       return extractedUser;
     } catch (error) {
       console.error("Error in getUser:", error);
@@ -213,12 +203,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const initialize = useCallback(async () => {
     try {
-      console.log('AuthContext initialize:', { isAuthenticated, auth0User });
-
       if (isAuthenticated) {
         const user = await getUser();
-        console.log('AuthContext getUser result:', user);
-
         // Only set initialized if we successfully got user data
         if (user) {
           dispatch({
@@ -267,7 +253,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Retry mechanism for when user data is not immediately available
   useEffect(() => {
     if (isAuthenticated && !state.user && state.isInitialized) {
-      console.log('AuthContext: Retrying user data fetch...');
+
       const retryTimer = setTimeout(() => {
         initialize();
       }, 2000); // Retry after 2 seconds

@@ -31,7 +31,7 @@ export function StudentWeekOverview({ student, showDetails = false, className = 
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <UserIcon className="h-4 w-4 text-brand-blue" />
-            {student.name}
+            {student.firstName} {student.lastName}
           </CardTitle>
           <CardDescription>{student.email}</CardDescription>
         </CardHeader>
@@ -113,7 +113,7 @@ export function StudentWeekOverview({ student, showDetails = false, className = 
   return (
     <div className={`inline-flex items-center space-x-2 ${className}`}>
       <div className="text-sm">
-        <div className="font-medium">{student.name}</div>
+        <div className="font-medium">{student.firstName} {student.lastName}</div>
         <div className="text-xs text-muted-foreground">{student.email}</div>
       </div>
       <div className="flex flex-col items-end space-y-1">

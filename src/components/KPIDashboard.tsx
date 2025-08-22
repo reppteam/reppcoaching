@@ -82,14 +82,53 @@ export function KPIDashboard({showCoachSummary = true}: {showCoachSummary?: bool
   const loadKPIData = async () => {
     setLoading(true);
     try {
-      const usersData = await eightbaseService.getAllUsersWithDetails();
+      // Fetch all required data from 8base
+      const [usersData, weeklyReports, goals] = await Promise.all([
+        eightbaseService.getAllUsersWithDetails(),
+        eightbaseService.getWeeklyReports(),
+        eightbaseService.getGoals()
+      ]);
+      
       setUsers(usersData);
       
-      // Calculate metrics
+      // Calculate metrics from real data
       const students = usersData.filter(u => u.role === 'user');
       const coaches = usersData.filter(u => u.role === 'coach');
       const paidStudents = students.filter(s => s.has_paid);
       const activeStudents = students.filter(s => s.is_active !== false);
+      
+      // Calculate real time-based metrics
+      const now = new Date();
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      
+      const studentsThisMonth = students.filter(s => {
+        const createdAt = new Date(s.created_at);
+        return createdAt >= thisMonth;
+      }).length;
+      
+      const studentsLastMonth = students.filter(s => {
+        const createdAt = new Date(s.created_at);
+        return createdAt >= lastMonth && createdAt < thisMonth;
+      }).length;
+      
+      // Calculate revenue from weekly reports
+      const thisMonthReports = weeklyReports.filter(report => {
+        const reportDate = new Date(report.start_date);
+        return reportDate >= thisMonth;
+      });
+      
+      const lastMonthReports = weeklyReports.filter(report => {
+        const reportDate = new Date(report.start_date);
+        return reportDate >= lastMonth && reportDate < thisMonth;
+      });
+      
+      const revenueThisMonth = thisMonthReports.reduce((total, report) => total + report.revenue, 0);
+      const revenueLastMonth = lastMonthReports.reduce((total, report) => total + report.revenue, 0);
+      
+      // Calculate real progress metrics
+      const activeStudentsPercentage = students.length > 0 ? Math.round((activeStudents.length / students.length) * 100) : 0;
+      const completionRate = Math.round((paidStudents.length / students.length) * 100);
       
       const calculatedMetrics: KPIMetrics = {
         totalStudents: students.length,
@@ -98,42 +137,85 @@ export function KPIDashboard({showCoachSummary = true}: {showCoachSummary?: bool
         activeCoaches: coaches.filter(c => c.is_active !== false).length,
         paidStudents: paidStudents.length,
         unpaidStudents: students.length - paidStudents.length,
-        studentsThisMonth: Math.floor(students.length * 0.3), // Mock data
-        studentsLastMonth: Math.floor(students.length * 0.2), // Mock data
-        averageWeekProgress: 65,
-        completionRate: 78,
-        revenueThisMonth: paidStudents.length * 299, // Mock pricing
-        revenueLastMonth: Math.floor(paidStudents.length * 0.8) * 299
+        studentsThisMonth: studentsThisMonth,
+        studentsLastMonth: studentsLastMonth,
+        averageWeekProgress: activeStudentsPercentage,
+        completionRate: completionRate,
+        revenueThisMonth: revenueThisMonth,
+        revenueLastMonth: revenueLastMonth
       };
       
       setMetrics(calculatedMetrics);
       
-      // Generate mock activity data
-      const mockActivityData: ActivityData[] = [];
+      // Generate real activity data based on actual data
+      const activityData: ActivityData[] = [];
       for (let i = 29; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
-        mockActivityData.push({
-          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          newStudents: Math.floor(Math.random() * 5),
-          activeStudents: Math.floor(Math.random() * 20) + 30,
-          completedGoals: Math.floor(Math.random() * 15) + 5
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        // Count students created on this date
+        const newStudentsOnDate = students.filter(s => {
+          const createdAt = new Date(s.created_at);
+          return createdAt.toDateString() === date.toDateString();
+        }).length;
+        
+        // Count active students (students with recent activity)
+        const activeStudentsOnDate = students.filter(s => {
+          const createdAt = new Date(s.created_at);
+          const daysSinceCreation = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+          return daysSinceCreation <= 30 && s.is_active !== false;
+        }).length;
+        
+        // Count completed goals for this date
+        const completedGoalsOnDate = goals.filter(g => {
+          const completedDate = new Date(g.deadline);
+          return completedDate.toDateString() === date.toDateString() && g.status === 'completed';
+        }).length;
+        
+        activityData.push({
+          date: dateStr,
+          newStudents: newStudentsOnDate,
+          activeStudents: activeStudentsOnDate,
+          completedGoals: completedGoalsOnDate
         });
       }
-      setActivityData(mockActivityData);
+      setActivityData(activityData);
       
-      // Calculate coach performance
+      // Calculate real coach performance using weekly reports
       const coachPerf: CoachPerformance[] = coaches.map(coach => {
         const assignedStudents = students.filter(s => s.assigned_admin_id === coach.id);
         const activeAssigned = assignedStudents.filter(s => s.is_active !== false);
+        const paidAssigned = assignedStudents.filter(s => s.has_paid);
+        
+        // Get coach's weekly reports
+        const coachReports = weeklyReports.filter(report => {
+          const student = students.find(s => s.id === report.user_id);
+          return student && student.assigned_admin_id === coach.id;
+        });
+        
+        // Calculate real metrics based on reports
+        const totalRevenue = coachReports.reduce((sum, report) => sum + report.revenue, 0);
+        const averageRevenue = coachReports.length > 0 ? totalRevenue / coachReports.length : 0;
+        
+        // Calculate progress based on active students vs total assigned
+        const progressPercentage = assignedStudents.length > 0 ? Math.round((activeAssigned.length / assignedStudents.length) * 100) : 0;
+        
+        // Calculate completion rate based on paid students
+        const completionPercentage = assignedStudents.length > 0 ? Math.round((paidAssigned.length / assignedStudents.length) * 100) : 0;
+        
+        // Calculate engagement based on students with recent reports
+        const studentsWithReports = new Set(coachReports.map(r => r.user_id)).size;
+        const engagementPercentage = assignedStudents.length > 0 ? Math.round((studentsWithReports / assignedStudents.length) * 100) : 0;
+        
         return {
           coachId: coach.id,
-          coachName: coach.name,
+          coachName: `${coach.firstName} ${coach.lastName}`,
           assignedStudents: assignedStudents.length,
           activeStudents: activeAssigned.length,
-          averageProgress: Math.floor(Math.random() * 30) + 60,
-          completionRate: Math.floor(Math.random() * 20) + 70,
-          engagement: Math.floor(Math.random() * 25) + 65
+          averageProgress: progressPercentage,
+          completionRate: completionPercentage,
+          engagement: engagementPercentage
         };
       });
       setCoachPerformance(coachPerf);
@@ -387,52 +469,73 @@ export function KPIDashboard({showCoachSummary = true}: {showCoachSummary?: bool
 
         <TabsContent value="coaches" className="space-y-6">
           {showCoachSummary && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {coachPerformance.map((coach) => (
-                <Card key={coach.coachId}>
-            <CardHeader>
-                    <CardTitle className="text-lg">{coach.coachName}</CardTitle>
-                    <CardDescription>Performance metrics</CardDescription>
-            </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{coach.assignedStudents}</div>
-                        <div className="text-xs text-muted-foreground">Assigned</div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Coach Performance</h3>
+                  <p className="text-sm text-muted-foreground">Individual coach metrics and student management</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {coachPerformance.map((coach) => (
+                  <Card key={coach.coachId} className="relative">
+                    <CardContent className="pt-6">
+                      {/* Engagement Badge */}
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-green-100 text-green-800">
+                          {coach.engagement}% engagement
+                        </Badge>
+                      </div>
+                      
+                      {/* Coach Header */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <Shield className="h-5 w-5 text-green-600" />
+                        <div>
+                          <h4 className="font-semibold">{coach.coachName}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {coach.assignedStudents} students assigned
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Metrics */}
+                      <div className="space-y-4">
+                        {/* Active Students */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Active Students</span>
+                            <span className="text-sm text-muted-foreground">{coach.activeStudents}</span>
                           </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{coach.activeStudents}</div>
-                        <div className="text-xs text-muted-foreground">Active</div>
+                          <Progress 
+                            value={coach.assignedStudents > 0 ? (coach.activeStudents / coach.assignedStudents) * 100 : 0} 
+                            className="h-2" 
+                          />
+                        </div>
+                        
+                        {/* Average Progress */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Avg Progress</span>
+                            <span className="text-sm text-muted-foreground">{coach.averageProgress}%</span>
+                          </div>
+                          <Progress value={coach.averageProgress} className="h-2" />
+                        </div>
+                        
+                        {/* Completion Rate */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Completion Rate</span>
+                            <span className="text-sm text-muted-foreground">{coach.completionRate}%</span>
+                          </div>
+                          <Progress value={coach.completionRate} className="h-2" />
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Progress</span>
-                        <span className="text-sm font-medium">{coach.averageProgress}%</span>
-                      </div>
-                      <Progress value={coach.averageProgress} className="h-2" />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Completion</span>
-                        <span className="text-sm font-medium">{coach.completionRate}%</span>
-                      </div>
-                      <Progress value={coach.completionRate} className="h-2" />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Engagement</span>
-                        <span className="text-sm font-medium">{coach.engagement}%</span>
-                      </div>
-                      <Progress value={coach.engagement} className="h-2" />
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
+            </div>
           )}
         </TabsContent>
 

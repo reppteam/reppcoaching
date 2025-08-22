@@ -118,7 +118,7 @@ export function ImplementationSummary() {
               <div className="flex items-center space-x-3">
                 {roleCapabilities[user.role as keyof typeof roleCapabilities].icon}
                 <div>
-                  <div className="font-medium">{user.name}</div>
+                  <div className="font-medium">{user.firstName} {user.lastName}</div>
                   <Badge className={roleCapabilities[user.role as keyof typeof roleCapabilities].color}>
                     {roleCapabilities[user.role as keyof typeof roleCapabilities].name}
                   </Badge>

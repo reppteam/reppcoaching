@@ -142,7 +142,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
           access_start: formData.access_start || undefined,
           access_end: formData.access_end || undefined,
           has_paid: formData.has_paid,
-          invited_by: user?.name || 'System Administrator',
+          invited_by: `${user?.firstName} ${user?.lastName}` || 'System Administrator',
           custom_message: formData.custom_message || undefined
         };
 

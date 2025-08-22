@@ -246,7 +246,8 @@ class EightBaseAuthService {
       const roleName = eightBaseUser.roles?.items?.[0]?.name?.toLowerCase() || 'user';
       const user: User = {
         id: eightBaseUser.id,
-        name: `${eightBaseUser.firstName} ${eightBaseUser.lastName}`,
+        firstName: eightBaseUser.firstName || '',
+        lastName: eightBaseUser.lastName || '',
         email: eightBaseUser.email,
         role: (roleName === 'user' || roleName === 'coach' || roleName === 'coach_manager' || roleName === 'super_admin')
           ? roleName as 'user' | 'coach' | 'coach_manager' | 'super_admin'

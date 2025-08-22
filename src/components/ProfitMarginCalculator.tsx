@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { mockApi } from '../services/mockApi';
+import { eightbaseService } from '../services/8baseService';
 import { GlobalVariables, Product, Subitem, ProductWithCalculations, SubitemWithCalculation } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -69,8 +69,8 @@ export function ProfitMarginCalculator() {
     setLoading(true);
     try {
       const [globalVarsData, productsData] = await Promise.all([
-        mockApi.getGlobalVariables(user.id),
-        mockApi.getProducts(user.id)
+        eightbaseService.getGlobalVariables(user.id),
+        eightbaseService.getProducts(user.id)
       ]);
       
       setGlobalVars(globalVarsData);
@@ -87,7 +87,7 @@ export function ProfitMarginCalculator() {
       // Load all subitems for the products
       const allSubitems: Subitem[] = [];
       for (const product of productsData) {
-        const productSubitems = await mockApi.getSubitems(product.id);
+        const productSubitems = await eightbaseService.getSubitems(product.id);
         allSubitems.push(...productSubitems);
       }
       setSubitems(allSubitems);
@@ -158,7 +158,7 @@ export function ProfitMarginCalculator() {
     if (!user) return;
     
     try {
-      const updatedGlobalVars = await mockApi.updateGlobalVariables(user.id, globalVarsForm);
+      const updatedGlobalVars = await eightbaseService.updateGlobalVariables(user.id, globalVarsForm);
       setGlobalVars(updatedGlobalVars);
       setGlobalVarsDialogOpen(false);
     } catch (error) {
@@ -171,9 +171,9 @@ export function ProfitMarginCalculator() {
     
     try {
       if (editingProduct) {
-        await mockApi.updateProduct(editingProduct.id, productForm);
+        await eightbaseService.updateProduct(editingProduct.id, productForm);
       } else {
-        await mockApi.createProduct({
+        await eightbaseService.createProduct({
           user_id: user.id,
           ...productForm
         });
@@ -190,7 +190,7 @@ export function ProfitMarginCalculator() {
 
   const handleDeleteProduct = async (productId: string) => {
     try {
-      await mockApi.deleteProduct(productId);
+      await eightbaseService.deleteProduct(productId);
       await loadData();
     } catch (error) {
       console.error('Failed to delete product:', error);
@@ -202,9 +202,9 @@ export function ProfitMarginCalculator() {
     
     try {
       if (editingSubitem) {
-        await mockApi.updateSubitem(editingSubitem.id, subitemForm);
+        await eightbaseService.updateSubitem(editingSubitem.id, subitemForm);
       } else {
-        await mockApi.createSubitem({
+        await eightbaseService.createSubitem({
           product_id: selectedProductId,
           ...subitemForm
         });
@@ -221,7 +221,7 @@ export function ProfitMarginCalculator() {
 
   const handleDeleteSubitem = async (subitemId: string) => {
     try {
-      await mockApi.deleteSubitem(subitemId);
+      await eightbaseService.deleteSubitem(subitemId);
       await loadData();
     } catch (error) {
       console.error('Failed to delete subitem:', error);

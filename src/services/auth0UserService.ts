@@ -60,13 +60,14 @@ class Auth0UserService {
           user: existingUser,
           studentProfile,
           isNewUser: false,
-          message: `Welcome back ${existingUser.name}!`
+          message: `Welcome back ${existingUser.firstName} ${existingUser.lastName}!`
         };
       }
 
       // New user - create as student by default
       const newUser: Omit<User, 'id' | 'created_at'> = {
-        name: auth0User.name || `${auth0User.given_name || ''} ${auth0User.family_name || ''}`.trim(),
+        firstName: auth0User.given_name || auth0User.name?.split(' ')[0] || '',
+        lastName: auth0User.family_name || auth0User.name?.split(' ').slice(1).join(' ') || '',
         email: auth0User.email,
         role: 'user', // Default to student
         assigned_admin_id: null,
@@ -99,7 +100,7 @@ class Auth0UserService {
         user: createdUser,
         studentProfile,
         isNewUser: true,
-        message: `Welcome ${createdUser.name}! Your student account has been created successfully.`
+        message: `Welcome ${createdUser.firstName} ${createdUser.lastName}! Your student account has been created successfully.`
       };
     } catch (error) {
       console.error('Error handling Auth0 user:', error);
@@ -126,7 +127,8 @@ class Auth0UserService {
 
       // Create new coach user
       const newCoach: Omit<User, 'id' | 'created_at'> = {
-        name: invitationData.email.split('@')[0], // Use email prefix as name
+        firstName: invitationData.email.split('@')[0], // Use email prefix as firstName
+        lastName: '', // No lastName for now
         email: invitationData.email,
         role: invitationData.role,
         assigned_admin_id: null,
@@ -165,7 +167,8 @@ class Auth0UserService {
 
       // Create new admin user
       const newAdmin: Omit<User, 'id' | 'created_at'> = {
-        name: invitationData.email.split('@')[0], // Use email prefix as name
+        firstName: invitationData.email.split('@')[0], // Use email prefix as firstName
+        lastName: '', // No lastName for now
         email: invitationData.email,
         role: invitationData.role,
         assigned_admin_id: null,

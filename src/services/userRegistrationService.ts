@@ -71,7 +71,8 @@ class UserRegistrationService {
 
       // Create the user in 8base
       const newUser: Omit<User, 'id' | 'created_at'> = {
-        name: `${registrationData.firstName} ${registrationData.lastName}`,
+        firstName: registrationData.firstName,
+        lastName: registrationData.lastName,
         email: registrationData.email,
         role: registrationData.role,
         assigned_admin_id: null,
@@ -162,7 +163,7 @@ class UserRegistrationService {
       this.authToken = `${user.role}-token-${user.id}`;
 
       const roleDisplayName = this.getRoleDisplayName(user.role);
-      const message = `Welcome back ${user.name}! You are logged in as a ${roleDisplayName}.`;
+      const message = `Welcome back ${user.firstName} ${user.lastName}! You are logged in as a ${roleDisplayName}.`;
 
       return {
         user,

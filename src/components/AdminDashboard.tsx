@@ -126,7 +126,7 @@ export function AdminDashboard() {
         ...noteForm,
         user_id: authState.user!.id,
         created_by: authState.user!.id,
-        created_by_name: authState.user!.name,
+        created_by_name: `${authState.user!.firstName} ${authState.user!.lastName}`,
         visibility: noteForm.visibility as 'public' | 'private'
       });
       setNoteDialogOpen(false);
@@ -281,7 +281,7 @@ export function AdminDashboard() {
                       <div key={student.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <div className="font-medium">{student.name}</div>
+                            <div className="font-medium">{student.firstName} {student.lastName}</div>
                             <div className="text-sm text-muted-foreground">{student.email}</div>
                           </div>
                           <Badge className={student.has_paid ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}>
@@ -333,7 +333,10 @@ export function AdminDashboard() {
                         <div key={report.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                           <div>
                             <div className="text-sm font-medium">
-                              {users.find(u => u.id === report.user_id)?.name || 'Unknown Student'}
+                              {(() => {
+                                const user = users.find(u => u.id === report.user_id);
+                                return user ? `${user.firstName} ${user.lastName}` : 'Unknown Student';
+                              })()}
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {report.start_date} - {report.end_date}
@@ -490,7 +493,7 @@ export function AdminDashboard() {
                 <SelectContent>
                   {assignedStudents.map(student => (
                     <SelectItem key={student.id} value={student.id}>
-                      {student.name}
+                      {student.firstName} {student.lastName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -611,12 +614,15 @@ export function AdminDashboard() {
                 <SelectContent>
                   {noteForm.target_type === 'student' && assignedStudents.map(student => (
                     <SelectItem key={student.id} value={student.id}>
-                      {student.name}
+                      {student.firstName} {student.lastName}
                     </SelectItem>
                   ))}
                   {noteForm.target_type === 'call' && callLogs.map(call => (
                     <SelectItem key={call.id} value={call.id}>
-                      Call with {users.find(u => u.id === call.student_id)?.name || 'Unknown'} on {call.call_date}
+                      Call with {(() => {
+                        const user = users.find(u => u.id === call.student_id);
+                        return user ? `${user.firstName} ${user.lastName}` : 'Unknown';
+                      })()} on {call.call_date}
                     </SelectItem>
                   ))}
                   {noteForm.target_type === 'lead' && leads.map(lead => (

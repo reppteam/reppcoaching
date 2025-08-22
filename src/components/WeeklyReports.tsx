@@ -31,6 +31,7 @@ export const WeeklyReports: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [addingReport, setAddingReport] = useState(false);
   const [editingReport, setEditingReport] = useState<string | null>(null);
+  const [viewingReport, setViewingReport] = useState<WeeklyReport | null>(null);
   const [formData, setFormData] = useState({
     start_date: '',
     end_date: '',
@@ -439,7 +440,11 @@ export const WeeklyReports: React.FC = () => {
                       </TableCell>
                         <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setViewingReport(report)}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button 
@@ -629,6 +634,109 @@ export const WeeklyReports: React.FC = () => {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Report Dialog */}
+      <Dialog open={!!viewingReport} onOpenChange={() => setViewingReport(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>View Weekly Report</DialogTitle>
+            <DialogDescription>
+              Read-only view of the weekly report
+            </DialogDescription>
+          </DialogHeader>
+          {viewingReport && (
+            <div className="space-y-6">
+              {/* Report Period */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Start Date</Label>
+                  <p className="text-lg font-semibold">{new Date(viewingReport.start_date).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">End Date</Label>
+                  <p className="text-lg font-semibold">{new Date(viewingReport.end_date).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              {/* Client Metrics */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">New Clients</Label>
+                  <p className="text-2xl font-bold text-blue-600">{viewingReport.new_clients}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Unique Clients</Label>
+                  <p className="text-2xl font-bold text-green-600">{viewingReport.unique_clients}</p>
+                </div>
+              </div>
+
+              {/* Shoot Metrics */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Paid Shoots</Label>
+                  <p className="text-2xl font-bold text-emerald-600">{viewingReport.paid_shoots}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Free Shoots</Label>
+                  <p className="text-2xl font-bold text-orange-600">{viewingReport.free_shoots}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Total Shoots</Label>
+                  <p className="text-2xl font-bold">{viewingReport.paid_shoots + viewingReport.free_shoots}</p>
+                </div>
+              </div>
+
+              {/* Financial Metrics */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Revenue</Label>
+                  <p className="text-2xl font-bold text-green-600">${viewingReport.revenue.toLocaleString()}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Expenses</Label>
+                  <p className="text-2xl font-bold text-red-600">${viewingReport.expenses.toLocaleString()}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Editing Cost</Label>
+                  <p className="text-2xl font-bold text-orange-600">${viewingReport.editing_cost.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* AOV and Net Profit */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Average Order Value (AOV)</Label>
+                  <p className="text-2xl font-bold text-purple-600">${viewingReport.aov.toFixed(2)}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Net Profit</Label>
+                  <p className="text-2xl font-bold text-green-600">${viewingReport.net_profit.toFixed(2)}</p>
+                </div>
+              </div>
+
+              {/* Status */}
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+                <Badge variant={viewingReport.status === 'completed' ? 'default' : 'secondary'} className="mt-1">
+                  {viewingReport.status}
+                </Badge>
+              </div>
+
+              {/* Created Date */}
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">Report Created</Label>
+                <p className="text-sm">{new Date(viewingReport.created_at).toLocaleString()}</p>
+              </div>
+
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setViewingReport(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

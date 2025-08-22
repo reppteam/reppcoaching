@@ -39,7 +39,8 @@ import { StudentProfile as StudentProfileType, CallLog, Note } from '../types';
 interface StudentProfileProps {
   student: {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: string;
   };
@@ -169,7 +170,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
         content: noteForm.content,
         visibility: noteForm.visibility,
         created_by: currentUser?.id || '',
-        created_by_name: currentUser?.name || ''
+        created_by_name: currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : ''
       });
 
       setNotes([newNote, ...notes]);
@@ -200,7 +201,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
           <div>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
-                {student.name}
+                {student.firstName} {student.lastName}
               </CardTitle>
               <CardDescription>{student.email}</CardDescription>
             </div>

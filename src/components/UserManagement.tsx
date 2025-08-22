@@ -47,13 +47,15 @@ import {
 } from 'lucide-react';
 
 interface CreateCoachFormData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   assignedStudents: string[];
 }
 
 interface CreateStudentFormData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   startDate: string;
   endDate: string;
@@ -65,6 +67,7 @@ interface CreateStudentFormData {
 export function UserManagement() {
   const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
+  const [coaches, setCoaches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Dialog states
@@ -79,13 +82,15 @@ export function UserManagement() {
   
   // Form states
   const [coachFormData, setCoachFormData] = useState<CreateCoachFormData>({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     assignedStudents: []
   });
   
   const [studentFormData, setStudentFormData] = useState<CreateStudentFormData>({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     startDate: '',
     endDate: '',
@@ -98,6 +103,7 @@ export function UserManagement() {
   const [createdUser, setCreatedUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [newTag, setNewTag] = useState('');
+  const [selectedStudentsForCoach, setSelectedStudentsForCoach] = useState<string[]>([]);
 
   useEffect(() => {
     loadUsers();
@@ -106,9 +112,12 @@ export function UserManagement() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const fetchedUsers = await eightbaseService.getAllUsersWithDetails();
-      console.log("🚀 ~ loadUsers ~ fetchedUsers:", fetchedUsers)
+      const [fetchedUsers, fetchedCoaches] = await Promise.all([
+        eightbaseService.getAllUsersWithDetails(),
+        eightbaseService.getAllCoaches()
+      ]);
       setUsers(fetchedUsers);
+      setCoaches(fetchedCoaches);
     } catch (error) {
       console.error('Failed to load users:', error);
     } finally {
@@ -118,7 +127,8 @@ export function UserManagement() {
 
   const resetCoachForm = () => {
     setCoachFormData({
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       assignedStudents: []
     });
@@ -126,7 +136,8 @@ export function UserManagement() {
 
   const resetStudentForm = () => {
     setStudentFormData({
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       startDate: '',
       endDate: '',
@@ -145,10 +156,10 @@ export function UserManagement() {
       // Use the automated user creation system
       const invitationData = {
         email: coachFormData.email,
-        firstName: coachFormData.name.split(' ')[0],
-        lastName: coachFormData.name.split(' ').slice(1).join(' ') || '',
+        firstName: coachFormData.firstName,
+        lastName: coachFormData.lastName,
         role: 'coach' as const,
-        invited_by: user.name || 'System Administrator',
+        invited_by: `${user.firstName} ${user.lastName}` || 'System Administrator',
         has_paid: true,
         access_start: new Date().toISOString().split('T')[0],
         access_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]
@@ -190,11 +201,11 @@ export function UserManagement() {
       // Use the automated user creation system
       const invitationData = {
         email: studentFormData.email,
-        firstName: studentFormData.name.split(' ')[0],
-        lastName: studentFormData.name.split(' ').slice(1).join(' ') || '',
+        firstName: studentFormData.firstName,
+        lastName: studentFormData.lastName,
         role: 'user' as const,
         assigned_admin_id: user.role === 'coach_manager' ? user.id : undefined,
-        invited_by: user.name || 'System Administrator',
+        invited_by: `${user.firstName} ${user.lastName}` || 'System Administrator',
         has_paid: studentFormData.hasPaid,
         access_start: studentFormData.startDate,
         access_end: studentFormData.endDate,
@@ -222,8 +233,8 @@ export function UserManagement() {
     if (!userToDelete) return;
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Use the actual 8base service to delete the user
+      await eightbaseService.deleteUser(userToDelete.id);
       
       // Remove from users list
       setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
@@ -232,6 +243,85 @@ export function UserManagement() {
       setUserToDelete(null);
     } catch (error) {
       console.error('Failed to delete user:', error);
+      // You can add a toast notification here for better UX
+    }
+  };
+
+  const handleEditUser = async (userData: any) => {
+    if (!editingUser) return;
+
+    try {
+      let updatedUser: User;
+      
+      // Handle role changes first
+      if (userData.role && userData.role !== editingUser.role) {
+        // If changing to coach role, ensure coach record is created
+        if (userData.role === 'coach') {
+          await eightbaseService.ensureCoachRecord(editingUser.id, userData);
+        }
+      }
+      
+      // Handle different assignment scenarios based on role
+      if (editingUser.role === 'user' && userData.assigned_admin_id && userData.assigned_admin_id !== 'none') {
+        // Student being assigned to a coach
+        // userData.assigned_admin_id now contains the coach ID from coach table
+        const { assigned_admin_id, ...userDataWithoutCoach } = userData;
+        updatedUser = await eightbaseService.updateUserWithCoach(
+          editingUser.id, 
+          userDataWithoutCoach, 
+          assigned_admin_id // This is now the coach ID from coach table
+        );
+      } else if (editingUser.role === 'coach') {
+        // Coach being updated - handle student assignment
+        updatedUser = await eightbaseService.updateUser(editingUser.id, userData);
+        
+        // Get current assigned student
+        const currentAssignedStudent = users.find(u => u.role === 'user' && u.assigned_admin_id === editingUser.id);
+        
+        // Unassign current student if different student is selected
+        if (currentAssignedStudent && (!selectedStudentsForCoach.length || selectedStudentsForCoach[0] !== currentAssignedStudent.id)) {
+          try {
+            await eightbaseService.updateUser(currentAssignedStudent.id, { assigned_admin_id: null });
+          } catch (error) {
+            console.error(`Failed to unassign student ${currentAssignedStudent.id} from coach:`, error);
+          }
+        }
+        
+        // Assign newly selected student
+        if (selectedStudentsForCoach.length > 0) {
+          const studentToAssign = selectedStudentsForCoach[0];
+          if (!currentAssignedStudent || currentAssignedStudent.id !== studentToAssign) {
+            try {
+              await eightbaseService.assignStudentToCoach(studentToAssign, editingUser.id);
+            } catch (error) {
+              console.error(`Failed to assign student ${studentToAssign} to coach:`, error);
+            }
+          }
+        }
+        
+        // Handle manager assignment if present
+        if (userData.assigned_admin_id && userData.assigned_admin_id !== 'none') {
+          const { assigned_admin_id, ...userDataWithoutManager } = userData;
+          updatedUser = await eightbaseService.updateUserWithCoach(
+            editingUser.id, 
+            userDataWithoutManager, 
+            assigned_admin_id
+          );
+        }
+      } else {
+        // Regular user update
+        updatedUser = await eightbaseService.updateUser(editingUser.id, userData);
+      }
+      
+      // Refresh the users list to get updated assignments
+      await loadUsers();
+      
+      setEditUserDialogOpen(false);
+      setEditingUser(null);
+      setSelectedStudentsForCoach([]);
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      // You can add a toast notification here for better UX
     }
   };
 
@@ -242,6 +332,15 @@ export function UserManagement() {
 
   const openEditUser = (userToEdit: User) => {
     setEditingUser(userToEdit);
+    
+    // Initialize selected student if editing a coach (single assignment)
+    if (userToEdit.role === 'coach') {
+      const assignedStudent = users.find(u => u.role === 'user' && u.assigned_admin_id === userToEdit.id);
+      setSelectedStudentsForCoach(assignedStudent ? [assignedStudent.id] : []);
+    } else {
+      setSelectedStudentsForCoach([]);
+    }
+    
     setEditUserDialogOpen(true);
   };
 
@@ -297,7 +396,6 @@ export function UserManagement() {
   };
 
   // Filter users based on role permissions
-  const coaches = users.filter(u => u.role === 'coach');
   const coachManagers = users.filter(u => u.role === 'coach_manager');
   const students = users.filter(u => u.role === 'user');
   const availableStudents = students.filter(s => !s.assigned_admin_id || user?.role === 'super_admin' || user?.role === 'coach_manager');
@@ -360,7 +458,7 @@ export function UserManagement() {
           )}
           
           {/* Super Admin can create Coach Managers */}
-          {user?.role === 'super_admin' && (
+          {/* {user?.role === 'super_admin' && (
             <Button 
               variant="outline"
               onClick={() => {
@@ -383,9 +481,9 @@ export function UserManagement() {
                 </Button>
               </DialogTrigger>
             </Dialog>
-          )}
+          )} */}
           
-          {canCreateStudent && (
+          {/* {canCreateStudent && (
             <>
               <Dialog open={createStudentDialogOpen} onOpenChange={setCreateStudentDialogOpen}>
                 <DialogTrigger asChild>
@@ -400,7 +498,7 @@ export function UserManagement() {
                 Invite Student
               </Button>
             </>
-          )}
+          )} */}
           
           {/* Show restrictions for coaches */}
           {user?.role === 'coach' && (
@@ -449,11 +547,12 @@ export function UserManagement() {
                   ) : (
                     <div className="space-y-3">
                       {coachManagers.map((manager) => {
-                        const managedCoaches = coaches.filter(c => c.assigned_admin_id === manager.id);
+                        // Since coaches are now from coach table, we need to check their user relationship
+                        const managedCoaches = coaches.filter(c => c.user?.id === manager.id);
                         return (
                           <div key={manager.id} className="flex items-center justify-between p-3 border rounded-lg">
                             <div className="flex-1">
-                              <div className="font-medium">{manager.name}</div>
+                              <div className="font-medium">{manager.firstName} {manager.lastName}</div>
                               <div className="text-sm text-muted-foreground">{manager.email}</div>
                               <div className="text-xs text-muted-foreground mt-1">
                                 {managedCoaches.length} coaches managed
@@ -506,11 +605,12 @@ export function UserManagement() {
               ) : (
                 <div className="space-y-3">
                   {coaches.map((coach) => {
-                    const assignedStudents = students.filter(s => s.assigned_admin_id === coach.id);
+                    // Find assigned students using the assignedCoach field
+                    const assignedStudents = students.filter(s => s.assignedCoach?.id === coach.id);
                     return (
                       <div key={coach.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex-1">
-                          <div className="font-medium">{coach.name}</div>
+                          <div className="font-medium">{coach.firstName} {coach.lastName}</div>
                           <div className="text-sm text-muted-foreground">{coach.email}</div>
                           <div className="text-xs text-muted-foreground mt-1">
                             {assignedStudents.length} students assigned
@@ -527,14 +627,14 @@ export function UserManagement() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => openEditUser(coach)}
+                            onClick={() => openEditUser(coach.user || coach)}
                           >
                             <Edit className="h-3 w-3" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => openDeleteConfirm(coach)}
+                            onClick={() => openDeleteConfirm(coach.user || coach)}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -579,14 +679,15 @@ export function UserManagement() {
                     (user?.role === 'coach' && student.assigned_admin_id === user?.id)
                   )
                   .map((student) => {
-                    const coach = coaches.find(c => c.id === student.assigned_admin_id);
+                    // Use the assignedCoach field directly from the student data
+                    const coach = student.assignedCoach;
                     return (
                       <div key={student.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex-1">
-                          <div className="font-medium">{student.name}</div>
+                          <div className="font-medium">{student.firstName} {student.lastName}</div>
                           <div className="text-sm text-muted-foreground">{student.email}</div>
                           <div className="text-xs text-muted-foreground mt-1">
-                            Coach: {coach?.name || 'Unassigned'}
+                            Coach: {coach ? (coach.firstName ? coach.firstName : 'Coach Assigned') : 'Unassigned'}
                           </div>
                           <div className="mt-1">
                             <WeekTracker user={student} variant="compact" showTotal={false} />
@@ -675,7 +776,7 @@ export function UserManagement() {
         open={studentSignUpModalOpen}
         onOpenChange={setStudentSignUpModalOpen}
         onComplete={handleStudentSignUpComplete}
-        invitedBy={user?.name}
+                      invitedBy={`${user?.firstName} ${user?.lastName}`}
       />
 
       {/* Create Coach Dialog */}
@@ -693,12 +794,22 @@ export function UserManagement() {
           <form onSubmit={handleCreateCoach} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="coach-name">Full Name *</Label>
+                <Label htmlFor="coach-firstName">First Name *</Label>
                 <Input
-                  id="coach-name"
-                  value={coachFormData.name}
-                  onChange={(e) => setCoachFormData(prev => ({...prev, name: e.target.value}))}
-                  placeholder="John Smith"
+                  id="coach-firstName"
+                  value={coachFormData.firstName}
+                  onChange={(e) => setCoachFormData(prev => ({...prev, firstName: e.target.value}))}
+                  placeholder="John"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="coach-lastName">Last Name *</Label>
+                <Input
+                  id="coach-lastName"
+                  value={coachFormData.lastName}
+                  onChange={(e) => setCoachFormData(prev => ({...prev, lastName: e.target.value}))}
+                  placeholder="Smith"
                   required
                 />
               </div>
@@ -727,7 +838,7 @@ export function UserManagement() {
                         onCheckedChange={() => toggleStudentAssignment(student.id)}
                       />
                       <label htmlFor={`student-${student.id}`} className="text-sm flex-1">
-                        <div>{student.name}</div>
+                        <div>{student.firstName} {student.lastName}</div>
                         <div className="text-xs text-muted-foreground">{student.email}</div>
                       </label>
                     </div>
@@ -766,12 +877,22 @@ export function UserManagement() {
           <form onSubmit={handleCreateStudent} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="student-name">Full Name *</Label>
+                <Label htmlFor="student-firstName">First Name *</Label>
                 <Input
-                  id="student-name"
-                  value={studentFormData.name}
-                  onChange={(e) => setStudentFormData(prev => ({...prev, name: e.target.value}))}
-                  placeholder="Jane Doe"
+                  id="student-firstName"
+                  value={studentFormData.firstName}
+                  onChange={(e) => setStudentFormData(prev => ({...prev, firstName: e.target.value}))}
+                  placeholder="Jane"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="student-lastName">Last Name *</Label>
+                <Input
+                  id="student-lastName"
+                  value={studentFormData.lastName}
+                  onChange={(e) => setStudentFormData(prev => ({...prev, lastName: e.target.value}))}
+                  placeholder="Doe"
                   required
                 />
               </div>
@@ -894,7 +1015,7 @@ export function UserManagement() {
               {createdUser && (
                 <div className="space-y-2">
                   <p>
-                    <strong>{createdUser.name}</strong> has been successfully created as a{' '}
+                    <strong>{createdUser.firstName} {createdUser.lastName}</strong> has been successfully created as a{' '}
                     <strong>{createdUser.role === 'coach' ? 'Coach' : 'Student'}</strong>.
                   </p>
                   <div className="bg-muted p-3 rounded-lg">
@@ -933,7 +1054,7 @@ export function UserManagement() {
             <AlertDialogDescription>
               {userToDelete && (
                 <>
-                  Are you sure you want to delete <strong>{userToDelete.name}</strong>? 
+                  Are you sure you want to delete <strong>{userToDelete.firstName} {userToDelete.lastName}</strong>? 
                   This action cannot be undone and will remove all associated data.
                 </>
               )}
@@ -954,11 +1075,206 @@ export function UserManagement() {
           open={emailConfirmationModalOpen}
           onOpenChange={setEmailConfirmationModalOpen}
           userType={createdUser.role === 'coach' ? 'coach' : 'student'}
-          userName={createdUser.name}
+                        userName={`${createdUser.firstName} ${createdUser.lastName}`}
           userEmail={createdUser.email}
-          createdBy={user?.name}
+                      createdBy={`${user?.firstName} ${user?.lastName}`}
         />
       )}
+
+      {/* Edit User Dialog */}
+      <Dialog open={editUserDialogOpen} onOpenChange={(open) => {
+        setEditUserDialogOpen(open);
+        if (!open) {
+          setSelectedStudentsForCoach([]);
+        }
+      }}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Edit User - {editingUser ? `${editingUser.firstName} ${editingUser.lastName}` : ''}
+            </DialogTitle>
+            <DialogDescription>
+              Update user account settings and permissions
+            </DialogDescription>
+          </DialogHeader>
+          {editingUser && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-name">Full Name</Label>
+                  <Input
+                    id="edit-name"
+                    value={`${editingUser.firstName} ${editingUser.lastName}`}
+                                          onChange={(e) => {
+                        const nameParts = e.target.value.split(' ');
+                        setEditingUser({ 
+                          ...editingUser, 
+                          firstName: nameParts[0] || '', 
+                          lastName: nameParts.slice(1).join(' ') || '' 
+                        });
+                      }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-email">Email Address</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editingUser.email}
+                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-role">Role</Label>
+                  <Select 
+                    value={editingUser.role} 
+                    onValueChange={(value) => setEditingUser({ ...editingUser, role: value as any })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">Student</SelectItem>
+                      <SelectItem value="coach">Coach</SelectItem>
+                      <SelectItem value="coach_manager">Coach Manager</SelectItem>
+                      <SelectItem value="super_admin">Super Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  {/* Show Assigned Coach for Students/Users */}
+                  {editingUser.role === 'user' && (
+                    <>
+                      <Label htmlFor="edit-assigned-coach">Assigned Coach</Label>
+                      <Select 
+                        value={(() => {
+                          if (!editingUser.assigned_admin_id) return 'none';
+                          // Find the coach from coach table using the user ID
+                          const coach = coaches.find(c => c.user?.id === editingUser.assigned_admin_id);
+                          return coach ? coach.id : 'none';
+                        })()} 
+                        onValueChange={(value) => setEditingUser({ ...editingUser, assigned_admin_id: value === 'none' ? null : value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select coach" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No coach assigned</SelectItem>
+                          {coaches.map(coach => (
+                            <SelectItem key={coach.id} value={coach.id}>
+                              {coach.firstName} {coach.lastName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </>
+                  )}
+                  
+                  {/* Show Assigned Students for Coaches */}
+                  {editingUser.role === 'coach' && (
+                    <>
+                      <Label htmlFor="edit-assigned-students">Assigned Students</Label>
+                      <Select 
+                        value={selectedStudentsForCoach.length > 0 ? selectedStudentsForCoach[0] : 'none'} 
+                        onValueChange={(value) => {
+                          if (value === 'none') {
+                            setSelectedStudentsForCoach([]);
+                          } else {
+                            setSelectedStudentsForCoach([value]);
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select student" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No student assigned</SelectItem>
+                          {users.filter(u => u.role === 'user').map(student => (
+                            <SelectItem key={student.id} value={student.id}>
+                              {student.firstName} {student.lastName} ({student.email})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {selectedStudentsForCoach.length > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Currently assigned: {users.find(u => u.id === selectedStudentsForCoach[0])?.firstName} {users.find(u => u.id === selectedStudentsForCoach[0])?.lastName}
+                        </p>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Show Assigned Coach Manager for Coaches */}
+                  {editingUser.role === 'coach' && (
+                    <>
+                      <Label htmlFor="edit-assigned-manager">Assigned Manager</Label>
+                      <Select 
+                        value={editingUser.assigned_admin_id || 'none'} 
+                        onValueChange={(value) => setEditingUser({ ...editingUser, assigned_admin_id: value === 'none' ? null : value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select manager" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No manager assigned</SelectItem>
+                          {users.filter(u => u.role === 'coach_manager').map(manager => (
+                            <SelectItem key={manager.id} value={manager.id}>
+                              {manager.firstName} {manager.lastName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-access-start">Access Start Date</Label>
+                  <Input
+                    id="edit-access-start"
+                    type="date"
+                    value={editingUser.access_start}
+                    onChange={(e) => setEditingUser({ ...editingUser, access_start: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-access-end">Access End Date</Label>
+                  <Input
+                    id="edit-access-end"
+                    type="date"
+                    value={editingUser.access_end}
+                    onChange={(e) => setEditingUser({ ...editingUser, access_end: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="edit-has-paid"
+                  checked={editingUser.has_paid}
+                  onCheckedChange={(checked) => setEditingUser({ ...editingUser, has_paid: checked as boolean })}
+                />
+                <Label htmlFor="edit-has-paid">Paid User</Label>
+              </div>
+              
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={() => setEditUserDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => handleEditUser(editingUser)}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Add User Modal */}
       <AddUserModal

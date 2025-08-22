@@ -10,6 +10,7 @@ import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Progress } from './ui/progress';
+import { toast } from 'sonner';
 import {
   Target,
   Calendar,
@@ -40,7 +41,16 @@ export const Goals: React.FC = () => {
     goal_type: 'revenue' as 'revenue' | 'clients' | 'shoots' | 'other',
     deadline: '',
     priority: 'medium' as 'low' | 'medium' | 'high',
-    status: 'active' as 'active' | 'completed'
+    status: 'active' as 'active' | 'completed',
+    // Additional 8base fields
+    month_start: '',
+    low_goal_revenue: 0,
+    success_goal_revenue: 0,
+    actual_revenue: 0,
+    low_goal_shoots: 0,
+    success_goal_shoots: 0,
+    actual_shoots: 0,
+    aov: 0
   });
 
   useEffect(() => {
@@ -84,6 +94,7 @@ export const Goals: React.FC = () => {
     console.log("goalId", goalId)
     try {
       const updates = {
+        user_id: user?.id,
         ...formData
       };
       const updatedGoal = await eightbaseService.updateGoal(goalId, updates);
@@ -99,10 +110,16 @@ export const Goals: React.FC = () => {
   }
   const handleDelete = async (goalId: string) => {
     try {
-      await eightbaseService.deleteGoal(goalId);
-      setGoals(goals.filter(g => g.id !== goalId));
+      const success = await eightbaseService.deleteGoal(goalId);
+      if (success) {
+        setGoals(goals.filter(g => g.id !== goalId));
+        toast.success('Goal deleted successfully!');
+      } else {
+        toast.error('Failed to delete goal. Please try again.');
+      }
     } catch (error) {
       console.error('Error deleting goal:', error);
+      toast.error('Error deleting goal. Please try again.');
     }
   };
 
@@ -115,7 +132,16 @@ export const Goals: React.FC = () => {
       goal_type: 'revenue',
       deadline: '',
       priority: 'medium',
-      status: 'active'
+      status: 'active',
+      // Additional 8base fields
+      month_start: '',
+      low_goal_revenue: 0,
+      success_goal_revenue: 0,
+      actual_revenue: 0,
+      low_goal_shoots: 0,
+      success_goal_shoots: 0,
+      actual_shoots: 0,
+      aov: 0
     });
   };
 
@@ -283,6 +309,100 @@ export const Goals: React.FC = () => {
                 </div>
               </div>
 
+              {/* Additional 8base Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="month_start">Month Start</Label>
+                  <Input
+                    id="month_start"
+                    type="date"
+                    value={formData.month_start}
+                    onChange={(e) => setFormData({ ...formData, month_start: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="aov">Average Order Value (AOV)</Label>
+                  <Input
+                    id="aov"
+                    type="number"
+                    step="0.01"
+                    value={formData.aov}
+                    onChange={(e) => setFormData({ ...formData, aov: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+              </div>
+
+              {/* Revenue Goals */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-muted-foreground">Revenue Goal Details</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="low_goal_revenue">Low Goal Revenue</Label>
+                    <Input
+                      id="low_goal_revenue"
+                      type="number"
+                      step="0.01"
+                      value={formData.low_goal_revenue}
+                      onChange={(e) => setFormData({ ...formData, low_goal_revenue: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="success_goal_revenue">Success Goal Revenue</Label>
+                    <Input
+                      id="success_goal_revenue"
+                      type="number"
+                      step="0.01"
+                      value={formData.success_goal_revenue}
+                      onChange={(e) => setFormData({ ...formData, success_goal_revenue: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="actual_revenue">Actual Revenue</Label>
+                    <Input
+                      id="actual_revenue"
+                      type="number"
+                      step="0.01"
+                      value={formData.actual_revenue}
+                      onChange={(e) => setFormData({ ...formData, actual_revenue: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Shoot Goals */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-muted-foreground">Shoot Goal Details</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="low_goal_shoots">Low Goal Shoots</Label>
+                    <Input
+                      id="low_goal_shoots"
+                      type="number"
+                      value={formData.low_goal_shoots}
+                      onChange={(e) => setFormData({ ...formData, low_goal_shoots: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="success_goal_shoots">Success Goal Shoots</Label>
+                    <Input
+                      id="success_goal_shoots"
+                      type="number"
+                      value={formData.success_goal_shoots}
+                      onChange={(e) => setFormData({ ...formData, success_goal_shoots: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="actual_shoots">Actual Shoots</Label>
+                    <Input
+                      id="actual_shoots"
+                      type="number"
+                      value={formData.actual_shoots}
+                      onChange={(e) => setFormData({ ...formData, actual_shoots: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Progress Preview */}
               <Card>
                 <CardContent className="pt-6">
@@ -418,7 +538,16 @@ export const Goals: React.FC = () => {
                       goal_type: goal.goal_type,
                       deadline: goal.deadline,
                       priority: goal.priority,
-                      status: goal.status
+                      status: goal.status,
+                      // Additional 8base fields
+                      month_start: goal.deadline || '',
+                      low_goal_revenue: goal.goal_type === 'revenue' ? goal.target_value : 0,
+                      success_goal_revenue: goal.goal_type === 'revenue' ? goal.target_value : 0,
+                      actual_revenue: goal.goal_type === 'revenue' ? goal.current_value : 0,
+                      low_goal_shoots: goal.goal_type === 'shoots' ? goal.target_value : 0,
+                      success_goal_shoots: goal.goal_type === 'shoots' ? goal.target_value : 0,
+                      actual_shoots: goal.goal_type === 'shoots' ? goal.current_value : 0,
+                      aov: goal.goal_type === 'revenue' ? goal.current_value : 0
                     });
                     setEditingGoal(goal.id)
                     handleEditGoal(goal.id);
@@ -553,6 +682,100 @@ export const Goals: React.FC = () => {
                   <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Additional 8base Fields for Edit */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit_month_start">Month Start</Label>
+                <Input
+                  id="edit_month_start"
+                  type="date"
+                  value={formData.month_start}
+                  onChange={(e) => setFormData({ ...formData, month_start: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_aov">Average Order Value (AOV)</Label>
+                <Input
+                  id="edit_aov"
+                  type="number"
+                  step="0.01"
+                  value={formData.aov}
+                  onChange={(e) => setFormData({ ...formData, aov: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
+            {/* Revenue Goals for Edit */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-muted-foreground">Revenue Goal Details</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="edit_low_goal_revenue">Low Goal Revenue</Label>
+                  <Input
+                    id="edit_low_goal_revenue"
+                    type="number"
+                    step="0.01"
+                    value={formData.low_goal_revenue}
+                    onChange={(e) => setFormData({ ...formData, low_goal_revenue: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_success_goal_revenue">Success Goal Revenue</Label>
+                  <Input
+                    id="edit_success_goal_revenue"
+                    type="number"
+                    step="0.01"
+                    value={formData.success_goal_revenue}
+                    onChange={(e) => setFormData({ ...formData, success_goal_revenue: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_actual_revenue">Actual Revenue</Label>
+                  <Input
+                    id="edit_actual_revenue"
+                    type="number"
+                    step="0.01"
+                    value={formData.actual_revenue}
+                    onChange={(e) => setFormData({ ...formData, actual_revenue: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Shoot Goals for Edit */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-muted-foreground">Shoot Goal Details</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="edit_low_goal_shoots">Low Goal Shoots</Label>
+                  <Input
+                    id="edit_low_goal_shoots"
+                    type="number"
+                    value={formData.low_goal_shoots}
+                    onChange={(e) => setFormData({ ...formData, low_goal_shoots: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_success_goal_shoots">Success Goal Shoots</Label>
+                  <Input
+                    id="edit_success_goal_shoots"
+                    type="number"
+                    value={formData.success_goal_shoots}
+                    onChange={(e) => setFormData({ ...formData, success_goal_shoots: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_actual_shoots">Actual Shoots</Label>
+                  <Input
+                    id="edit_actual_shoots"
+                    type="number"
+                    value={formData.actual_shoots}
+                    onChange={(e) => setFormData({ ...formData, actual_shoots: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Progress Preview */}

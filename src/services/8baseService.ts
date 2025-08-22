@@ -25,6 +25,57 @@ const CREATE_USER_WITH_ROLES = `
   }
 `;
 
+// Create Coach record mutation
+const CREATE_COACH = `
+  mutation CreateCoach($data: CoachCreateInput!) {
+    coachCreate(data: $data) {
+      id
+      firstName
+      lastName
+      email
+      bio
+      profileImage {
+        downloadUrl
+      }
+      user {
+        id
+        email
+        firstName
+        lastName
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// Create Student record mutation
+const CREATE_STUDENT = `
+  mutation CreateStudent($data: StudentCreateInput!) {
+    studentCreate(data: $data) {
+      id
+      phone
+      business_name
+      location
+      target_market
+      strengths
+      challenges
+      goals
+      preferred_contact_method
+      availability
+      notes
+      user {
+        id
+        email
+        firstName
+        lastName
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 // We'll use the authenticated Apollo Client from the context instead of creating our own
 let apolloClient: any = null;
 
@@ -100,15 +151,18 @@ const transformUser = (user: any): User => {
   }
 
   return {
-  id: user.id,
-  name: `${user.firstName} ${user.lastName}`,
-  email: user.email,
+    id: user.id,
+    firstName: user.firstName || '',
+    lastName: user.lastName || '',
+    email: user.email,
     role: userRole,
-    assigned_admin_id: user.assignedCoach?.id || null,
+    assigned_admin_id: user.assigned_admin_id || null,
+    assignedCoach: user.assignedCoach || null,
+    coach: user.coach || null,
     access_start: new Date().toISOString().split('T')[0], // Default to today
     access_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0], // Default to 1 year from now
     has_paid: true, // Default to true
-  created_at: user.createdAt,
+    created_at: user.createdAt,
     coaching_term_start: null, // Not available in new schema
     coaching_term_end: null, // Not available in new schema
     is_active: true // Default to true
@@ -228,20 +282,22 @@ const transformStudentLead = (lead: any): Lead => {
   };
 };
 
-const transformGoal = (goal: any): Goal => ({
+const transformGoal = (goal: any): Goal => {
+  return {
   id: goal.id,
-  user_id: goal.student?.id,
+    user_id: goal.student?.id || '',
   title: goal.title || 'Monthly Goal',
   description: goal.description || '',
   target_value: goal.target_value || 0,
   current_value: goal.current_value || 0,
   goal_type: goal.goal_type || 'revenue',
-  deadline: goal.deadline || new Date().toISOString(),
+    deadline: goal.deadline || goal.month_start || new Date().toISOString(),
   priority: goal.priority || 'medium',
   status: goal.status || 'active',
   created_at: goal.createdAt,
   updated_at: goal.updatedAt
-});
+  };
+};
 
 const transformPricing = (pricing: any): Pricing => ({
   id: pricing.id,
@@ -340,12 +396,193 @@ export const eightbaseService = {
   },
 
   async createUser(userData: any): Promise<User> {
-    const data = await executeMutation(CREATE_USER_WITH_ROLES, { data: userData });
-    return transformUser(data.userCreate);
+    try {
+      // First, create the user
+      const userResult = await executeMutation(CREATE_USER_WITH_ROLES, { data: userData });
+      const createdUser = transformUser(userResult.userCreate);
+      
+      // Determine the user's role
+      let userRole: 'user' | 'coach' | 'coach_manager' | 'super_admin' = 'user';
+      if (userData.roles && userData.roles.connect && userData.roles.connect.length > 0) {
+        const roleName = userData.roles.connect[0].name;
+        switch (roleName.toLowerCase()) {
+          case 'superadmin':
+          case 'administrator':
+          case 'admin':
+            userRole = 'super_admin';
+            break;
+          case 'coach manager':
+          case 'coach_manager':
+            userRole = 'coach_manager';
+            break;
+          case 'coach':
+            userRole = 'coach';
+            break;
+          case 'student':
+          case 'user':
+          default:
+            userRole = 'user';
+            break;
+        }
+      }
+      
+      // Create Coach record if user has coach role
+      if (userRole === 'coach') {
+        try {
+          const coachData = {
+            firstName: userData.firstName || '',
+            lastName: userData.lastName || '',
+            email: userData.email,
+            bio: '',
+            user: {
+              connect: { id: createdUser.id }
+            }
+          };
+          
+          const coachResult = await executeMutation(CREATE_COACH, { data: coachData });
+          console.log(`Coach record created and connected to user: ${createdUser.id}`, coachResult);
+        } catch (coachError) {
+          console.error('Failed to create coach record:', coachError);
+          // Don't fail the entire operation if coach creation fails
+        }
+      }
+      
+      // Create Student record if user has student/user role
+      if (userRole === 'user') {
+        try {
+          const studentData = {
+            phone: '',
+            business_name: '',
+            location: '',
+            target_market: '',
+            strengths: '',
+            challenges: '',
+            goals: '',
+            preferred_contact_method: '',
+            availability: '',
+            notes: '',
+            user: {
+              connect: { id: createdUser.id }
+            }
+          };
+          
+          await executeMutation(CREATE_STUDENT, { data: studentData });
+          console.log(`Student record created for user: ${createdUser.id}`);
+        } catch (studentError) {
+          console.error('Failed to create student record:', studentError);
+          // Don't fail the entire operation if student creation fails
+        }
+      }
+      
+      return createdUser;
+    } catch (error) {
+      console.error('Error creating user with related records:', error);
+      throw error;
+    }
   },
 
   async updateUser(id: string, updates: any): Promise<User> {
-    const data = await executeMutation(queries.UPDATE_USER, { id, data: updates });
+    // Transform the updates to match the correct field names
+    const transformedUpdates: any = {};
+    
+    // Map field names to correct 8base field names
+    if (updates.email) transformedUpdates.email = updates.email;
+    if (updates.firstName) transformedUpdates.firstName = updates.firstName;
+    if (updates.lastName) transformedUpdates.lastName = updates.lastName;
+    if (updates.status) transformedUpdates.status = updates.status;
+    if (updates.origin) transformedUpdates.origin = updates.origin;
+    if (updates.timezone) transformedUpdates.timezone = updates.timezone;
+    
+    // Handle roles - convert role string to roles connection
+    if (updates.role) {
+      // This would need to be handled differently based on your role system
+      // For now, we'll skip role updates as they need special handling
+      console.log('Role updates need special handling - skipping for now');
+    }
+    
+    // Handle assigned_admin_id - convert to both assignedCoach and coach relationships
+    if (updates.assigned_admin_id !== undefined) {
+      if (updates.assigned_admin_id) {
+        transformedUpdates.assignedCoach = {
+          connect: { id: updates.assigned_admin_id }
+        };
+        transformedUpdates.coach = {
+          connect: { id: updates.assigned_admin_id }
+        };
+      } else {
+        transformedUpdates.assignedCoach = {
+          disconnect: true
+        };
+        transformedUpdates.coach = {
+          disconnect: true
+        };
+      }
+    }
+    
+    // Remove fields that don't exist in UserUpdateInput
+    const validFields = [
+      'firstName', 'lastName', 'email', 'status', 'origin', 'timezone',
+      'assignedCoach', 'coach', 'roles'
+    ];
+    
+    // Only include valid fields
+    const finalUpdates: any = {};
+    Object.keys(transformedUpdates).forEach(key => {
+      if (validFields.includes(key)) {
+        finalUpdates[key] = transformedUpdates[key];
+      }
+    });
+    
+    const data = await executeMutation(queries.UPDATE_USER, { 
+      filter: { id }, 
+      data: finalUpdates 
+    });
+    
+    // If role is being changed to coach, ensure coach record exists
+    if (updates.role === 'coach') {
+      await this.ensureCoachRecord(id, updates);
+    }
+    
+    return transformUser(data.userUpdate);
+  },
+
+  async updateUserWithCoach(id: string, updates: any, assignedCoachId?: string): Promise<User> {
+    // Transform the updates to match the correct field names
+    const transformedUpdates: any = {};
+    
+    // Map field names to correct 8base field names
+    if (updates.email) transformedUpdates.email = updates.email;
+    if (updates.firstName) transformedUpdates.firstName = updates.firstName;
+    if (updates.lastName) transformedUpdates.lastName = updates.lastName;
+    if (updates.status) transformedUpdates.status = updates.status;
+    if (updates.origin) transformedUpdates.origin = updates.origin;
+    if (updates.timezone) transformedUpdates.timezone = updates.timezone;
+    
+    // Handle roles - convert role string to roles connection
+    if (updates.role) {
+      // This would need to be handled differently based on your role system
+      // For now, we'll skip role updates as they need special handling
+      console.log('Role updates need special handling - skipping for now');
+    }
+    
+    // Construct the data object with both assignedCoach and coach relationships
+    // assignedCoachId should be the coach ID from the coach table
+    const dataObject = {
+      ...transformedUpdates,
+      ...(assignedCoachId && {
+        assignedCoach: {
+          connect: { id: assignedCoachId }
+        },
+        coach: {
+          connect: { id: assignedCoachId }
+        }
+      })
+    };
+    
+    const data = await executeMutation(queries.UPDATE_USER_WITH_COACH, { 
+      filter: { id }, 
+      data: dataObject
+    });
     return transformUser(data.userUpdate);
   },
 
@@ -354,11 +591,104 @@ export const eightbaseService = {
   },
 
   async assignStudentToCoach(studentId: string, coachId: string | null): Promise<User> {
-    const data = await executeMutation(queries.ASSIGN_STUDENT_TO_COACH, {
-      id: studentId,
-      assignedCoachId: coachId 
+    if (coachId) {
+      // Connect to a coach
+      const dataObject = {
+      assignedCoach: {
+        connect: { id: coachId }
+      },
+      coach: {
+        connect: { id: coachId }
+      }
+      };
+      
+      const data = await executeMutation(queries.UPDATE_USER_WITH_COACH, {
+        filter: { id: studentId },
+        data: dataObject
+      });
+      return transformUser(data.userUpdate);
+    } else {
+      // Disconnect from current coach - we need to get the current coach ID first
+      const currentUsers = await this.getUsersByFilter({ id: { equals: studentId } });
+      const currentUser = currentUsers[0];
+      const currentCoachId = currentUser?.assignedCoach?.id;
+      
+      if (currentCoachId) {
+        const dataObject = {
+      assignedCoach: {
+            disconnect: { id: currentCoachId }
+      },
+      coach: {
+            disconnect: { id: currentCoachId }
+      }
+    };
+    
+    const data = await executeMutation(queries.UPDATE_USER_WITH_COACH, {
+      filter: { id: studentId },
+      data: dataObject
     });
     return transformUser(data.userUpdate);
+      } else {
+        // No coach to disconnect
+        return currentUser;
+      }
+    }
+  },
+
+  async createCoachForUser(userId: string, coachData: any): Promise<any> {
+    try {
+      const coachRecordData = {
+        firstName: coachData.firstName || '',
+        lastName: coachData.lastName || '',
+        email: coachData.email,
+        bio: coachData.bio || '',
+        user: {
+          connect: { id: userId }
+        }
+      };
+      
+      const data = await executeMutation(CREATE_COACH, { data: coachRecordData });
+      console.log(`Coach record created and connected to user: ${userId}`);
+      return data.coachCreate;
+    } catch (error) {
+      console.error('Failed to create coach record:', error);
+      throw error;
+    }
+  },
+
+  async ensureCoachRecord(userId: string, userData: any): Promise<void> {
+    try {
+      // Check if coach record already exists for this user
+      const existingCoach = await this.getCoachByUserId(userId);
+      
+      if (!existingCoach) {
+        // Create coach record if it doesn't exist
+        await this.createCoachForUser(userId, userData);
+      }
+    } catch (error) {
+      console.error('Failed to ensure coach record:', error);
+      // Don't throw error to avoid breaking the main operation
+    }
+  },
+
+  async getAllCoaches(): Promise<any[]> {
+    try {
+      const data = await executeQuery(queries.GET_ALL_COACHES);
+      return data.coachesList.items;
+    } catch (error) {
+      console.error('Failed to get all coaches:', error);
+      return [];
+    }
+  },
+
+  async getCoachByUserId(userId: string): Promise<any> {
+    try {
+      const data = await executeQuery(queries.GET_COACH_BY_USER_ID, { userId });
+      return data.coachesList.items.length > 0 ? data.coachesList.items[0] : null;
+    } catch (error) {
+      console.error('Failed to get coach by user ID:', error);
+      return null;
+    }
   },
 
   async updateCoachingTermDates(userId: string, startDate: string, endDate: string): Promise<User> {
@@ -416,14 +746,49 @@ export const eightbaseService = {
   },
 
   async createWeeklyReport(report: Omit<WeeklyReport, 'id' | 'created_at' | 'updated_at'>): Promise<WeeklyReport> {
-    const data = await executeMutation(queries.CREATE_WEEKLY_REPORT, { data: report });
+    // Transform the data to include student connection
+    const reportData = {
+      start_date: report.start_date,
+      end_date: report.end_date,
+      new_clients: report.new_clients,
+      paid_shoots: report.paid_shoots,
+      free_shoots: report.free_shoots,
+      unique_clients: report.unique_clients,
+      aov: report.aov,
+      revenue: report.revenue,
+      expenses: report.expenses,
+      editing_cost: report.editing_cost,
+      net_profit: report.net_profit,
+      status: report.status,
+      student: {
+        connect: { id: report.user_id }
+      }
+    };
+    
+    const data = await executeMutation(queries.CREATE_WEEKLY_REPORT, { data: reportData });
     return transformWeeklyReport(data.weeklyReportCreate);
   },
 
   async updateWeeklyReport(id: string, updates: Partial<WeeklyReport>): Promise<WeeklyReport> {
+    // Format the data to match WeeklyReportUpdateByFilterInput structure
+    const formattedData: any = {};
+    
+    if (updates.start_date) formattedData.start_date = { set: updates.start_date };
+    if (updates.end_date) formattedData.end_date = { set: updates.end_date };
+    if (updates.new_clients !== undefined) formattedData.new_clients = { set: updates.new_clients };
+    if (updates.paid_shoots !== undefined) formattedData.paid_shoots = { set: updates.paid_shoots };
+    if (updates.free_shoots !== undefined) formattedData.free_shoots = { set: updates.free_shoots };
+    if (updates.unique_clients !== undefined) formattedData.unique_clients = { set: updates.unique_clients };
+    if (updates.aov !== undefined) formattedData.aov = { set: updates.aov };
+    if (updates.revenue !== undefined) formattedData.revenue = { set: updates.revenue };
+    if (updates.expenses !== undefined) formattedData.expenses = { set: updates.expenses };
+    if (updates.editing_cost !== undefined) formattedData.editing_cost = { set: updates.editing_cost };
+    if (updates.net_profit !== undefined) formattedData.net_profit = { set: updates.net_profit };
+    if (updates.status) formattedData.status = { set: updates.status };
+    
     const data = await executeMutation(queries.UPDATE_WEEKLY_REPORT, {
       filter: { id: { equals: id } },
-      data: updates
+      data: formattedData
     });
     return transformWeeklyReport(data.weeklyReportUpdateByFilter.items[0]);
   },
@@ -436,7 +801,11 @@ export const eightbaseService = {
   async getGoals(userId?: string): Promise<Goal[]> {
     const filter = userId ? { student: { id: { equals: userId } } } : {};
     const data = await executeQuery(queries.GET_GOALS_BY_FILTER, { filter });
-    return data.goalsList.items.map(transformGoal);
+    console.log('Goals query response:', data);
+    console.log('Goals items:', data.goalsList?.items);
+    const transformedGoals = data.goalsList?.items?.map(transformGoal) || [];
+    console.log('Transformed goals:', transformedGoals);
+    return transformedGoals;
   },
 
   async getGoalsByCoach(coachId: string): Promise<Goal[]> {
@@ -451,17 +820,83 @@ export const eightbaseService = {
   },
 
   async createGoal(goal: Omit<Goal, 'id' | 'created_at' | 'updated_at'>): Promise<Goal> {
-    const data = await executeMutation(queries.CREATE_GOAL, { data: goal });
+    // Use the actual 8base schema fields
+    const goalData = {
+      title: goal.title,
+      description: goal.description,
+      target_value: goal.target_value,
+      current_value: goal.current_value,
+      goal_type: goal.goal_type,
+      deadline: goal.deadline,
+      priority: goal.priority,
+      status: goal.status,
+      month_start: goal.deadline,
+      low_goal_revenue: goal.goal_type === 'revenue' ? goal.target_value : 0,
+      success_goal_revenue: goal.goal_type === 'revenue' ? goal.target_value : 0,
+      actual_revenue: goal.goal_type === 'revenue' ? goal.current_value : 0,
+      low_goal_shoots: goal.goal_type === 'shoots' ? goal.target_value : 0,
+      success_goal_shoots: goal.goal_type === 'shoots' ? goal.target_value : 0,
+      actual_shoots: goal.goal_type === 'shoots' ? goal.current_value : 0,
+      aov: goal.goal_type === 'revenue' ? goal.current_value : 0,
+      student: {
+        connect: { id: goal.user_id }
+      }
+    };
+    
+    const data = await executeMutation(queries.CREATE_GOAL, { data: goalData });
     return transformGoal(data.goalCreate);
   },
 
   async updateGoal(id: string, updates: Partial<Goal>): Promise<Goal> {
-    const data = await executeMutation(queries.UPDATE_GOAL, { id, data: updates });
+    // Use the actual 8base schema fields
+    const goalUpdates: any = {};
+    
+    if (updates.title !== undefined) goalUpdates.title = updates.title;
+    if (updates.description !== undefined) goalUpdates.description = updates.description;
+    if (updates.target_value !== undefined) goalUpdates.target_value = updates.target_value;
+    if (updates.current_value !== undefined) goalUpdates.current_value = updates.current_value;
+    if (updates.goal_type !== undefined) goalUpdates.goal_type = updates.goal_type;
+    if (updates.deadline !== undefined) goalUpdates.deadline = updates.deadline;
+    if (updates.priority !== undefined) goalUpdates.priority = updates.priority;
+    if (updates.status !== undefined) goalUpdates.status = updates.status;
+    if (updates.deadline !== undefined) goalUpdates.month_start = updates.deadline;
+    
+    // Map goal type specific updates for the additional fields
+    if (updates.goal_type === 'shoots') {
+      if (updates.target_value !== undefined) {
+        goalUpdates.low_goal_shoots = updates.target_value;
+        goalUpdates.success_goal_shoots = updates.target_value;
+      }
+      if (updates.current_value !== undefined) goalUpdates.actual_shoots = updates.current_value;
+    } else if (updates.goal_type === 'revenue') {
+      if (updates.target_value !== undefined) {
+        goalUpdates.low_goal_revenue = updates.target_value;
+        goalUpdates.success_goal_revenue = updates.target_value;
+      }
+      if (updates.current_value !== undefined) goalUpdates.actual_revenue = updates.current_value;
+    }
+    
+    if (updates.goal_type === 'revenue' && updates.current_value !== undefined) {
+      goalUpdates.aov = updates.current_value;
+    }
+    
+    // Handle student connection if user_id is provided
+    if (updates.user_id) {
+      goalUpdates.student = {
+        connect: { id: updates.user_id }
+      };
+    }
+    
+    const data = await executeMutation(queries.UPDATE_GOAL, { 
+      filter: { id }, 
+      data: goalUpdates 
+    });
     return transformGoal(data.goalUpdate);
   },
 
-  async deleteGoal(id: string): Promise<void> {
-    await executeMutation(queries.DELETE_GOAL, { id });
+  async deleteGoal(id: string): Promise<boolean> {
+    const result = await executeMutation(queries.DELETE_GOAL, { data: { id } });
+    return result.goalDelete?.success || false;
   },
 
   // Pricing
@@ -530,9 +965,22 @@ export const eightbaseService = {
   },
 
   async createLead(lead: Omit<Lead, 'id' | 'created_at' | 'updated_at'>): Promise<Lead> {
-    // Create the lead first
+    // Create the lead with only the fields that exist in 8base schema
     const leadData = {
-      ...lead,
+      lead_name: lead.lead_name,
+      email: lead.email,
+      phone: lead.phone,
+      instagram_handle: lead.instagram_handle,
+      lead_source: lead.lead_source,
+      initial_call_outcome: lead.initial_call_outcome,
+      date_of_initial_call: lead.date_of_initial_call,
+      last_followup_outcome: lead.last_followup_outcome,
+      date_of_last_followup: lead.date_of_last_followup,
+      next_followup_date: lead.next_followup_date,
+      message_sent: lead.message_sent,
+      followed_back: lead.followed_back,
+      followed_up: lead.followed_up,
+      status: lead.status,
       user: { connect: { id: lead.user_id } }
     };
     
@@ -565,7 +1013,10 @@ export const eightbaseService = {
   },
 
   async updateLead(id: string, updates: Partial<Lead>): Promise<Lead> {
-    const data = await executeMutation(queries.UPDATE_LEAD, { id, data: updates });
+    const data = await executeMutation(queries.UPDATE_LEAD, { 
+      filter: { id }, 
+      data: updates 
+    });
     return transformLead(data.leadUpdate);
   },
 
@@ -1159,7 +1610,7 @@ export const eightbaseService = {
 
         return {
           coachId: coach.id,
-          coachName: coach.name,
+          coachName: `${coach.firstName} ${coach.lastName}`,
           coachEmail: coach.email,
           assignedStudentsCount: coachStudents.length,
           activeStudentsCount: activeStudents,

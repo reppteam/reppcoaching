@@ -68,8 +68,6 @@ const ApolloViewModel: React.FC<ApolloViewModelProps> = ({ children }) => {
   const authLink = setContext(async (_, { headers, ...rest }) => {
     // Use 8base API token for now until Auth0 is properly configured
     const token = EIGHT_BASE.apiToken;
-    console.log('Using 8base API token for GraphQL requests');
-
     return {
       ...rest,
       headers: {

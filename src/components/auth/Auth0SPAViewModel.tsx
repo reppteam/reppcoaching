@@ -6,18 +6,13 @@ interface Auth0SPAViewModelProps {
 }
 
 export const Auth0SPAViewModel: React.FC<Auth0SPAViewModelProps> = ({ children }) => {
-  console.log('Auth0SPAViewModel Config:', {
-    domain: "dev-8lo26de64qqp1i28.us.auth0.com",
-    clientId: "UplJIwoCM8CxUzwmUSefUhSD3Gbi6VR8",
-    redirect_uri: `https://reppcoaching.vercel.app/auth/callback`,
-  });
-
+ 
   return (
     <Auth0Provider
       domain={"dev-8lo26de64qqp1i28.us.auth0.com"}
       clientId={"UplJIwoCM8CxUzwmUSefUhSD3Gbi6VR8"}
       authorizationParams={{
-        redirect_uri: `https://reppcoaching.vercel.app/auth/callback`,
+        redirect_uri: `${window.location.origin}/auth/callback`,
       }}
       onRedirectCallback={(appState) => {
         console.log('Auth0 Redirect Callback:', appState);

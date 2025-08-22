@@ -1,10 +1,23 @@
 // Existing types...
 export interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: 'user' | 'coach' | 'coach_manager' | 'super_admin';
   assigned_admin_id?: string | null;
+  assignedCoach?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | null;
+  coach?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | null;
   access_start: string;
   access_end: string;
   has_paid: boolean;
@@ -12,6 +25,14 @@ export interface User {
   coaching_term_start?: string | null;
   coaching_term_end?: string | null;
   is_active?: boolean;
+  roles?: {
+    items: Array<{
+      id: string;
+      name: string;
+      __typename?: string;
+    }>;
+    __typename?: string;
+  };
 }
 
 export interface WeeklyReport {

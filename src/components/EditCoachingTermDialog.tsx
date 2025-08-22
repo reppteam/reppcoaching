@@ -55,7 +55,7 @@ export function EditCoachingTermDialog({ user, onUpdate }: EditCoachingTermDialo
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Coaching Term - {user.name}</DialogTitle>
+          <DialogTitle>Edit Coaching Term - {user.firstName} {user.lastName}</DialogTitle>
           <DialogDescription>
             Update the coaching term start and end dates for this user
           </DialogDescription>

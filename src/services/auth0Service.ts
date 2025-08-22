@@ -103,7 +103,7 @@ class Auth0Service {
         `client_id=${"UplJIwoCM8CxUzwmUSefUhSD3Gbi6VR8"}&` +
         `redirect_uri=${encodeURIComponent(`${window.location.origin}/auth/callback`)}&` +
         `scope=openid profile email&` +
-        `audience=${encodeURIComponent('https://reppcoaching.vercel.app')}&` +
+        `audience=${encodeURIComponent(window.location.origin)}&` +
         `state=${encodeURIComponent(window.location.origin)}`;
       
       window.location.href = auth0Url;
@@ -252,7 +252,8 @@ class Auth0Service {
       const roleName = eightBaseUser.roles?.items?.[0]?.name?.toLowerCase() || 'user';
       const user: User = {
         id: eightBaseUser.id,
-        name: `${eightBaseUser.firstName} ${eightBaseUser.lastName}`,
+        firstName: eightBaseUser.firstName || '',
+        lastName: eightBaseUser.lastName || '',
         email: eightBaseUser.email,
         role: (roleName === 'user' || roleName === 'coach' || roleName === 'coach_manager' || roleName === 'super_admin') 
           ? roleName as 'user' | 'coach' | 'coach_manager' | 'super_admin' 

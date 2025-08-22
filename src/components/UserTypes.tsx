@@ -229,7 +229,7 @@ export const UserTypes: React.FC = () => {
                 <TableBody>
                   {stat.users.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Mail className="h-3 w-3" />
@@ -281,7 +281,7 @@ export const UserTypes: React.FC = () => {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

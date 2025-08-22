@@ -49,23 +49,16 @@ export const GET_ALL_8BASE_USERS = gql`
         }
         assignedCoach {
           id
-          fullName
+          firstName
+          lastName
           email
         }
         createdAt
         updatedAt
         student {
           id
-          phone
-          business_name
-          location
-          target_market
-          strengths
-          challenges
-          goals
-          preferred_contact_method
-          availability
-          notes
+          goal
+         
         }
         coach {
           id
@@ -325,7 +318,8 @@ export const CREATE_STUDENT_USER = gql`
       }
       assignedCoach {
         id
-        fullName
+        firstName
+        lastName
         email
       }
       createdAt

@@ -15,7 +15,8 @@ import {
 
 interface SubscriptionInfoProps {
   user?: {
-    name: string;
+    firstName: string;
+    lastName: string;
     plan?: string;
     has_paid?: boolean;
     created_at?: string;
