@@ -119,7 +119,7 @@ export interface Lead {
   date_of_last_followup?: string;
   next_followup_date?: string;
   // New engagement tracking system - array of tags
-  engagement_tags: EngagementTag[];
+  engagementTag: EngagementTag[];
   script_components: {
     intro: string;
     hook: string;

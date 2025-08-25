@@ -151,7 +151,7 @@ export function Leads() {
     instagram_handle: '',
     lead_source: 'Instagram',
     status: 'new',
-    engagement_tags: [],
+    engagementTag: [],
     script_components: {
       intro: '',
       hook: '',
@@ -222,7 +222,7 @@ export function Leads() {
   const availableEngagementTags = useMemo(() => {
     const tags = new Set<EngagementTagType>();
     leads.forEach(lead => {
-      lead.engagement_tags.forEach(tag => tags.add(tag.type));
+      lead.engagementTag.forEach(tag => tags.add(tag.type));
     });
     return Array.from(tags).sort();
   }, [leads]);
@@ -241,7 +241,7 @@ export function Leads() {
     if (filters.engagementTags.length > 0) {
       filtered = filtered.filter(lead => 
         filters.engagementTags.some(tag => 
-          lead.engagement_tags.some(leadTag => leadTag.type === tag)
+          lead.engagementTag.some(leadTag => leadTag.type === tag)
         )
       );
     }
@@ -279,7 +279,7 @@ export function Leads() {
       const leadData = {
         ...formData,
         user_id: user.id,
-        engagement_tags: formData.engagement_tags || [],
+        engagementTag: formData.engagementTag || [],
         message_sent: false,
         followed_back: false,
         followed_up: false
@@ -302,7 +302,7 @@ export function Leads() {
       instagram_handle: '',
       lead_source: 'Instagram',
       status: 'new',
-      engagement_tags: [],
+      engagementTag: [],
       script_components: {
         intro: '',
         hook: '',
@@ -348,7 +348,7 @@ export function Leads() {
     const lead = leads.find(l => l.id === leadId);
     if (!lead) return;
 
-    const existingTag = lead.engagement_tags.find(t => t.type === tagType);
+    const existingTag = lead.engagementTag.find(t => t.type === tagType);
     
     try {
       if (existingTag && existingTag.id) {
@@ -458,7 +458,7 @@ export function Leads() {
         `"${lead.status}"`,
         `"${new Date(lead.created_at).toLocaleDateString()}"`,
         `"${lead.date_of_last_followup ? new Date(lead.date_of_last_followup).toLocaleDateString() : ''}"`,
-        `"${lead.engagement_tags.map(tag => ENGAGEMENT_TAG_CONFIG[tag.type].label).join('; ')}"`,
+        `"${lead.engagementTag.map(tag => ENGAGEMENT_TAG_CONFIG[tag.type].label).join('; ')}"`,
       ].join(','))
     ].join('\n');
 
@@ -513,7 +513,7 @@ export function Leads() {
         instagram_handle: values[headers.indexOf('instagram')] || '',
         lead_source: values[headers.indexOf('source')] || 'Other',
         status: (values[headers.indexOf('status')] as Lead['status']) || 'new',
-        engagement_tags: []
+        engagementTag: []
       };
 
       if (!row.lead_name) {
@@ -550,7 +550,7 @@ export function Leads() {
             instagram_handle: values[headers.indexOf('instagram')] || '',
             lead_source: values[headers.indexOf('source')] || 'Other',
             status: (values[headers.indexOf('status')] as Lead['status']) || 'new',
-            engagement_tags: [],
+            engagementTag: [],
             script_components: {
               intro: '',
               hook: '',
@@ -1149,7 +1149,7 @@ export function Leads() {
                             
                             {/* Engagement Tags Summary */}
                             <div className="flex flex-wrap gap-1 max-w-xs">
-                              {lead.engagement_tags.slice(0, 3).map((tag) => {
+                              {lead.engagementTag.slice(0, 3).map((tag) => {
                                 const config = ENGAGEMENT_TAG_CONFIG[tag.type];
                                 return (
                                   <Badge 
@@ -1161,9 +1161,9 @@ export function Leads() {
                                   </Badge>
                                 );
                               })}
-                              {lead.engagement_tags.length > 3 && (
+                                {lead.engagementTag.length > 3 && (
                                 <Badge variant="secondary" className="text-xs">
-                                  +{lead.engagement_tags.length - 3}
+                                  +{lead.engagementTag.length - 3}
                                 </Badge>
                               )}
                             </div>
@@ -1215,8 +1215,8 @@ export function Leads() {
                               </h4>
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 {Object.values(ENGAGEMENT_TAG_CONFIG).map((config) => {
-                                  const isCompleted = lead.engagement_tags.some(t => t.type === config.type);
-                                  const completedTag = lead.engagement_tags.find(t => t.type === config.type);
+                                  const isCompleted = lead.engagementTag.some(t => t.type === config.type);
+                                  const completedTag = lead.engagementTag.find(t => t.type === config.type);
                                   
                                   return (
                                     <div

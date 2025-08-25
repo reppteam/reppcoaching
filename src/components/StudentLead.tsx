@@ -44,7 +44,7 @@ export const StudentLead: React.FC = () => {
     instagram_handle: '',
     lead_source: 'Instagram',
     status: 'new' as 'new' | 'contacted' | 'qualified' | 'converted' | 'lost',
-    engagement_tags: [] as EngagementTag[]
+    engagementTag: [] as EngagementTag[]
   });
 
   useEffect(() => {
@@ -71,12 +71,17 @@ export const StudentLead: React.FC = () => {
 
     try {
       const leadData = {
-        ...formData,
+        lead_name: formData.lead_name,
+        email: formData.email,
+        phone: formData.phone,
+        instagram_handle: formData.instagram_handle,
+        lead_source: formData.lead_source,
+        status: formData.status,
         user_id: user.id,
         message_sent: false,
         followed_back: false,
         followed_up: false,
-
+        engagementTag: [], // Initialize as empty array
         script_components: {
           intro: '',
           hook: '',
@@ -97,7 +102,18 @@ export const StudentLead: React.FC = () => {
 
   const handleUpdate = async (leadId: string) => {
     try {
-      const updatedLead = await eightbaseService.updateLead(leadId, formData);
+      // Only include the basic lead fields that can be updated
+      // engagementTag field is completely excluded from updates
+      const updateData = {
+        lead_name: formData.lead_name,
+        email: formData.email,
+        phone: formData.phone,
+        instagram_handle: formData.instagram_handle,
+        lead_source: formData.lead_source,
+        status: formData.status
+      };
+      
+      const updatedLead = await eightbaseService.updateLead(leadId, updateData);
       setLeads(leads.map(l => l.id === leadId ? updatedLead : l));
       setEditingLead(null);
       resetForm();
@@ -114,7 +130,7 @@ export const StudentLead: React.FC = () => {
       instagram_handle: '',
       lead_source: 'Instagram',
       status: 'new',
-      engagement_tags: []
+      engagementTag: []
     });
   };
 
@@ -145,6 +161,26 @@ export const StudentLead: React.FC = () => {
       await loadLeads();
     } catch (error) {
       console.error('Failed to toggle engagement tag:', error);
+    }
+  };
+
+  // Example function showing how to update engagementTag field directly (if needed)
+  const updateEngagementTagField = async (leadId: string, engagementTags: EngagementTag[]) => {
+    try {
+      const updateData: any = {
+        // Basic fields
+        lead_name: formData.lead_name,
+        email: formData.email,
+        phone: formData.phone,
+        instagram_handle: formData.instagram_handle,
+        lead_source: formData.lead_source,
+        status: formData.status
+      };
+
+      const updatedLead = await eightbaseService.updateLead(leadId, updateData);
+      setLeads(leads.map(l => l.id === leadId ? updatedLead : l));
+    } catch (error) {
+      console.error('Error updating engagement tag field:', error);
     }
   };
 
@@ -456,7 +492,7 @@ export const StudentLead: React.FC = () => {
                             instagram_handle: lead.instagram_handle || '',
                             lead_source: lead.lead_source,
                             status: lead.status,
-                            engagement_tags: lead.engagement_tags
+                            engagementTag: [] // Initialize as empty array since we don't edit engagement tags here
                           });
                           setEditingLead(lead.id);
                         }}

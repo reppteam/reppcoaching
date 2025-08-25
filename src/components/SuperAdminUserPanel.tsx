@@ -62,6 +62,22 @@ export function SuperAdminUserPanel() {
     email: '',
     role: '',
     is_active: true,
+    has_paid: false,
+    assignedCoachId: ''
+  });
+
+  // Delete confirmation dialog states
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<{ id: string; name: string } | null>(null);
+
+  // Create user dialog states
+  const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
+  const [createUserForm, setCreateUserForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'user',
+    is_active: true,
     has_paid: false
   });
 
@@ -106,7 +122,8 @@ export function SuperAdminUserPanel() {
       email: user.email || '',
       role: user.role || '',
       is_active: user.is_active !== false,
-      has_paid: user.has_paid || false
+      has_paid: user.has_paid || false,
+      assignedCoachId: user.assignedCoach?.id || ''
     });
     setEditDialogOpen(true);
   };
@@ -115,7 +132,22 @@ export function SuperAdminUserPanel() {
     if (!editingUser) return;
     
     try {
-      await eightbaseService.updateUser(editingUser.id, editForm);
+      // Update basic user information
+      await eightbaseService.updateUser(editingUser.id, {
+        firstName: editForm.firstName,
+        lastName: editForm.lastName,
+        email: editForm.email,
+        role: editForm.role,
+        is_active: editForm.is_active,
+        has_paid: editForm.has_paid
+      });
+
+      // Update assigned coach if the user is a student and coach assignment changed
+      if (editForm.role === 'user' && editForm.assignedCoachId !== editingUser.assignedCoach?.id) {
+        const coachId = editForm.assignedCoachId || null;
+        await eightbaseService.assignStudentToCoach(editingUser.id, coachId);
+      }
+
       setEditDialogOpen(false);
       setEditingUser(null);
       setEditForm({
@@ -124,11 +156,58 @@ export function SuperAdminUserPanel() {
         email: '',
         role: '',
         is_active: true,
-        has_paid: false
+        has_paid: false,
+        assignedCoachId: ''
       });
       await loadUsers();
     } catch (error) {
       console.error('Failed to update user:', error);
+    }
+  };
+
+  const handleDeleteUser = (userId: string, userName: string) => {
+    setUserToDelete({ id: userId, name: userName });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    
+    try {
+      const success = await eightbaseService.deleteUser(userToDelete.id);
+      if (success) {
+        // Remove the user from the local state
+        setUsers(users.filter(user => user.id !== userToDelete.id));
+        setDeleteDialogOpen(false);
+        setUserToDelete(null);
+      } else {
+        alert('Failed to delete user. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      alert('Error deleting user. Please try again.');
+    }
+  };
+
+  const handleCreateUser = async () => {
+    try {
+      const newUser = await eightbaseService.createUser(createUserForm);
+      // Add the new user to the local state
+      setUsers([newUser, ...users]);
+      // Close the dialog
+      setCreateUserDialogOpen(false);
+      // Reset the form
+      setCreateUserForm({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: 'user',
+        is_active: true,
+        has_paid: false
+      });
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      alert('Error creating user. Please try again.');
     }
   };
 
@@ -161,14 +240,110 @@ export function SuperAdminUserPanel() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="flex items-center gap-2">
-          <Users className="h-6 w-6 text-brand-blue" />
-          User Management Panel
-        </h1>
-        <p className="text-muted-foreground">
-          Manage all users, assign coaches, and monitor account status
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="flex items-center gap-2">
+            <Users className="h-6 w-6 text-brand-blue" />
+            User Management Panel
+          </h1>
+          <p className="text-muted-foreground">
+            Manage all users, assign coaches, and monitor account status
+          </p>
+        </div>
+        <Dialog open={createUserDialogOpen} onOpenChange={setCreateUserDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Create User
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New User</DialogTitle>
+              <DialogDescription>
+                Add a new user to the platform
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="create-firstName">First Name</Label>
+                  <Input
+                    id="create-firstName"
+                    value={createUserForm.firstName}
+                    onChange={(e) => setCreateUserForm({...createUserForm, firstName: e.target.value})}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="create-lastName">Last Name</Label>
+                  <Input
+                    id="create-lastName"
+                    value={createUserForm.lastName}
+                    onChange={(e) => setCreateUserForm({...createUserForm, lastName: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="create-email">Email</Label>
+                <Input
+                  id="create-email"
+                  type="email"
+                  value={createUserForm.email}
+                  onChange={(e) => setCreateUserForm({...createUserForm, email: e.target.value})}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="create-role">Role</Label>
+                <Select value={createUserForm.role} onValueChange={(value) => setCreateUserForm({...createUserForm, role: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">Student</SelectItem>
+                    <SelectItem value="coach">Coach</SelectItem>
+                    <SelectItem value="coach_manager">Coach Manager</SelectItem>
+                    <SelectItem value="super_admin">Super Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="create-is_active"
+                    checked={createUserForm.is_active}
+                    onChange={(e) => setCreateUserForm({...createUserForm, is_active: e.target.checked})}
+                  />
+                  <Label htmlFor="create-is_active">Active</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="create-has_paid"
+                    checked={createUserForm.has_paid}
+                    onChange={(e) => setCreateUserForm({...createUserForm, has_paid: e.target.checked})}
+                  />
+                  <Label htmlFor="create-has_paid">Paid Account</Label>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setCreateUserDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateUser}>
+                  Create User
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Quick Stats */}
@@ -380,6 +555,14 @@ export function SuperAdminUserPanel() {
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        onClick={() => handleDeleteUser(user.id, `${user.firstName} ${user.lastName}`)}
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -498,6 +681,29 @@ export function SuperAdminUserPanel() {
               </Select>
             </div>
             
+            {editForm.role === 'user' && (
+              <div>
+                <Label htmlFor="assignedCoach">Assigned Coach</Label>
+                <Select 
+                  value={editForm.assignedCoachId} 
+                  onValueChange={(value) => setEditForm({...editForm, assignedCoachId: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select coach" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No Coach Assigned</SelectItem>
+                    {coaches.map(coach => (
+                      <SelectItem key={coach.id} value={coach.id}>
+                        {coach.firstName} {coach.lastName} ({coach.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+              </div>
+            )}
+            
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center space-x-2">
                 <input
@@ -527,6 +733,26 @@ export function SuperAdminUserPanel() {
                 Save Changes
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete User</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete user "{userToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteUser}>
+              Delete User
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -1561,7 +1561,7 @@ export const mockApi = {
     const newLead: Lead = {
       ...lead,
       id: Date.now().toString(),
-      engagement_tags: lead.engagement_tags || [],
+      engagementTag: lead.engagementTag || [],
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -1589,12 +1589,12 @@ export const mockApi = {
     if (index === -1) throw new Error('Lead not found');
     
     // Remove existing tag of same type if it exists
-    const existingTags = mockLeads[index].engagement_tags.filter(t => t.type !== tag.type);
+    const existingTags = mockLeads[index].engagementTag.filter(t => t.type !== tag.type);
     existingTags.push(tag);
     
     mockLeads[index] = {
       ...mockLeads[index],
-      engagement_tags: existingTags,
+      engagementTag: existingTags,
       updated_at: new Date().toISOString()
     };
     return mockLeads[index];
@@ -1607,7 +1607,7 @@ export const mockApi = {
     
     mockLeads[index] = {
       ...mockLeads[index],
-      engagement_tags: mockLeads[index].engagement_tags.filter(t => t.type !== tagType),
+      engagementTag: mockLeads[index].engagementTag.filter(t => t.type !== tagType),
       updated_at: new Date().toISOString()
     };
     return mockLeads[index];
@@ -1806,13 +1806,13 @@ export const mockApi = {
     
     // Calculate DM metrics
     const totalDMsSent = leadsInPeriod.reduce((count, lead) => {
-      return count + lead.engagement_tags.filter(tag => 
+      return count + lead.engagementTag.filter(tag => 
         tag.type === 'dm_sent' && isWithinTimeFrame(tag.completed_date, timeFrame)
       ).length;
     }, 0);
     
     const followUpDMsSent = leadsInPeriod.reduce((count, lead) => {
-      return count + lead.engagement_tags.filter(tag => 
+      return count + lead.engagementTag.filter(tag => 
         tag.type === 'follow_up_dm_sent' && isWithinTimeFrame(tag.completed_date, timeFrame)
       ).length;
     }, 0);
@@ -1830,14 +1830,14 @@ export const mockApi = {
     const completedEngagements = leadsInPeriod.filter(lead => {
       const requiredTags: string[] = ['follow_day_engagement', 'engagement_day_1', 'dm_sent'];
       return requiredTags.every(reqTag => 
-        lead.engagement_tags.some(tag => tag.type === reqTag)
+        lead.engagementTag.some(tag => tag.type === reqTag)
       );
     }).length;
     const engagementCompletionRate = leadsInPeriod.length > 0 ? (completedEngagements / leadsInPeriod.length) * 100 : 0;
     
     // Calculate time metrics
     const avgTimeToFirstContact = leadsInPeriod.reduce((sum, lead) => {
-      const firstContact = lead.engagement_tags.find(tag => tag.type === 'dm_sent' || tag.type === 'initial_call_done');
+        const firstContact = lead.engagementTag.find(tag => tag.type === 'dm_sent' || tag.type === 'initial_call_done');
       if (firstContact) {
         const daysDiff = Math.floor((new Date(firstContact.completed_date).getTime() - new Date(lead.created_at).getTime()) / (1000 * 60 * 60 * 24));
         return sum + daysDiff;
@@ -1948,7 +1948,7 @@ export const mockApi = {
     const freeStudents = students.length - paidStudents;
     
     const totalDMsSent = leadsInPeriod.reduce((count, lead) => {
-      return count + lead.engagement_tags.filter(tag => 
+      return count + lead.engagementTag.filter(tag => 
         (tag.type === 'dm_sent' || tag.type === 'follow_up_dm_sent') && 
         isWithinTimeFrame(tag.completed_date, timeFrame)
       ).length;
@@ -1972,7 +1972,7 @@ export const mockApi = {
       const completedEngagements = studentLeads.filter(lead => {
         const requiredTags: string[] = ['follow_day_engagement', 'engagement_day_1', 'dm_sent'];
         return requiredTags.every(reqTag => 
-          lead.engagement_tags.some(tag => tag.type === reqTag)
+          lead.engagementTag.some(tag => tag.type === reqTag)
         );
       }).length;
       return (completedEngagements / studentLeads.length) * 100;
@@ -2046,7 +2046,7 @@ export const mockApi = {
       
       const recentLeads = leads.filter(l => isWithinTimeFrame(l.created_at, timeFrame)).length;
       const recentDMs = leads.reduce((count, lead) => {
-        return count + lead.engagement_tags.filter(tag => 
+        return count + lead.engagementTag.filter(tag => 
           (tag.type === 'dm_sent' || tag.type === 'follow_up_dm_sent') && 
           isWithinTimeFrame(tag.completed_date, timeFrame)
         ).length;
@@ -2129,7 +2129,7 @@ export const mockApi = {
       const dayDMs = mockLeads
         .filter(l => studentIds.includes(l.user_id))
         .reduce((count, lead) => {
-          return count + lead.engagement_tags.filter(tag => 
+          return count + lead.engagementTag.filter(tag => 
             (tag.type === 'dm_sent' || tag.type === 'follow_up_dm_sent') && 
             tag.completed_date.startsWith(dateStr)
           ).length;

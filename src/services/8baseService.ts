@@ -150,6 +150,19 @@ const transformUser = (user: any): User => {
     }
   }
 
+  // Handle legacy data where assignedCoach might not be populated
+  let assignedCoach = user.assignedCoach;
+  if (!assignedCoach && user.assigned_admin_id) {
+    // For legacy data, we'll create a placeholder assignedCoach object
+    // This will be resolved when we load all users and can match the IDs
+    assignedCoach = {
+      id: user.assigned_admin_id,
+      firstName: 'Unknown',
+      lastName: 'Coach',
+      email: 'unknown@example.com'
+    };
+  }
+
   return {
     id: user.id,
     firstName: user.firstName || '',
@@ -157,7 +170,7 @@ const transformUser = (user: any): User => {
     email: user.email,
     role: userRole,
     assigned_admin_id: user.assigned_admin_id || null,
-    assignedCoach: user.assignedCoach || null,
+    assignedCoach: assignedCoach,
     coach: user.coach || null,
     access_start: new Date().toISOString().split('T')[0], // Default to today
     access_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0], // Default to 1 year from now
@@ -201,7 +214,7 @@ const transformLead = (lead: any): Lead => ({
   last_followup_outcome: lead.last_followup_outcome,
   date_of_last_followup: lead.date_of_last_followup,
   next_followup_date: lead.next_followup_date,
-  engagement_tags: lead.engagementTag?.items?.map((tag: any) => ({
+  engagementTag: lead.engagementTag?.items?.map((tag: any) => ({
     id: tag.id,
     type: tag.type,
     completed_date: tag.completed_date
@@ -229,24 +242,24 @@ const transformLead = (lead: any): Lead => ({
 
 const transformStudentLead = (lead: any): Lead => {
   // Create engagement tags based on boolean fields
-  const engagement_tags: EngagementTag[] = [];
+  const engagementTag: EngagementTag[] = [];
   
   if (lead.message_sent) {
-    engagement_tags.push({
+    engagementTag.push({
       type: 'dm_sent',
       completed_date: lead.updatedAt || lead.createdAt
     });
   }
   
   if (lead.followed_back) {
-    engagement_tags.push({
+    engagementTag.push({
       type: 'follow_day_engagement',
       completed_date: lead.updatedAt || lead.createdAt
     });
   }
   
   if (lead.followed_up) {
-    engagement_tags.push({
+    engagementTag.push({
       type: 'follow_up_dm_sent',
       completed_date: lead.updatedAt || lead.createdAt
     });
@@ -265,7 +278,7 @@ const transformStudentLead = (lead: any): Lead => {
     last_followup_outcome: lead.last_followup_outcome,
     date_of_last_followup: lead.date_of_last_followup,
     next_followup_date: lead.next_followup_date,
-    engagement_tags: engagement_tags,
+    engagementTag: engagementTag,
     script_components: {
       intro: '',
       hook: '',
@@ -586,8 +599,22 @@ export const eightbaseService = {
     return transformUser(data.userUpdate);
   },
 
-  async deleteUser(id: string): Promise<void> {
-    await executeMutation(queries.DELETE_USER, { id });
+  async deleteUser(userId: string): Promise<boolean> {
+    try {
+      const { data } = await apolloClient.mutate({
+        mutation: gql`${queries.DELETE_USER}`,
+        variables: {
+          filter: {
+            id: userId
+          }
+        }
+      });
+      
+      return data.userDestroy.success;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
   },
 
   async assignStudentToCoach(studentId: string, coachId: string | null): Promise<User> {
@@ -673,6 +700,7 @@ export const eightbaseService = {
 
   async getAllCoaches(): Promise<any[]> {
     try {
+      // Load coaches from the Coach table since assignedCoach points to Coach records
       const data = await executeQuery(queries.GET_ALL_COACHES);
       return data.coachesList.items;
     } catch (error) {
@@ -998,8 +1026,8 @@ export const eightbaseService = {
     }
 
     // Create engagement tags if provided
-    if (lead.engagement_tags && lead.engagement_tags.length > 0) {
-      for (const tag of lead.engagement_tags) {
+    if (lead.engagementTag && lead.engagementTag.length > 0) {
+      for (const tag of lead.engagementTag) {
         await executeMutation(queries.CREATE_ENGAGEMENT_TAG, {
           data: {
             ...tag,
@@ -1453,7 +1481,30 @@ export const eightbaseService = {
   async getAllUsersWithDetails(): Promise<User[]> {
     try {
       const response = await apolloClient.query({ query: gql`${queries.GET_USERS}` });
-      return response.data.usersList.items.map(transformUser);
+      
+      const transformedUsers = response.data.usersList.items.map(transformUser);
+      
+      // Resolve coach information for legacy data
+      const resolvedUsers = transformedUsers.map((user: User) => {
+        if (user.assignedCoach && user.assignedCoach.firstName === 'Unknown') {
+          // Find the actual coach from the users list
+          const actualCoach = transformedUsers.find((u: User) => u.id === user.assignedCoach?.id);
+          if (actualCoach) {
+            return {
+              ...user,
+              assignedCoach: {
+                id: actualCoach.id,
+                firstName: actualCoach.firstName,
+                lastName: actualCoach.lastName,
+                email: actualCoach.email
+              }
+            };
+          }
+        }
+        return user;
+      });
+      
+      return resolvedUsers;
     } catch (error) {
       console.error('Error fetching all users with details:', error);
       throw error;

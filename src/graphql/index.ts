@@ -200,9 +200,9 @@ export const UPDATE_USER_WITH_COACH = `
 `;
 
 export const DELETE_USER = `
-  mutation DeleteUser($id: ID!) {
-    userDestroy(id: $id) {
-      id
+  mutation DeleteUser($filter: UserKeyFilter!) {
+    userDestroy(filter: $filter) {
+      success
     }
   }
 `;
@@ -663,21 +663,21 @@ export const DELETE_PRICING = `
 // ========================================
 
 export const GET_COACH_PRICING_BY_FILTER = `
-  query GetCoachPricingByFilter($filter: CoachPricingFilter) {
-    coachPricingsList(filter: $filter) {
+  query GetCoachPricingByFilter($filter: PricingFilter) {
+    pricingsList(filter: $filter) {
       items {
-      id
-      name
-      description
-      price
-      duration_weeks
+        id
+        name
+        description
+        price
+        duration_weeks
         category
-      packageFeatures
-      status
+        packageFeatures
+        status
         createdAt
         updatedAt
-      user {
-        id
+        user {
+          id
           firstName
           lastName
           email
@@ -688,8 +688,8 @@ export const GET_COACH_PRICING_BY_FILTER = `
 `;
 
 export const CREATE_COACH_PRICING = `
-  mutation CreateCoachPricing($data: CoachPricingCreateInput!) {
-    coachPricingCreate(data: $data) {
+  mutation CreateCoachPricing($data: PricingCreateInput!) {
+    pricingCreate(data: $data) {
       id
       name
       description
@@ -705,8 +705,8 @@ export const CREATE_COACH_PRICING = `
 `;
 
 export const UPDATE_COACH_PRICING = `
-  mutation UpdateCoachPricing($id: ID!, $data: CoachPricingUpdateInput!) {
-    coachPricingUpdate(id: $id, data: $data) {
+  mutation UpdateCoachPricing($id: ID!, $data: PricingUpdateInput!) {
+    pricingUpdate(id: $id, data: $data) {
       id
       name
       description
@@ -722,7 +722,7 @@ export const UPDATE_COACH_PRICING = `
 
 export const DELETE_COACH_PRICING = `
   mutation DeleteCoachPricing($id: ID!) {
-    coachPricingDestroy(id: $id) {
+    pricingDestroy(id: $id) {
       id
     }
   }
@@ -814,23 +814,7 @@ export const GET_STUDENT_LEADS = `
 export const CREATE_LEAD = `
   mutation CreateLead($data: LeadCreateInput!) {
     leadCreate(data: $data) {
-      id
-      lead_name
-      email
-      phone
-      instagram_handle
-      lead_source
-      initial_call_outcome
-      date_of_initial_call
-      last_followup_outcome
-      date_of_last_followup
-      next_followup_date
-      message_sent
-      followed_back
-      followed_up
-      status
-      createdAt
-      updatedAt
+      success
     }
   }
 `;
@@ -838,23 +822,7 @@ export const CREATE_LEAD = `
 export const UPDATE_LEAD = `
   mutation UpdateLead($filter: LeadKeyFilter!, $data: LeadUpdateInput!) {
     leadUpdate(filter: $filter, data: $data) {
-      __typename
-      id
-      lead_name
-      email
-      phone
-      instagram_handle
-      lead_source
-      initial_call_outcome
-      date_of_initial_call
-      last_followup_outcome
-      date_of_last_followup
-      next_followup_date
-      message_sent
-      followed_back
-      followed_up
-      status
-      updatedAt
+      success
     }
   }
 `;
@@ -879,6 +847,7 @@ export const UPDATE_LEAD_BY_FILTER = `
         followed_back
         followed_up
         status
+       
         updatedAt
       }
     }
@@ -886,9 +855,9 @@ export const UPDATE_LEAD_BY_FILTER = `
 `;
 
 export const DELETE_LEAD = `
-  mutation DeleteLead($id: ID!) {
-    leadDestroy(id: $id) {
-      id
+  mutation DeleteLead($filter: LeadKeyFilter!) {
+    leadDestroy(filter: $filter) {
+      success
     }
   }
 `;

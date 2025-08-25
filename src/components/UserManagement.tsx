@@ -262,15 +262,25 @@ export function UserManagement() {
       }
       
       // Handle different assignment scenarios based on role
-      if (editingUser.role === 'user' && userData.assigned_admin_id && userData.assigned_admin_id !== 'none') {
+      if (editingUser.role === 'user' && userData.assignedCoach?.id) {
         // Student being assigned to a coach
-        // userData.assigned_admin_id now contains the coach ID from coach table
-        const { assigned_admin_id, ...userDataWithoutCoach } = userData;
-        updatedUser = await eightbaseService.updateUserWithCoach(
-          editingUser.id, 
-          userDataWithoutCoach, 
-          assigned_admin_id // This is now the coach ID from coach table
-        );
+        const { assignedCoach, ...userDataWithoutCoach } = userData;
+        updatedUser = await eightbaseService.updateUser(editingUser.id, userDataWithoutCoach);
+        
+        // Update coach assignment separately - need to find the coach's user ID
+        const selectedCoach = coaches.find(c => c.id === userData.assignedCoach.id);
+        if (selectedCoach && selectedCoach.user?.id) {
+          await eightbaseService.assignStudentToCoach(editingUser.id, selectedCoach.user.id);
+        }
+      } else if (editingUser.role === 'user' && !userData.assignedCoach) {
+        // Student being unassigned from coach
+        const { assignedCoach, ...userDataWithoutCoach } = userData;
+        updatedUser = await eightbaseService.updateUser(editingUser.id, userDataWithoutCoach);
+        
+        // Unassign from current coach
+        if (editingUser.assignedCoach?.id) {
+          await eightbaseService.assignStudentToCoach(editingUser.id, null);
+        }
       } else if (editingUser.role === 'coach') {
         // Coach being updated - handle student assignment
         updatedUser = await eightbaseService.updateUser(editingUser.id, userData);
@@ -1151,13 +1161,23 @@ export function UserManagement() {
                     <>
                       <Label htmlFor="edit-assigned-coach">Assigned Coach</Label>
                       <Select 
-                        value={(() => {
-                          if (!editingUser.assigned_admin_id) return 'none';
-                          // Find the coach from coach table using the user ID
-                          const coach = coaches.find(c => c.user?.id === editingUser.assigned_admin_id);
-                          return coach ? coach.id : 'none';
-                        })()} 
-                        onValueChange={(value) => setEditingUser({ ...editingUser, assigned_admin_id: value === 'none' ? null : value })}
+                        value={editingUser.assignedCoach?.id || 'none'} 
+                        onValueChange={(value) => {
+                          if (value === 'none') {
+                            setEditingUser({ ...editingUser, assignedCoach: null });
+                          } else {
+                            const selectedCoach = coaches.find(c => c.id === value);
+                            setEditingUser({ 
+                              ...editingUser, 
+                              assignedCoach: selectedCoach ? {
+                                id: selectedCoach.id,
+                                firstName: selectedCoach.firstName,
+                                lastName: selectedCoach.lastName,
+                                email: selectedCoach.email
+                              } : null
+                            });
+                          }
+                        }}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select coach" />
