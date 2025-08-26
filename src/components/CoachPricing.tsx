@@ -117,7 +117,10 @@ export function CoachPricing() {
   const loadPackages = async () => {
     setLoading(true);
     try {
+      console.log('Loading packages for user:', user?.id);
       const response = await eightbaseService.getCoachPricing(user?.id);
+      console.log('Raw response from service:', response);
+      console.log('Response length:', response.length);
 
       const transformed: CoachPricingItem[] = response.map((pkg: any) => ({
         id: pkg.id,
@@ -126,7 +129,7 @@ export function CoachPricing() {
         price: pkg.price,
         duration_weeks: pkg.duration_weeks,
         category: pkg.category,
-        packageFeatures: pkg.packageFeatures,
+        package_Features: pkg.package_Features || [],
         status: pkg.status,
         createdAt: pkg.createdAt,
         updatedAt: pkg.updatedAt,
@@ -138,23 +141,27 @@ export function CoachPricing() {
         }
       }));
 
+      console.log('Transformed data:', transformed);
+      console.log('Transformed data length:', transformed.length);
       setData(transformed);
-      console.log("data1", data)
+      console.log("Final data state:", transformed);
 
       setPackages(
-        transformed.map(pkg => ({
-          id: pkg.id,
-          coach_id: pkg.user.id,
-          name: pkg.name,
-          description: pkg.description,
-          duration_weeks: pkg.duration_weeks,
-          price: pkg.price,
-          category: pkg.category as any,
-          created_at: pkg.createdAt,
-          updated_at: pkg.updatedAt,
-          features: pkg.packageFeatures ? pkg.packageFeatures.split(',').map((f: string) => f.trim()) : [],
-          is_active: pkg.status === 'active'
-        }))
+        transformed.map(pkg => {
+          return {
+            id: pkg.id,
+            coach_id: pkg.user.id,
+            name: pkg.name,
+            description: pkg.description,
+            duration_weeks: pkg.duration_weeks,
+            price: pkg.price,
+            category: pkg.category as any,
+            created_at: pkg.createdAt,
+            updated_at: pkg.updatedAt,
+            features: pkg.package_Features || [],
+            is_active: pkg.status === 'active'
+          };
+        })
       );
     } catch (err) {
       console.error('Failed to load packages', err);
@@ -183,19 +190,23 @@ export function CoachPricing() {
     e.preventDefault(); // ✅ Prevents page reload
 
     try {
-      await eightbaseService.createCoachPricing({
+      const success = await eightbaseService.createCoachPricing({
         name: packageFormData.name,
         description: packageFormData.description,
         duration_weeks: packageFormData.duration_weeks,
         price: packageFormData.price,
         category: packageFormData.category,
-        packageFeatures: packageFormData.features.join(','),
+        package_Features: packageFormData.features,
         status: packageFormData.is_active ? 'active' : 'inactive',
       } as any);
 
-      await loadPackages();
-      setCreatePackageDialogOpen(false);
-      resetPackageForm();
+      if (success) {
+        await loadPackages();
+        setCreatePackageDialogOpen(false);
+        resetPackageForm();
+      } else {
+        console.error('Create failed - no success response');
+      }
     } catch (err) {
       console.error('Create failed', err);
     }
@@ -207,19 +218,25 @@ export function CoachPricing() {
     if (!editingPackage) return;
 
     try {
-      await eightbaseService.updateCoachPricing(editingPackage.id, {
+      const success = await eightbaseService.updateCoachPricing(editingPackage.id, {
         name: packageFormData.name,
         description: packageFormData.description,
         duration_weeks: packageFormData.duration_weeks,
         price: packageFormData.price,
         category: packageFormData.category,
-        packageFeatures: packageFormData.features.join(','),
+        package_Features: packageFormData.features,
         status: packageFormData.is_active ? 'active' : 'inactive'
       } as any);
 
-      await loadPackages();
-      setEditPackageDialogOpen(false);
-      setEditingPackage(null);
+      if (success) {
+        await loadPackages();
+        setEditPackageDialogOpen(false);
+        setEditingPackage(null);
+        resetPackageForm(); // Clear all form values
+        setNewFeature(''); // Clear the new feature input
+      } else {
+        console.error('Update failed - no success response');
+      }
     } catch (err) {
       console.error('Update failed', err);
     }
@@ -228,10 +245,14 @@ export function CoachPricing() {
   const handleDeletePackage = async () => {
     if (!packageToDelete) return;
     try {
-      await eightbaseService.deleteCoachPricing(packageToDelete.id);
-      await loadPackages();
-      setDeletePackageDialogOpen(false);
-      setPackageToDelete(null);
+      const success = await eightbaseService.deleteCoachPricing(packageToDelete.id);
+      if (success) {
+        await loadPackages();
+        setDeletePackageDialogOpen(false);
+        setPackageToDelete(null);
+      } else {
+        console.error('Delete failed - no success response');
+      }
     } catch (err) {
       console.error('Delete failed', err);
     }
@@ -242,12 +263,18 @@ export function CoachPricing() {
 
 
   const handleTogglePackageStatus = async (id: string, isActive: boolean) => {
-    // try {
-    //   await api.updatePricing(id, { status: isActive ? 'active' : 'inactive' });
-    //   await loadPackages();
-    // } catch (err) {
-    //   console.error('Status update failed', err);
-    // }
+    try {
+      const success = await eightbaseService.updateCoachPricing(id, { 
+        status: isActive ? 'active' : 'inactive' 
+      });
+      if (success) {
+        await loadPackages();
+      } else {
+        console.error('Status update failed - no success response');
+      }
+    } catch (err) {
+      console.error('Status update failed', err);
+    }
   };
 
   const openEditDialog = (pkg: PricingPackage) => {
@@ -383,7 +410,7 @@ export function CoachPricing() {
             <div className="flex items-center space-x-2">
               <Package className="h-8 w-8 text-blue-600" />
               <div>
-                <div className="text-2xl font-bold">{packages.length}</div>
+                <div className="text-2xl font-bold">{data.length}</div>
                 <div className="text-sm text-muted-foreground">Total Packages</div>
               </div>
             </div>
@@ -395,7 +422,7 @@ export function CoachPricing() {
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-8 w-8 text-green-600" />
               <div>
-                <div className="text-2xl font-bold">{packages.filter(p => p.is_active).length}</div>
+                <div className="text-2xl font-bold">{data.filter(p => p.status === 'active').length}</div>
                 <div className="text-sm text-muted-foreground">Active Packages</div>
               </div>
             </div>
@@ -408,7 +435,7 @@ export function CoachPricing() {
               <DollarSign className="h-8 w-8 text-purple-600" />
               <div>
                 <div className="text-2xl font-bold">
-                  ${packages.length > 0 ? Math.round(packages.reduce((sum, p) => sum + p.price, 0) / packages.length) : 0}
+                  ${data.length > 0 ? Math.round(data.reduce((sum, p) => sum + p.price, 0) / data.length) : 0}
                 </div>
                 <div className="text-sm text-muted-foreground">Avg. Price</div>
               </div>
@@ -422,7 +449,7 @@ export function CoachPricing() {
               <Clock className="h-8 w-8 text-orange-600" />
               <div>
                 <div className="text-2xl font-bold">
-                  {packages.length > 0 ? Math.round(packages.reduce((sum, p) => sum + p.duration_weeks, 0) / packages.length) : 0}
+                  {data.length > 0 ? Math.round(data.reduce((sum, p) => sum + p.duration_weeks, 0) / data.length) : 0}
                 </div>
                 <div className="text-sm text-muted-foreground">Avg. Duration (weeks)</div>
               </div>
@@ -468,7 +495,7 @@ export function CoachPricing() {
                   price: pkg.price,
                   duration_weeks: pkg.duration_weeks,
                   category: pkg.category as any,
-                  features: pkg.packageFeatures?.split(',') || [],
+                  features: pkg.package_Features || [],
                   is_active: pkg.status === 'active',
                   created_at: pkg.createdAt,
                   updated_at: pkg.updatedAt,
@@ -479,7 +506,7 @@ export function CoachPricing() {
                   price: pkg.price,
                   duration_weeks: pkg.duration_weeks,
                   category: pkg.category as any,
-                  features: pkg.packageFeatures?.split(',') || [],
+                  features: pkg.package_Features || [],
                   is_active: pkg.status === 'active',
                 });
                 setEditPackageDialogOpen(true);
@@ -493,12 +520,27 @@ export function CoachPricing() {
                   price: pkg.price,
                   duration_weeks: pkg.duration_weeks,
                   category: pkg.category as any,
-                  features: pkg.packageFeatures?.split(',') || [],
+                  features: pkg.package_Features || [],
                   is_active: pkg.status === 'active',
                   created_at: pkg.createdAt,
                   updated_at: pkg.updatedAt,
                 });
                 setDeletePackageDialogOpen(true);
+              }}
+              onDuplicate={(pkg) => {
+                setPackageFormData({
+                  name: `${pkg.name} (Copy)`,
+                  description: pkg.description,
+                  price: pkg.price,
+                  duration_weeks: pkg.duration_weeks,
+                  category: pkg.category as any,
+                  features: pkg.package_Features || [],
+                  is_active: false,
+                });
+                setCreatePackageDialogOpen(true);
+              }}
+              onToggleStatus={(pkg) => {
+                handleTogglePackageStatus(pkg.id, pkg.status === 'inactive');
               }}
             />
 
@@ -744,6 +786,44 @@ export function CoachPricing() {
                   required
                 />
               </div>
+            </div>
+
+            <div>
+              <Label>Package Features</Label>
+              <div className="flex items-center space-x-2 mt-2">
+                <Input
+                  value={newFeature}
+                  onChange={(e) => setNewFeature(e.target.value)}
+                  placeholder="Add a feature..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addFeature();
+                    }
+                  }}
+                />
+                <Button type="button" variant="outline" onClick={addFeature}>
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add
+                </Button>
+              </div>
+              {packageFormData.features.map((feature, index) => (
+                <div key={index} className="flex items-center justify-between rounded border px-2 py-1 text-sm mt-2">
+                  {feature}
+                  <button
+                    type="button"
+                    className="text-red-500 text-xs"
+                    onClick={() =>
+                      setPackageFormData((prev) => ({
+                        ...prev,
+                        features: prev.features.filter((_, i) => i !== index),
+                      }))
+                    }
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">

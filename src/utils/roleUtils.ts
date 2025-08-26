@@ -66,21 +66,38 @@ export function getDashboardRoute(user: any): string {
 
 // Helper function to get user's primary role (highest priority)
 export function getPrimaryRole(user: any): string {
+  // First check the direct role field (most reliable)
+  if (user?.role) {
+    switch (user.role) {
+      case 'super_admin':
+        return 'Super Admin';
+      case 'coach_manager':
+        return 'Coach Manager';
+      case 'coach':
+        return 'Coach';
+      case 'user':
+        return 'Student';
+      default:
+        return user.role;
+    }
+  }
+  
+  // Fallback to roles array if direct role field is not available
   const roles = getUserRoles(user);
   
-  if (roles.includes('SuperAdmin') || roles.includes('Super Admin') || roles.includes('Administrator')) {
+  if (roles.includes('SuperAdmin') || roles.includes('Super Admin') || roles.includes('Administrator') || roles.includes('super_admin')) {
     return 'Super Admin';
   }
   
-  if (roles.includes('Coach Manager')) {
+  if (roles.includes('Coach Manager') || roles.includes('coach_manager')) {
     return 'Coach Manager';
   }
   
-  if (roles.includes('Coach')) {
+  if (roles.includes('Coach') || roles.includes('coach')) {
     return 'Coach';
   }
   
-  if (roles.includes('Student')) {
+  if (roles.includes('Student') || roles.includes('user')) {
     return 'Student';
   }
   

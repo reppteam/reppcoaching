@@ -21,7 +21,6 @@ import { StudentSignUpModal } from './StudentSignUpModal';
 import { ConfirmationEmailModal } from './ConfirmationEmailModal';
 import { AddUserModal } from './AddUserModal';
 import { userInvitationService } from '../services/userInvitationService';
-import { SendGridReminder } from './SendGridReminder';
 import { 
   Users, 
   Plus, 
@@ -431,8 +430,6 @@ export function UserManagement() {
 
   return (
     <div className="space-y-6">
-      {/* SendGrid Setup Reminder */}
-      <SendGridReminder />
       
       {/* Header */}
       <div className="flex justify-between items-center">

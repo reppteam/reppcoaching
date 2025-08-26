@@ -78,7 +78,7 @@ export interface CoachPricingItem {
   price: number;
   duration_weeks: number;
   category: string;
-  packageFeatures: string;
+  package_Features: string[];
   status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;

@@ -199,14 +199,14 @@ export default function Router() {
             </ProtectedRoute>
           ),
         },
-        {
-          path: "role-implementation-status",
-          element: (
-            <ProtectedRoute requiredRole="Super Admin">
-              <RoleImplementationStatus />
-            </ProtectedRoute>
-          ),
-        },
+        // {
+        //   path: "role-implementation-status",
+        //   element: (
+        //     <ProtectedRoute requiredRole="Super Admin">
+        //       <RoleImplementationStatus />
+        //     </ProtectedRoute>
+        //   ),
+        // },
         {
           path: "role-system-summary",
           element: (

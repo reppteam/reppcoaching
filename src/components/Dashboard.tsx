@@ -70,8 +70,13 @@ export function Dashboard() {
 
   // Get user's primary role for display purposes
   const userRoleDisplay = user ? getPrimaryRole(user) : 'User';
-  // Use the internal role value for logic
+  // Use the internal role value for logic - ensure consistency
   const userRole = user?.role || 'user';
+  
+  // Debug logging to help identify role issues
+  console.log('User object:', user);
+  console.log('User role:', userRole);
+  console.log('User role display:', userRoleDisplay);
 
   const loadStudent = useCallback(async (studentId: string) => {
     try {
@@ -186,11 +191,11 @@ export function Dashboard() {
           label: "Role Permissions",
           icon: Crown,
         },
-        {
-          id: "implementation-status",
-          label: "Implementation Status",
-          icon: CheckCircle,
-        },
+        // {
+        //   id: "implementation-status",
+        //   label: "Implementation Status",
+        //   icon: CheckCircle,
+        // },
         {
           id: "admin-dashboard",
           label: "Admin Dashboard",
@@ -219,17 +224,17 @@ export function Dashboard() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "home":
-        if (user?.role === "super_admin") {
+        if (userRole === "super_admin") {
           console.log("Rendering SuperAdminDashboard")
           return <SuperAdminDashboard />;
-        } else if (user?.role === "coach_manager") {
+        } else if (userRole === "coach_manager") {
           console.log("Rendering CoachManagerDashboard")
           return <CoachManagerDashboard />;
-        } else if (user?.role === "coach") {
+        } else if (userRole === "coach") {
           console.log("Rendering AdminDashboard")
           return <AdminDashboard />;
         } else {
-          console.log("Rendering Student Dashboard - user role:", user?.role)
+          console.log("Rendering Student Dashboard - user role:", userRole)
           return (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Content - Student Dashboard */}
@@ -267,7 +272,7 @@ export function Dashboard() {
       case "coach-pricing":
         return <CoachPricing />;
       case "leads":
-        if (user?.role === "user") {
+        if (userRole === "user") {
           return <StudentLead />;
         } else {
           return <Leads />;
@@ -286,8 +291,8 @@ export function Dashboard() {
         return <AdminDashboard />;
       case "role-permissions":
         return <RolePermissionsManager />;
-      case "implementation-status":
-        return <RoleImplementationStatus />;
+      // case "implementation-status":
+      //   return <RoleImplementationStatus />;
       case "user-types":
         return <UserTypes />;
 
@@ -306,7 +311,7 @@ export function Dashboard() {
       <div className="min-h-screen bg-background">
         <Header
           showEditProfile={
-            user.role === "user" &&
+            userRole === "user" &&
             user.id === currentStudent.id
           }
           onEditProfile={() => setEditProfileOpen(true)}
@@ -316,7 +321,7 @@ export function Dashboard() {
             student={currentStudent}
           />
         </main>
-        {user.role === "user" &&
+        {userRole === "user" &&
           user.id === currentStudent.id && (
             <EditOwnProfile />
           )}
@@ -390,23 +395,6 @@ export function Dashboard() {
                       );
                     })}
                   </nav>
-
-                  {/* Clean access level info */}
-                  <div className="mt-6 p-3 bg-muted rounded-lg">
-                    <div className="text-xs font-medium mb-1">
-                      Access Level
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {userRole === "super_admin" &&
-                        "🔓 Full platform access + role management"}
-                      {userRole === "coach_manager" &&
-                        "🔓 Manage all coaches/students + KPIs + pricing"}
-                      {userRole === "coach" &&
-                        "🔓 View assigned students + coaching tools"}
-                      {userRole === "user" &&
-                        "🔓 Personal dashboard + learning resources"}
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </div>

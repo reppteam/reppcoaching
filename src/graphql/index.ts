@@ -414,7 +414,7 @@ export const GET_WEEKLY_REPORTS_BY_FILTER = `
         status
         createdAt
         updatedAt
-        student {
+        weekly_Report {
           id
         }
       }
@@ -441,7 +441,7 @@ export const CREATE_WEEKLY_REPORT = `
       status
       createdAt
       updatedAt
-      student {
+      weekly_Report {
         id
         firstName
         lastName
@@ -672,7 +672,7 @@ export const GET_COACH_PRICING_BY_FILTER = `
         price
         duration_weeks
         category
-        packageFeatures
+        package_Features
         status
         createdAt
         updatedAt
@@ -690,40 +690,23 @@ export const GET_COACH_PRICING_BY_FILTER = `
 export const CREATE_COACH_PRICING = `
   mutation CreateCoachPricing($data: PricingCreateInput!) {
     pricingCreate(data: $data) {
-      id
-      name
-      description
-      price
-      duration_weeks
-      category
-      packageFeatures
-      status
-      createdAt
-      updatedAt
+      success
     }
   }
 `;
 
 export const UPDATE_COACH_PRICING = `
-  mutation UpdateCoachPricing($id: ID!, $data: PricingUpdateInput!) {
-    pricingUpdate(id: $id, data: $data) {
+  mutation UpdateCoachPricing($filter: PricingKeyFilter!, $data: PricingUpdateInput!) {
+    pricingUpdate(filter: $filter, data: $data) {
       id
-      name
-      description
-      price
-      duration_weeks
-      category
-      packageFeatures
-      status
-      updatedAt
     }
   }
 `;
 
 export const DELETE_COACH_PRICING = `
-  mutation DeleteCoachPricing($id: ID!) {
-    pricingDestroy(id: $id) {
-      id
+  mutation DeleteCoachPricing($filter: PricingKeyFilter!) {
+    pricingDestroy(filter: $filter) {
+      success
     }
   }
 `;

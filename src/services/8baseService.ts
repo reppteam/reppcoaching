@@ -332,7 +332,7 @@ const transformCoachPricing = (pricing: any): CoachPricingItem => ({
   price: pricing.price,
   duration_weeks: pricing.duration_weeks,
   category: pricing.category,
-  packageFeatures: pricing.packageFeatures,
+  package_Features: pricing.package_Features || [],
   status: pricing.status,
   createdAt: pricing.createdAt,
   updatedAt: pricing.updatedAt,
@@ -758,7 +758,7 @@ export const eightbaseService = {
   // Weekly Reports
   async getWeeklyReports(userId?: string): Promise<WeeklyReport[]> {
     const filter = userId ? { student: { id: { equals: userId } } } : {};
-    const data = await executeQuery(queries.GET_WEEKLY_REPORTS_BY_FILTER, { filter });
+    const data = await executeQuery(queries.GET_WEEKLY_REPORTS_BY_FILTER);
     return data.weeklyReportsList.items.map(transformWeeklyReport);
   },
 
@@ -950,23 +950,46 @@ export const eightbaseService = {
 
   // Coach Pricing
   async getCoachPricing(userId?: string): Promise<CoachPricingItem[]> {
-    const filter = userId ? { user: { id: { equals: userId } } } : {};
-    const data = await executeQuery(queries.GET_COACH_PRICING_BY_FILTER, { filter });
-    return data.coachPricingsList.items.map(transformCoachPricing);
+    try {
+      // Get all pricing items without filtering by user
+      const filter = {};
+      console.log('Fetching all pricing packages with filter:', filter);
+      const data = await executeQuery(queries.GET_COACH_PRICING_BY_FILTER, { filter });
+      console.log('Pricing data received:', data);
+      console.log('Full data structure:', JSON.stringify(data, null, 2));
+      
+      const items = data.pricingsList?.items || [];
+      console.log('Pricing items count:', items.length);
+      console.log('First item sample:', items[0]);
+      
+      const transformed = items.map(transformCoachPricing);
+      console.log('Transformed pricing items:', transformed);
+      
+      // Return all packages regardless of user
+      return transformed;
+    } catch (error) {
+      console.error('Error fetching coach pricing:', error);
+      console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+      return [];
+    }
   },
 
-  async createCoachPricing(pricing: Omit<CoachPricingItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<CoachPricingItem> {
+  async createCoachPricing(pricing: Omit<CoachPricingItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<boolean> {
     const data = await executeMutation(queries.CREATE_COACH_PRICING, { data: pricing });
-    return transformCoachPricing(data.coachPricingCreate);
+    return data.pricingCreate.success;
   },
 
-  async updateCoachPricing(id: string, updates: Partial<CoachPricingItem>): Promise<CoachPricingItem> {
-    const data = await executeMutation(queries.UPDATE_COACH_PRICING, { id, data: updates });
-    return transformCoachPricing(data.coachPricingUpdate);
+  async updateCoachPricing(id: string, updates: Partial<CoachPricingItem>): Promise<boolean> {
+    const data = await executeMutation(queries.UPDATE_COACH_PRICING, { 
+      filter: { id }, 
+      data: updates 
+    });
+    return !!data.pricingUpdate.id; // Return true if id exists (success), false otherwise
   },
 
-  async deleteCoachPricing(id: string): Promise<void> {
-    await executeMutation(queries.DELETE_COACH_PRICING, { id });
+  async deleteCoachPricing(id: string): Promise<boolean> {
+    const data = await executeMutation(queries.DELETE_COACH_PRICING, { filter: { id } });
+    return data.pricingDestroy.success;
   },
 
   // Leads
@@ -1513,9 +1536,7 @@ export const eightbaseService = {
 
   async getAllWeeklyReports(): Promise<WeeklyReport[]> {
     try {
-      const response = await apolloClient.query({ query: gql`${queries.GET_WEEKLY_REPORTS_BY_FILTER}`, variables: {
-        filter: {}
-      } });
+      const response = await apolloClient.query({ query: gql`${queries.GET_WEEKLY_REPORTS_BY_FILTER}`});
       return response.data.weeklyReportsList.items.map(transformWeeklyReport);
     } catch (error) {
       console.error('Error fetching all weekly reports:', error);
