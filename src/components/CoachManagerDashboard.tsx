@@ -293,7 +293,7 @@ export function CoachManagerDashboard() {
                               ? "bg-blue-100 text-blue-800"
                               : user.role === "super_admin"
                               ? "bg-purple-100 text-purple-800"
-                              : "bg-gray-100 text-gray-800"
+                              : "bg-muted text-muted-foreground"
                           }
                         >
                           {user.role}
@@ -316,7 +316,7 @@ export function CoachManagerDashboard() {
                       className={
                         user.has_paid
                           ? "bg-emerald-100 text-emerald-800"
-                          : "bg-gray-100 text-gray-800"
+                          : "bg-muted text-muted-foreground"
                       }
                     >
                       {user.has_paid ? "Paid" : "Free"}

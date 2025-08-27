@@ -10,6 +10,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Checkbox } from './ui/checkbox';
 import { 
   Users, 
   Plus, 
@@ -267,40 +268,43 @@ export function SuperAdminUserPanel() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="create-firstName">First Name</Label>
+                  <Label htmlFor="create-firstName" className="text-foreground">First Name</Label>
                   <Input
                     id="create-firstName"
                     value={createUserForm.firstName}
                     onChange={(e) => setCreateUserForm({...createUserForm, firstName: e.target.value})}
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="create-lastName">Last Name</Label>
+                  <Label htmlFor="create-lastName" className="text-foreground">Last Name</Label>
                   <Input
                     id="create-lastName"
                     value={createUserForm.lastName}
                     onChange={(e) => setCreateUserForm({...createUserForm, lastName: e.target.value})}
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                     required
                   />
                 </div>
               </div>
               
               <div>
-                <Label htmlFor="create-email">Email</Label>
+                <Label htmlFor="create-email" className="text-foreground">Email</Label>
                 <Input
                   id="create-email"
                   type="email"
                   value={createUserForm.email}
                   onChange={(e) => setCreateUserForm({...createUserForm, email: e.target.value})}
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
               
               <div>
-                <Label htmlFor="create-role">Role</Label>
+                <Label htmlFor="create-role" className="text-foreground">Role</Label>
                 <Select value={createUserForm.role} onValueChange={(value) => setCreateUserForm({...createUserForm, role: value})}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -314,27 +318,25 @@ export function SuperAdminUserPanel() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id="create-is_active"
                     checked={createUserForm.is_active}
-                    onChange={(e) => setCreateUserForm({...createUserForm, is_active: e.target.checked})}
+                    onCheckedChange={(checked) => setCreateUserForm({...createUserForm, is_active: checked as boolean})}
                   />
-                  <Label htmlFor="create-is_active">Active</Label>
+                  <Label htmlFor="create-is_active" className="text-foreground">Active</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id="create-has_paid"
                     checked={createUserForm.has_paid}
-                    onChange={(e) => setCreateUserForm({...createUserForm, has_paid: e.target.checked})}
+                    onCheckedChange={(checked) => setCreateUserForm({...createUserForm, has_paid: checked as boolean})}
                   />
-                  <Label htmlFor="create-has_paid">Paid Account</Label>
+                  <Label htmlFor="create-has_paid" className="text-foreground">Paid Account</Label>
                 </div>
               </div>
               
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setCreateUserDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setCreateUserDialogOpen(false)} className="text-foreground">
                   Cancel
                 </Button>
                 <Button onClick={handleCreateUser}>
@@ -420,18 +422,19 @@ export function SuperAdminUserPanel() {
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
-              <Label htmlFor="search">Search Users</Label>
+              <Label htmlFor="search" className="text-foreground">Search Users</Label>
               <Input
                 id="search"
                 placeholder="Search by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div>
-              <Label htmlFor="role-filter">Role</Label>
+              <Label htmlFor="role-filter" className="text-foreground">Role</Label>
               <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -444,9 +447,9 @@ export function SuperAdminUserPanel() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="status-filter">Status</Label>
+              <Label htmlFor="status-filter" className="text-foreground">Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -484,7 +487,7 @@ export function SuperAdminUserPanel() {
                       user.role === 'super_admin' ? 'bg-purple-100 text-purple-800' :
                       user.role === 'coach_manager' ? 'bg-blue-100 text-blue-800' :
                       user.role === 'coach' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
+                      'bg-muted text-muted-foreground'
                     }>
                       {user.role === 'super_admin' ? 'Super Admin' :
                        user.role === 'coach_manager' ? 'Coach Manager' :
@@ -497,7 +500,7 @@ export function SuperAdminUserPanel() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={user.has_paid ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}>
+                    <Badge className={user.has_paid ? 'bg-emerald-100 text-emerald-800' : 'bg-muted text-muted-foreground'}>
                       {user.has_paid ? 'Paid' : 'Free'}
                     </Badge>
                   </TableCell>
@@ -583,9 +586,9 @@ export function SuperAdminUserPanel() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="student">Student</Label>
+              <Label htmlFor="student" className="text-foreground">Student</Label>
               <Select value={assignCoachForm.studentId} onValueChange={(value) => setAssignCoachForm({...assignCoachForm, studentId: value})}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue placeholder="Select student" />
                 </SelectTrigger>
                 <SelectContent>
@@ -599,9 +602,9 @@ export function SuperAdminUserPanel() {
             </div>
             
             <div>
-              <Label htmlFor="coach">Coach</Label>
+              <Label htmlFor="coach" className="text-foreground">Coach</Label>
               <Select value={assignCoachForm.coachId} onValueChange={(value) => setAssignCoachForm({...assignCoachForm, coachId: value})}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue placeholder="Select coach" />
                 </SelectTrigger>
                 <SelectContent>
@@ -616,7 +619,7 @@ export function SuperAdminUserPanel() {
             </div>
             
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setAssignCoachDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setAssignCoachDialogOpen(false)} className="text-foreground">
                 Cancel
               </Button>
               <Button onClick={handleAssignCoach}>
@@ -639,37 +642,40 @@ export function SuperAdminUserPanel() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName">First Name</Label>
+                <Label htmlFor="firstName" className="text-foreground">First Name</Label>
                 <Input
                   id="firstName"
                   value={editForm.firstName}
                   onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName" className="text-foreground">Last Name</Label>
                 <Input
                   id="lastName"
                   value={editForm.lastName}
                   onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             </div>
             
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-foreground">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={editForm.email}
                 onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
             
             <div>
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="role" className="text-foreground">Role</Label>
               <Select value={editForm.role} onValueChange={(value) => setEditForm({...editForm, role: value})}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -683,12 +689,12 @@ export function SuperAdminUserPanel() {
             
             {editForm.role === 'user' && (
               <div>
-                <Label htmlFor="assignedCoach">Assigned Coach</Label>
+                <Label htmlFor="assignedCoach" className="text-foreground">Assigned Coach</Label>
                 <Select 
                   value={editForm.assignedCoachId} 
                   onValueChange={(value) => setEditForm({...editForm, assignedCoachId: value})}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue placeholder="Select coach" />
                   </SelectTrigger>
                   <SelectContent>
@@ -706,27 +712,25 @@ export function SuperAdminUserPanel() {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="is_active"
                   checked={editForm.is_active}
-                  onChange={(e) => setEditForm({...editForm, is_active: e.target.checked})}
+                  onCheckedChange={(checked) => setEditForm({...editForm, is_active: checked as boolean})}
                 />
-                <Label htmlFor="is_active">Active</Label>
+                <Label htmlFor="is_active" className="text-foreground">Active</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="has_paid"
                   checked={editForm.has_paid}
-                  onChange={(e) => setEditForm({...editForm, has_paid: e.target.checked})}
+                  onCheckedChange={(checked) => setEditForm({...editForm, has_paid: checked as boolean})}
                 />
-                <Label htmlFor="has_paid">Paid Account</Label>
+                <Label htmlFor="has_paid" className="text-foreground">Paid Account</Label>
               </div>
             </div>
             
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="text-foreground">
                 Cancel
               </Button>
               <Button onClick={handleSaveEdit}>

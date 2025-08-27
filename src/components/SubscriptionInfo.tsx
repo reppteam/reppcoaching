@@ -51,11 +51,11 @@ export function SubscriptionInfo({ user }: SubscriptionInfoProps) {
           {/* Current Plan */}
           <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
             <div className="flex items-center space-x-3">
-              <div className={`p-2 rounded-full ${planType === 'premium' ? 'bg-purple-100' : 'bg-gray-100'}`}>
+                              <div className={`p-2 rounded-full ${planType === 'premium' ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-gray-100 dark:bg-gray-800'}`}>
                 {planType === 'premium' ? (
                   <Crown className="h-4 w-4 text-purple-600" />
                 ) : (
-                  <Gift className="h-4 w-4 text-gray-600" />
+                  <Gift className="h-4 w-4 text-muted-foreground" />
                 )}
               </div>
               <div>
@@ -69,7 +69,7 @@ export function SubscriptionInfo({ user }: SubscriptionInfoProps) {
             </div>
             <Badge 
               variant={planType === 'premium' ? 'default' : 'secondary'}
-              className={planType === 'premium' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}
+                              className={planType === 'premium' ? 'bg-purple-100 text-purple-800' : 'bg-muted text-muted-foreground'}
             >
               {planType === 'premium' ? 'Premium' : 'Free'}
             </Badge>

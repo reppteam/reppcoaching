@@ -51,6 +51,10 @@ import {
   CheckCircle,
   CreditCard,
   X,
+  Settings,
+  Heart,
+  Quote,
+  User as UserIcon,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -64,6 +68,7 @@ export function Dashboard() {
   const { currentView, currentStudentId, navigateToDashboard, navigateToStudentProfile } =
     useNavigation();
   const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [currentStudent, setCurrentStudent] =
     useState<User | null>(null);
   const [activeTab, setActiveTab] = useState("home");
@@ -108,11 +113,6 @@ export function Dashboard() {
           id: "reports",
           label: "Weekly Reports",
           icon: FileText,
-        },
-        {
-          id: "subscription",
-          label: "Subscription",
-          icon: CreditCard,
         },
         { id: "leads", label: "My Leads", icon: Users },
       ];
@@ -191,22 +191,11 @@ export function Dashboard() {
           label: "Role Permissions",
           icon: Crown,
         },
-        // {
-        //   id: "implementation-status",
-        //   label: "Implementation Status",
-        //   icon: CheckCircle,
-        // },
-        {
-          id: "admin-dashboard",
-          label: "Admin Dashboard",
-          icon: Shield,
-        },
         {
           id: "user-types",
           label: "User Types Overview",
           icon: Users,
         },
-
         {
           id: "role-test",
           label: "Role Test",
@@ -236,28 +225,48 @@ export function Dashboard() {
         } else {
           console.log("Rendering Student Dashboard - user role:", userRole)
           return (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Main Content - Student Dashboard */}
-              <div className="lg:col-span-2 space-y-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-brand-gray">
-                    Welcome back,{" "}
-                    <span className="text-brand-blue">
-                      {user?.firstName} {user?.lastName}
-                    </span>
-                  </h1>
-                  <p className="text-muted-foreground mb-6">
-                    Track your real estate photography business
-                    progress
-                  </p>
+            <div className="space-y-6">
+              {/* Welcome Section with Why */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-3">
+                  <div>
+                    <h1 className="text-2xl font-bold text-foreground">
+                      Welcome back,{" "}
+                      <span className="text-brand-blue">
+                        {user?.firstName} {user?.lastName}
+                      </span>
+                    </h1>
+                    <p className="text-muted-foreground mb-6">
+                      Track your real estate photography business progress
+                    </p>
+                  </div>
+                  
+                  {/* Why Section - Motivational */}
+                  <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start space-x-3">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-full">
+                          <Heart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-foreground mb-2">Remember Your Why</h3>
+                          <div className="text-sm text-muted-foreground">
+                            {user?.why || "Why did you start this business? What drives you to succeed? Keep your purpose front and center."}
+                          </div>
+                          {!user?.why && (
+                            <Button variant="outline" size="sm" className="mt-2">
+                              <Quote className="mr-2 h-4 w-4" />
+                              Set Your Why
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-                <WeeklyReports />
               </div>
-
-              {/* Right Sidebar - Subscription Info */}
-              <div className="lg:col-span-1">
-                <SubscriptionInfo user={user} />
-              </div>
+              
+              <WeeklyReports />
             </div>
           );
         }
@@ -291,11 +300,8 @@ export function Dashboard() {
         return <AdminDashboard />;
       case "role-permissions":
         return <RolePermissionsManager />;
-      // case "implementation-status":
-      //   return <RoleImplementationStatus />;
       case "user-types":
         return <UserTypes />;
-
       case "role-test":
         return <RoleTest />;
       default:
@@ -365,7 +371,7 @@ export function Dashboard() {
                             ? "bg-blue-100 text-blue-800"
                             : userRole === "coach"
                               ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
+                              : "bg-muted text-muted-foreground"
                       }
                     >
                       {userRoleDisplay}
@@ -407,13 +413,28 @@ export function Dashboard() {
         </div>
       </main>
 
+      {/* Sticky Profile Button - Only for students */}
+      {userRole === "user" && (
+        <Button
+          onClick={() => setSubscriptionModalOpen(true)}
+          className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg bg-brand-blue hover:bg-brand-blue/90 text-white z-40 group"
+          size="icon"
+          title="Profile & Account Settings"
+        >
+          <UserIcon className="h-5 w-5" />
+          <span className="absolute right-14 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Profile & Settings
+          </span>
+        </Button>
+      )}
+
       {/* Edit Profile Modal/Overlay */}
       {editProfileOpen && userRole === "user" && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-background rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Edit Profile</h2>
+                <h2 className="text-2xl font-bold text-foreground">Edit Profile</h2>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -424,6 +445,28 @@ export function Dashboard() {
                 </Button>
               </div>
               <EditOwnProfile />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Settings Modal */}
+      {subscriptionModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-foreground">Profile & Account Settings</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSubscriptionModalOpen(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <SubscriptionInfo user={user} />
             </div>
           </div>
         </div>

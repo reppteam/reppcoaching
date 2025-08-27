@@ -278,7 +278,7 @@ export function RoleImplementationStatus() {
                 <span>Coach: coach@example.com</span>
               </div>
               <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-gray-600" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 <span>Student: student@example.com</span>
               </div>
             </div>

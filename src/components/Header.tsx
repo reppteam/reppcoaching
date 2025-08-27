@@ -125,7 +125,7 @@ export function Header({
             {/* User Info */}
             <div className="hidden md:block text-right truncate max-w-[160px]">
               <p className="text-sm font-medium truncate">{user.firstName} {user.lastName}</p>
-              <p className="text-xs text-muted-foreground truncate">
+              <p className="text-xs text-muted-foreground dark:text-black truncate">
                 {user.email}
               </p>
             </div>

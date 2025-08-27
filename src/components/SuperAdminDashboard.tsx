@@ -257,11 +257,11 @@ export function SuperAdminDashboard() {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Super Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">System-wide management and analytics for Real Estate Photographer Pro</p>
-          <p className="text-xs text-gray-500 mt-1">
-            Last updated: {lastUpdated.toLocaleTimeString()}
-          </p>
+          <h1 className="text-3xl font-bold text-foreground">Super Admin Dashboard</h1>
+          <p className="text-muted-foreground mt-2">System-wide management and analytics for Real Estate Photographer Pro</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </p>
         </div>
         <Button 
           onClick={loadDashboardData} 
@@ -367,11 +367,10 @@ export function SuperAdminDashboard() {
 
       {/* Content Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Platform Overview</TabsTrigger>
           <TabsTrigger value="user-management">User Management</TabsTrigger>
           <TabsTrigger value="performance">Performance KPIs</TabsTrigger>
-          <TabsTrigger value="coach-analytics">Coach Analytics</TabsTrigger>
           <TabsTrigger value="system-settings">System Settings</TabsTrigger>
         </TabsList>
 
@@ -388,7 +387,7 @@ export function SuperAdminDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Paid Students</span>
+                  <span className="text-sm text-muted-foreground">Paid Students</span>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{stats.paidStudents}</span>
                     <Badge variant="secondary" className="text-xs">
@@ -397,7 +396,7 @@ export function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Free Students</span>
+                  <span className="text-sm text-muted-foreground">Free Students</span>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{stats.freeStudents}</span>
                     <Badge variant="secondary" className="text-xs">
@@ -406,7 +405,7 @@ export function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Active Students</span>
+                  <span className="text-sm text-muted-foreground">Active Students</span>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{stats.activeStudents}</span>
                     <Badge variant="secondary" className="text-xs">
@@ -415,7 +414,7 @@ export function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Total Coaches</span>
+                  <span className="text-sm text-muted-foreground">Total Coaches</span>
                   <span className="font-semibold">{stats.totalCoaches}</span>
                 </div>
               </CardContent>
@@ -431,19 +430,19 @@ export function SuperAdminDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Total Revenue</span>
+                  <span className="text-sm text-muted-foreground">Total Revenue</span>
                   <span className="font-semibold">${stats.revenue.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Avg Revenue/Student</span>
+                  <span className="text-sm text-muted-foreground">Avg Revenue/Student</span>
                   <span className="font-semibold">${stats.avgRevenuePerStudent.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Total Leads Generated</span>
+                  <span className="text-sm text-muted-foreground">Total Leads Generated</span>
                   <span className="font-semibold">{stats.totalLeadsGenerated}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Avg Leads/Student</span>
+                  <span className="text-sm text-muted-foreground">Avg Leads/Student</span>
                   <span className="font-semibold">{stats.avgLeadsPerStudent}</span>
                 </div>
               </CardContent>
@@ -458,14 +457,14 @@ export function SuperAdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="border rounded-lg p-4 bg-orange-50">
+                <div className="border rounded-lg p-4 bg-orange-50 dark:bg-orange-950/20">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">Unassigned</span>
-                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                    <span className="text-sm font-medium text-foreground">Unassigned</span>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200">
                       {stats.unassignedStudents} students
                     </Badge>
                   </div>
-                  <p className="text-xs text-gray-600">No coach assigned</p>
+                  <p className="text-xs text-muted-foreground">No coach assigned</p>
                 </div>
               </CardContent>
             </Card>
@@ -482,48 +481,7 @@ export function SuperAdminDashboard() {
           <KPIDashboard />
         </TabsContent>
 
-        {/* Coach Analytics Tab */}
-        <TabsContent value="coach-analytics" className="space-y-6">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Coach Performance Analytics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{stats.coaches}</div>
-                    <div className="text-sm text-gray-600">Total Coaches</div>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{stats.activeStudents}</div>
-                    <div className="text-sm text-gray-600">Active Students</div>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">{stats.unassignedStudents}</div>
-                    <div className="text-sm text-gray-600">Unassigned Students</div>
-                  </div>
-                </div>
-                <div className="mt-6">
-                  <h4 className="font-semibold mb-3">Coach Assignment Overview</h4>
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-orange-800">
-                        {stats.unassignedStudents} students need coach assignment
-                      </span>
-                      <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                        Action Required
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+
 
         {/* System Settings Tab */}
         <TabsContent value="system-settings" className="space-y-6">
@@ -540,20 +498,20 @@ export function SuperAdminDashboard() {
                   <div>
                     <h4 className="font-semibold mb-3">Role Management</h4>
                     <div className="space-y-2">
-                      <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <span className="text-sm">Super Admins</span>
+                      <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-muted rounded">
+                        <span className="text-sm text-foreground">Super Admins</span>
                         <Badge variant="secondary">{users.filter(u => u.role === 'super_admin').length}</Badge>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <span className="text-sm">Coach Managers</span>
+                      <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-muted rounded">
+                        <span className="text-sm text-foreground">Coach Managers</span>
                         <Badge variant="secondary">{users.filter(u => u.role === 'coach_manager').length}</Badge>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <span className="text-sm">Coaches</span>
+                      <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-muted rounded">
+                        <span className="text-sm text-foreground">Coaches</span>
                         <Badge variant="secondary">{users.filter(u => u.role === 'coach').length}</Badge>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <span className="text-sm">Students</span>
+                      <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-muted rounded">
+                        <span className="text-sm text-foreground">Students</span>
                         <Badge variant="secondary">{users.filter(u => u.role === 'user').length}</Badge>
                       </div>
                     </div>
@@ -561,17 +519,17 @@ export function SuperAdminDashboard() {
                   <div>
                     <h4 className="font-semibold mb-3">System Status</h4>
                     <div className="space-y-2">
-                      <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-                        <span className="text-sm text-green-800">Database Connection</span>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">Active</Badge>
+                      <div className="flex justify-between items-center p-2 bg-green-50 dark:bg-green-950/20 rounded">
+                        <span className="text-sm text-green-800 dark:text-green-200">Database Connection</span>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200">Active</Badge>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-                        <span className="text-sm text-green-800">API Status</span>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">Online</Badge>
+                      <div className="flex justify-between items-center p-2 bg-green-50 dark:bg-green-950/20 rounded">
+                        <span className="text-sm text-green-800 dark:text-green-200">API Status</span>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200">Online</Badge>
                       </div>
-                      <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
-                        <span className="text-sm text-blue-800">Last Updated</span>
-                        <span className="text-xs text-blue-600">{lastUpdated.toLocaleString()}</span>
+                      <div className="flex justify-between items-center p-2 bg-blue-50 dark:bg-blue-950/20 rounded">
+                        <span className="text-sm text-blue-800 dark:text-blue-200">Last Updated</span>
+                        <span className="text-xs text-blue-600 dark:text-blue-300">{lastUpdated.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>

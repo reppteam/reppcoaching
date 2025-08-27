@@ -109,7 +109,7 @@ export function CoachingTermInfo({ user, showTitle = true, compact = false }: Co
 
           {isUpcoming && (
             <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-950/20 rounded-lg">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
+              <p className="text-sm text-muted-foreground">
                 <strong>Coaching Term Starts Soon</strong><br />
                 Your free coaching program begins on {formatDate(startDate, 'MMMM d, yyyy')}.
               </p>

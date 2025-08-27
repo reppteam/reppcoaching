@@ -159,22 +159,24 @@ export const WeeklyReports: React.FC = () => {
                   <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="start_date">Start Date</Label>
+                        <Label htmlFor="start_date" className="text-foreground">Start Date</Label>
                         <Input
                           id="start_date"
                           type="date"
                           value={formData.start_date}
                           onChange={(e) => setFormData({...formData, start_date: e.target.value})}
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                           required
                         />
                       </div>
                       <div>
-                        <Label htmlFor="end_date">End Date</Label>
+                        <Label htmlFor="end_date" className="text-foreground">End Date</Label>
                         <Input
                           id="end_date"
                           type="date"
                           value={formData.end_date}
                           onChange={(e) => setFormData({...formData, end_date: e.target.value})}
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                           required
                         />
                       </div>
@@ -182,90 +184,98 @@ export const WeeklyReports: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="new_clients">New Clients</Label>
+                        <Label htmlFor="new_clients" className="text-foreground">New Clients</Label>
                         <Input
                           id="new_clients"
                           type="number"
                           value={formData.new_clients}
                           onChange={(e) => setFormData({...formData, new_clients: parseInt(e.target.value) || 0})}
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                 <div>
-                  <Label htmlFor="unique_clients">Unique Clients</Label>
+                  <Label htmlFor="unique_clients" className="text-foreground">Unique Clients</Label>
                   <Input
                     id="unique_clients"
                     type="number"
                     value={formData.unique_clients}
                     onChange={(e) => setFormData({...formData, unique_clients: parseInt(e.target.value) || 0})}
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="paid_shoots">Paid Shoots</Label>
+                        <Label htmlFor="paid_shoots" className="text-foreground">Paid Shoots</Label>
                         <Input
                           id="paid_shoots"
                           type="number"
                           value={formData.paid_shoots}
                           onChange={(e) => setFormData({...formData, paid_shoots: parseInt(e.target.value) || 0})}
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="free_shoots">Free Shoots</Label>
+                        <Label htmlFor="free_shoots" className="text-foreground">Free Shoots</Label>
                         <Input
                           id="free_shoots"
                           type="number"
                           value={formData.free_shoots}
                           onChange={(e) => setFormData({...formData, free_shoots: parseInt(e.target.value) || 0})}
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                       <div>
-                  <Label htmlFor="aov">AOV ($)</Label>
+                  <Label htmlFor="aov" className="text-foreground">AOV ($)</Label>
                         <Input
                           id="aov"
                           type="number"
                           value={formData.aov}
                           onChange={(e) => setFormData({...formData, aov: parseFloat(e.target.value) || 0})}
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                       <div>
-                  <Label htmlFor="revenue">Revenue ($)</Label>
+                  <Label htmlFor="revenue" className="text-foreground">Revenue ($)</Label>
                         <Input
                           id="revenue"
                           type="number"
                           value={formData.revenue}
                           onChange={(e) => setFormData({...formData, revenue: parseFloat(e.target.value) || 0})}
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                       <div>
-                  <Label htmlFor="expenses">Expenses ($)</Label>
+                  <Label htmlFor="expenses" className="text-foreground">Expenses ($)</Label>
                         <Input
                           id="expenses"
                           type="number"
                           value={formData.expenses}
                           onChange={(e) => setFormData({...formData, expenses: parseFloat(e.target.value) || 0})}
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                       <div>
-                  <Label htmlFor="editing_cost">Editing Cost ($)</Label>
+                  <Label htmlFor="editing_cost" className="text-foreground">Editing Cost ($)</Label>
                         <Input
                           id="editing_cost"
                           type="number"
                           value={formData.editing_cost}
                           onChange={(e) => setFormData({...formData, editing_cost: parseFloat(e.target.value) || 0})}
+                          className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                        <Label htmlFor="status">Status</Label>
+                        <Label htmlFor="status" className="text-foreground">Status</Label>
                   <Select value={formData.status} onValueChange={(value: 'active' | 'completed') => setFormData({...formData, status: value})}>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background border-border text-foreground">
                       <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
@@ -297,7 +307,7 @@ export const WeeklyReports: React.FC = () => {
               </Card>
 
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setAddingReport(false)}>
+                <Button type="button" variant="outline" onClick={() => setAddingReport(false)} className="text-foreground">
                         Cancel
                       </Button>
                 <Button type="submit">Save Report</Button>
@@ -399,7 +409,7 @@ export const WeeklyReports: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="font-medium">
+                        <p className="font-medium text-foreground">
                         {new Date(report.start_date).toLocaleDateString()} - {new Date(report.end_date).toLocaleDateString()}
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -409,11 +419,11 @@ export const WeeklyReports: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium">${report.revenue.toLocaleString()}</div>
+                    <div className="font-medium text-foreground">${report.revenue.toLocaleString()}</div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{report.paid_shoots + report.free_shoots}</span>
+                      <span className="font-medium text-foreground">{report.paid_shoots + report.free_shoots}</span>
                       <div className="text-xs text-muted-foreground">
                         {report.paid_shoots} paid, {report.free_shoots} free
                       </div>
@@ -426,7 +436,7 @@ export const WeeklyReports: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium">${report.aov.toFixed(2)}</div>
+                    <div className="font-medium text-foreground">${report.aov.toFixed(2)}</div>
                   </TableCell>
                   <TableCell>
                     <div className="font-medium text-green-600">
@@ -496,6 +506,7 @@ export const WeeklyReports: React.FC = () => {
                   type="date"
                   value={formData.start_date}
                   onChange={(e) => setFormData({...formData, start_date: e.target.value})}
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <div>
@@ -505,6 +516,7 @@ export const WeeklyReports: React.FC = () => {
                   type="date"
                   value={formData.end_date}
                   onChange={(e) => setFormData({...formData, end_date: e.target.value})}
+                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             </div>
@@ -594,9 +606,9 @@ export const WeeklyReports: React.FC = () => {
               <div>
                 <Label htmlFor="edit_status">Status</Label>
                 <Select value={formData.status} onValueChange={(value: 'active' | 'completed') => setFormData({...formData, status: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
+                                            <SelectTrigger className="bg-background border-border text-foreground">
+                      <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
@@ -626,7 +638,7 @@ export const WeeklyReports: React.FC = () => {
             </Card>
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setEditingReport(null)}>
+              <Button variant="outline" onClick={() => setEditingReport(null)} className="text-foreground">
                 Cancel
               </Button>
               <Button onClick={() => editingReport && handleUpdate(editingReport)}>

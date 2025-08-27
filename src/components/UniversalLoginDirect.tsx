@@ -22,8 +22,8 @@ export function UniversalLoginDirect() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white shadow-xl">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-xl">
         <CardContent className="p-8">
           {/* Logo */}
           <div className="flex justify-center mb-6">
@@ -33,12 +33,12 @@ export function UniversalLoginDirect() {
           </div>
 
           {/* Welcome Title */}
-          <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-center text-foreground mb-2">
             Welcome
           </h1>
 
           {/* Instructions */}
-          <p className="text-sm text-gray-600 text-center mb-8">
+          <p className="text-sm text-muted-foreground text-center mb-8">
             Log in to SoftwareJV to continue to Software JV
           </p>
 
@@ -53,7 +53,7 @@ export function UniversalLoginDirect() {
           </Button>
 
           {/* Info Text */}
-          <p className="text-xs text-gray-500 text-center mt-6">
+          <p className="text-xs text-muted-foreground text-center mt-6">
             You will be redirected to Auth0's secure login page
           </p>
 

@@ -76,10 +76,10 @@ const PERMISSIONS: Permission[] = [
 ];
 
 const ROLES = [
-  { id: 'user', name: 'Student', icon: User, color: 'bg-gray-100 text-gray-800' },
-  { id: 'coach', name: 'Coach', icon: Shield, color: 'bg-green-100 text-green-800' },
-  { id: 'coach_manager', name: 'Coach Manager', icon: ShieldCheck, color: 'bg-blue-100 text-blue-800' },
-  { id: 'super_admin', name: 'Super Admin', icon: Crown, color: 'bg-purple-100 text-purple-800' }
+  { id: 'user', name: 'Student', icon: User, color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  { id: 'coach', name: 'Coach', icon: Shield, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200' },
+  { id: 'coach_manager', name: 'Coach Manager', icon: ShieldCheck, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200' },
+  { id: 'super_admin', name: 'Super Admin', icon: Crown, color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200' }
 ];
 
 // Default permissions for each role based on specifications
@@ -254,11 +254,11 @@ export function RolePermissionsManager() {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'core': return 'text-blue-600';
-      case 'management': return 'text-green-600';
-      case 'analytics': return 'text-purple-600';
-      case 'system': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'core': return 'text-blue-600 dark:text-blue-400';
+      case 'management': return 'text-green-600 dark:text-green-400';
+      case 'analytics': return 'text-purple-600 dark:text-purple-400';
+      case 'system': return 'text-red-600 dark:text-red-400';
+      default: return 'text-muted-foreground';
     }
   };
 

@@ -258,3 +258,104 @@ html {
   .text-brand-gray { color: var(--brand-gray); }
   .text-brand-gray-light { color: var(--brand-gray-light); }
 }
+
+/* Input field styling for better dark mode contrast */
+input, textarea, select {
+  color: var(--foreground) !important;
+  background-color: var(--background) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--muted-foreground) !important;
+}
+
+/* Focus states for better visibility */
+input:focus, textarea:focus, select:focus {
+  border-color: var(--ring) !important;
+  box-shadow: 0 0 0 2px var(--ring) !important;
+}
+
+/* Ensure all shadcn/ui input components have proper text visibility */
+.input, .textarea, .select-trigger {
+  color: var(--foreground) !important;
+  background-color: var(--background) !important;
+}
+
+/* Ensure placeholder text is visible */
+.input::placeholder, .textarea::placeholder {
+  color: var(--muted-foreground) !important;
+}
+
+/* Ensure SelectValue text is always visible in dark mode */
+[data-slot="select-value"] {
+  color: var(--foreground) !important;
+}
+
+/* Ensure SelectValue placeholder text is visible */
+[data-slot="select-value"]:empty::before {
+  color: var(--muted-foreground) !important;
+}
+
+/* Ensure all select-related text is visible */
+[data-slot="select-value"], 
+[data-slot="select-value"] span,
+[data-slot="select-value"] * {
+  color: var(--foreground) !important;
+}
+
+/* Ensure select trigger text is visible */
+[data-slot="select-trigger"] {
+  color: var(--foreground) !important;
+}
+
+/* Ensure select items text is visible */
+[data-slot="select-item"] {
+  color: var(--foreground) !important;
+}
+
+/* Ensure dialog titles are visible in dark mode */
+[data-slot="dialog-title"],
+[data-slot="alert-dialog-title"] {
+  color: var(--foreground) !important;
+}
+
+/* Ensure all dialog-related text is visible */
+[role="dialog"] h2,
+[role="dialog"] h3,
+[role="dialog"] .text-lg,
+[role="dialog"] .font-semibold {
+  color: var(--foreground) !important;
+}
+
+/* Ensure all modal headings and titles are visible */
+[data-radix-dialog-content] h2,
+[data-radix-dialog-content] h3,
+[data-radix-dialog-content] .text-lg,
+[data-radix-dialog-content] .font-semibold,
+[data-radix-dialog-content] .text-xl {
+  color: var(--foreground) !important;
+}
+
+/* Ensure all alert dialog titles are visible */
+[data-radix-alert-dialog-content] h2,
+[data-radix-alert-dialog-content] h3,
+[data-radix-alert-dialog-content] .text-lg,
+[data-radix-alert-dialog-content] .font-semibold {
+  color: var(--foreground) !important;
+}
+
+/* Ensure custom modal headings are visible */
+.fixed.inset-0.z-50 h2,
+.fixed.inset-0.z-50 h3,
+.fixed.inset-0.z-50 .text-2xl,
+.fixed.inset-0.z-50 .font-bold {
+  color: var(--foreground) !important;
+}
+
+/* Ensure all modal content text is visible */
+.bg-background.rounded-lg.shadow-lg h2,
+.bg-background.rounded-lg.shadow-lg h3,
+.bg-background.rounded-lg.shadow-lg .text-2xl,
+.bg-background.rounded-lg.shadow-lg .font-bold {
+  color: var(--foreground) !important;
+}

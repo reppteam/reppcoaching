@@ -274,7 +274,7 @@ export function ProfitMarginCalculator() {
   };
 
   const getProfitMarginColor = (margin: number) => {
-    if (!globalVars) return 'text-gray-600';
+    if (!globalVars) return 'text-muted-foreground';
     if (margin >= globalVars.target_profit_margin) return 'text-green-600';
     if (margin >= globalVars.target_profit_margin * 0.8) return 'text-yellow-600';
     return 'text-red-600';

@@ -284,7 +284,7 @@ export function AdminDashboard() {
                             <div className="font-medium">{student.firstName} {student.lastName}</div>
                             <div className="text-sm text-muted-foreground">{student.email}</div>
                           </div>
-                          <Badge className={student.has_paid ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}>
+                          <Badge className={student.has_paid ? 'bg-emerald-100 text-emerald-800' : 'bg-muted text-muted-foreground'}>
                             {student.has_paid ? 'Paid' : 'Free'}
                           </Badge>
                         </div>
@@ -330,7 +330,7 @@ export function AdminDashboard() {
                     <h4 className="font-medium mb-2">Recent Reports</h4>
                     <div className="space-y-2">
                       {reports.slice(0, 3).map(report => (
-                        <div key={report.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <div key={report.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-muted rounded">
                           <div>
                             <div className="text-sm font-medium">
                               {(() => {
@@ -355,7 +355,7 @@ export function AdminDashboard() {
                     <h4 className="font-medium mb-2">Recent Leads</h4>
                     <div className="space-y-2">
                       {leads.slice(0, 3).map(lead => (
-                        <div key={lead.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <div key={lead.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-muted rounded">
                           <div>
                             <div className="text-sm font-medium">{lead.lead_name}</div>
                             <div className="text-xs text-muted-foreground">{lead.lead_source}</div>
@@ -363,7 +363,7 @@ export function AdminDashboard() {
                           <Badge className={
                             lead.status === 'converted' ? 'bg-green-100 text-green-800' :
                             lead.status === 'qualified' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
+                            'bg-muted text-muted-foreground'
                           }>
                             {lead.status}
                           </Badge>
@@ -485,7 +485,7 @@ export function AdminDashboard() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="student">Student</Label>
+              <Label htmlFor="student" className="text-foreground">Student</Label>
               <Select value={callLogForm.student_id} onValueChange={(value) => setCallLogForm({...callLogForm, student_id: value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select student" />
@@ -501,7 +501,7 @@ export function AdminDashboard() {
             </div>
             
               <div>
-                <Label htmlFor="call_date">Call Date</Label>
+                <Label htmlFor="call_date" className="text-foreground">Call Date</Label>
                 <Input
                   id="call_date"
                   type="date"
@@ -511,7 +511,7 @@ export function AdminDashboard() {
               </div>
             
               <div>
-                <Label htmlFor="call_duration">Duration (minutes)</Label>
+                <Label htmlFor="call_duration" className="text-foreground">Duration (minutes)</Label>
                 <Input
                   id="call_duration"
                   type="number"
@@ -521,7 +521,7 @@ export function AdminDashboard() {
             </div>
             
               <div>
-                <Label htmlFor="call_type">Call Type</Label>
+                <Label htmlFor="call_type" className="text-foreground">Call Type</Label>
               <Select value={callLogForm.call_type} onValueChange={(value) => setCallLogForm({...callLogForm, call_type: value})}>
                   <SelectTrigger>
                     <SelectValue />
@@ -535,7 +535,7 @@ export function AdminDashboard() {
             </div>
             
             <div>
-              <Label htmlFor="outcome">Outcome</Label>
+              <Label htmlFor="outcome" className="text-foreground">Outcome</Label>
               <Textarea
                 id="outcome"
                 value={callLogForm.outcome}
@@ -545,7 +545,7 @@ export function AdminDashboard() {
             </div>
             
             <div>
-              <Label htmlFor="next_steps">Next Steps</Label>
+              <Label htmlFor="next_steps" className="text-foreground">Next Steps</Label>
               <Textarea
                 id="next_steps"
                 value={callLogForm.next_steps}
@@ -555,7 +555,7 @@ export function AdminDashboard() {
             </div>
 
             <div>
-              <Label htmlFor="student_mood">Student Mood</Label>
+              <Label htmlFor="student_mood" className="text-foreground">Student Mood</Label>
               <Select value={callLogForm.student_mood} onValueChange={(value) => setCallLogForm({...callLogForm, student_mood: value})}>
                 <SelectTrigger>
                   <SelectValue />
@@ -592,7 +592,7 @@ export function AdminDashboard() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="target_type">Note Type</Label>
+              <Label htmlFor="target_type" className="text-foreground">Note Type</Label>
               <Select value={noteForm.target_type} onValueChange={(value) => setNoteForm({...noteForm, target_type: value})}>
                 <SelectTrigger>
                   <SelectValue />
@@ -606,7 +606,7 @@ export function AdminDashboard() {
             </div>
             
             <div>
-              <Label htmlFor="target_id">Target</Label>
+              <Label htmlFor="target_id" className="text-foreground">Target</Label>
               <Select value={noteForm.target_id} onValueChange={(value) => setNoteForm({...noteForm, target_id: value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select target" />
@@ -635,7 +635,7 @@ export function AdminDashboard() {
             </div>
             
             <div>
-              <Label htmlFor="content">Note Content</Label>
+              <Label htmlFor="content" className="text-foreground">Note Content</Label>
               <Textarea
                 id="content"
                 value={noteForm.content}
@@ -646,7 +646,7 @@ export function AdminDashboard() {
             </div>
             
             <div>
-              <Label htmlFor="visibility">Visibility</Label>
+              <Label htmlFor="visibility" className="text-foreground">Visibility</Label>
               <Select value={noteForm.visibility} onValueChange={(value) => setNoteForm({...noteForm, visibility: value})}>
                 <SelectTrigger>
                   <SelectValue />

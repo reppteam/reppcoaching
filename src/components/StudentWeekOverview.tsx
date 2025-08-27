@@ -39,7 +39,7 @@ export function StudentWeekOverview({ student, showDetails = false, className = 
           {/* Account Type */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Account Type:</span>
-            <Badge className={isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'}>
+            <Badge className={isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-muted text-muted-foreground'}>
               {isPaid ? 'Paid Access' : 'Free Coaching'}
             </Badge>
           </div>

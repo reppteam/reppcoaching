@@ -701,7 +701,7 @@ export function UserManagement() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge className={student.has_paid ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          <Badge className={student.has_paid ? 'bg-green-100 text-green-800' : 'bg-muted text-muted-foreground'}>
                             {student.has_paid ? 'Paid' : 'Free'}
                           </Badge>
                           <Button
@@ -801,7 +801,7 @@ export function UserManagement() {
           <form onSubmit={handleCreateCoach} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="coach-firstName">First Name *</Label>
+                <Label htmlFor="coach-firstName" className="text-foreground">First Name *</Label>
                 <Input
                   id="coach-firstName"
                   value={coachFormData.firstName}
@@ -811,7 +811,7 @@ export function UserManagement() {
                 />
               </div>
               <div>
-                <Label htmlFor="coach-lastName">Last Name *</Label>
+                <Label htmlFor="coach-lastName" className="text-foreground">Last Name *</Label>
                 <Input
                   id="coach-lastName"
                   value={coachFormData.lastName}
@@ -821,7 +821,7 @@ export function UserManagement() {
                 />
               </div>
               <div>
-                <Label htmlFor="coach-email">Email Address *</Label>
+                <Label htmlFor="coach-email" className="text-foreground">Email Address *</Label>
                 <Input
                   id="coach-email"
                   type="email"
@@ -835,7 +835,7 @@ export function UserManagement() {
 
             {availableStudents.length > 0 && (
               <div>
-                <Label>Assign Students (Optional)</Label>
+                <Label className="text-foreground">Assign Students (Optional)</Label>
                 <div className="mt-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                   {availableStudents.map((student) => (
                     <div key={student.id} className="flex items-center space-x-2 py-2">
@@ -884,7 +884,7 @@ export function UserManagement() {
           <form onSubmit={handleCreateStudent} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="student-firstName">First Name *</Label>
+                <Label htmlFor="student-firstName" className="text-foreground">First Name *</Label>
                 <Input
                   id="student-firstName"
                   value={studentFormData.firstName}
@@ -894,7 +894,7 @@ export function UserManagement() {
                 />
               </div>
               <div>
-                <Label htmlFor="student-lastName">Last Name *</Label>
+                <Label htmlFor="student-lastName" className="text-foreground">Last Name *</Label>
                 <Input
                   id="student-lastName"
                   value={studentFormData.lastName}
@@ -904,7 +904,7 @@ export function UserManagement() {
                 />
               </div>
               <div>
-                <Label htmlFor="student-email">Email Address *</Label>
+                <Label htmlFor="student-email" className="text-foreground">Email Address *</Label>
                 <Input
                   id="student-email"
                   type="email"
@@ -918,7 +918,7 @@ export function UserManagement() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="start-date">Program Start Date *</Label>
+                <Label htmlFor="start-date" className="text-foreground">Program Start Date *</Label>
                 <Input
                   id="start-date"
                   type="date"
@@ -928,7 +928,7 @@ export function UserManagement() {
                 />
               </div>
               <div>
-                <Label htmlFor="end-date">Program End Date *</Label>
+                <Label htmlFor="end-date" className="text-foreground">Program End Date *</Label>
                 <Input
                   id="end-date"
                   type="date"
@@ -945,11 +945,11 @@ export function UserManagement() {
                 checked={studentFormData.hasPaid}
                 onCheckedChange={(checked) => setStudentFormData(prev => ({...prev, hasPaid: checked as boolean}))}
               />
-              <Label htmlFor="has-paid">Paid Student (Full Access)</Label>
+              <Label htmlFor="has-paid" className="text-foreground">Paid Student (Full Access)</Label>
             </div>
 
             <div>
-              <Label htmlFor="student-goals">Goals & Objectives</Label>
+              <Label htmlFor="student-goals" className="text-foreground">Goals & Objectives</Label>
               <Textarea
                 id="student-goals"
                 value={studentFormData.goals}
@@ -960,7 +960,7 @@ export function UserManagement() {
             </div>
 
             <div>
-              <Label>Tags</Label>
+              <Label className="text-foreground">Tags</Label>
               <div className="flex items-center space-x-2 mt-2">
                 <Input
                   value={newTag}

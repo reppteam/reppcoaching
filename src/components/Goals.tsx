@@ -23,7 +23,8 @@ import {
   Trash2,
   Star,
   Award,
-  Flag
+  Flag,
+  Quote
 } from 'lucide-react';
 import { Goal } from '../types';
 
@@ -38,7 +39,7 @@ export const Goals: React.FC = () => {
     description: '',
     target_value: 0,
     current_value: 0,
-    goal_type: 'revenue' as 'revenue' | 'clients' | 'shoots' | 'other',
+    goal_type: 'revenue' as 'revenue' | 'clients' | 'shoots' | 'text' | 'other',
     deadline: '',
     priority: 'medium' as 'low' | 'medium' | 'high',
     status: 'active' as 'active' | 'completed',
@@ -150,7 +151,7 @@ export const Goals: React.FC = () => {
       case 'high': return 'text-red-600';
       case 'medium': return 'text-yellow-600';
       case 'low': return 'text-green-600';
-      default: return 'text-gray-600';
+      default: return 'text-muted-foreground';
     }
   };
 
@@ -170,6 +171,7 @@ export const Goals: React.FC = () => {
       case 'revenue': return <TrendingUp className="h-5 w-5" />;
       case 'clients': return <Star className="h-5 w-5" />;
       case 'shoots': return <Award className="h-5 w-5" />;
+      case 'text': return <Quote className="h-5 w-5" />;
       default: return <Target className="h-5 w-5" />;
     }
   };
@@ -253,6 +255,7 @@ export const Goals: React.FC = () => {
                       <SelectItem value="revenue">Revenue</SelectItem>
                       <SelectItem value="clients">Clients</SelectItem>
                       <SelectItem value="shoots">Shoots</SelectItem>
+                      <SelectItem value="text">Text-Based Goal</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
@@ -276,27 +279,7 @@ export const Goals: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="target_value">Target Value</Label>
-                  <Input
-                    id="target_value"
-                    type="number"
-                    value={formData.target_value}
-                    onChange={(e) => setFormData({ ...formData, target_value: parseFloat(e.target.value) || 0 })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="current_value">Current Value</Label>
-                  <Input
-                    id="current_value"
-                    type="number"
-                    value={formData.current_value}
-                    onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) || 0 })}
-                    required
-                  />
-                </div>
+              {formData.goal_type === 'text' ? (
                 <div>
                   <Label htmlFor="deadline">Deadline</Label>
                   <Input
@@ -307,7 +290,40 @@ export const Goals: React.FC = () => {
                     required
                   />
                 </div>
-              </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="target_value">Target Value</Label>
+                    <Input
+                      id="target_value"
+                      type="number"
+                      value={formData.target_value}
+                      onChange={(e) => setFormData({ ...formData, target_value: parseFloat(e.target.value) || 0 })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current_value">Current Value</Label>
+                    <Input
+                      id="current_value"
+                      type="number"
+                      value={formData.current_value}
+                      onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) || 0 })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="deadline">Deadline</Label>
+                    <Input
+                      id="deadline"
+                      type="date"
+                      value={formData.deadline}
+                      onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Additional 8base Fields */}
               <div className="grid grid-cols-2 gap-4">
@@ -492,13 +508,13 @@ export const Goals: React.FC = () => {
           <Card key={goal.id} className="relative">
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  {getGoalIcon(goal.goal_type)}
-                  <div>
-                    <CardTitle className="text-lg">{goal.title}</CardTitle>
-                    <CardDescription>{goal.description}</CardDescription>
-                  </div>
+                              <div className="flex items-center gap-2">
+                {getGoalIcon(goal.goal_type)}
+                <div>
+                  <CardTitle className="text-lg text-foreground">{goal.title}</CardTitle>
+                  <CardDescription className="text-muted-foreground">{goal.description}</CardDescription>
                 </div>
+              </div>
                 <div className="flex items-center gap-1">
                   {getStatusBadge(goal.status)}
                   <div className={`text-xs font-medium ${getPriorityColor(goal.priority)}`}>
@@ -508,17 +524,28 @@ export const Goals: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Progress</span>
-                  <span>{((goal.current_value / goal.target_value) * 100).toFixed(1)}%</span>
+              {goal.goal_type === 'text' ? (
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">
+                    <span>Text-based goal - track your progress through updates</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    <span>Deadline: {new Date(goal.deadline).toLocaleDateString()}</span>
+                  </div>
                 </div>
-                <Progress value={Math.min((goal.current_value / goal.target_value) * 100, 100)} />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>${goal.current_value.toLocaleString()}</span>
-                  <span>${goal.target_value.toLocaleString()}</span>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress</span>
+                    <span>{((goal.current_value / goal.target_value) * 100).toFixed(1)}%</span>
+                  </div>
+                  <Progress value={Math.min((goal.current_value / goal.target_value) * 100, 100)} />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>${goal.current_value.toLocaleString()}</span>
+                    <span>${goal.target_value.toLocaleString()}</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
@@ -614,6 +641,7 @@ export const Goals: React.FC = () => {
                     <SelectItem value="revenue">Revenue</SelectItem>
                     <SelectItem value="clients">Clients</SelectItem>
                     <SelectItem value="shoots">Shoots</SelectItem>
+                    <SelectItem value="text">Text-Based Goal</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
@@ -637,25 +665,7 @@ export const Goals: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="edit_target_value">Target Value</Label>
-                <Input
-                  id="edit_target_value"
-                  type="number"
-                  value={formData.target_value}
-                  onChange={(e) => setFormData({ ...formData, target_value: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit_current_value">Current Value</Label>
-                <Input
-                  id="edit_current_value"
-                  type="number"
-                  value={formData.current_value}
-                  onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) || 0 })}
-                />
-              </div>
+            {formData.goal_type === 'text' ? (
               <div>
                 <Label htmlFor="edit_deadline">Deadline</Label>
                 <Input
@@ -665,7 +675,37 @@ export const Goals: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                 />
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="edit_target_value">Target Value</Label>
+                  <Input
+                    id="edit_target_value"
+                    type="number"
+                    value={formData.target_value}
+                    onChange={(e) => setFormData({ ...formData, target_value: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_current_value">Current Value</Label>
+                  <Input
+                    id="edit_current_value"
+                    type="number"
+                    value={formData.current_value}
+                    onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit_deadline">Deadline</Label>
+                  <Input
+                    id="edit_deadline"
+                    type="date"
+                    value={formData.deadline}
+                    onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="edit_status">Status</Label>

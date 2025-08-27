@@ -69,8 +69,8 @@ export function ConfirmationEmailModal({
       default:
         return {
           title: 'User Account',
-          icon: <User className="h-5 w-5 text-gray-600" />,
-          color: 'bg-gray-100 text-gray-800',
+                      icon: <User className="h-5 w-5 text-muted-foreground" />,
+            color: 'bg-muted text-muted-foreground',
           description: 'Basic account access'
         };
     }

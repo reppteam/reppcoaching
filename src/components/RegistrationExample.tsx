@@ -90,22 +90,22 @@ export function RegistrationExample() {
           {/* Login Form */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Email</label>
+              <label className="text-sm font-medium text-foreground">Email</label>
               <input
                 type="email"
                 value={loginData.email}
                 onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded bg-background text-foreground"
                 required
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Password</label>
+              <label className="text-sm font-medium text-foreground">Password</label>
               <input
                 type="password"
                 value={loginData.password}
                 onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded bg-background text-foreground"
                 required
               />
             </div>
@@ -115,7 +115,7 @@ export function RegistrationExample() {
           </form>
 
           <div className="text-center">
-            <span className="text-sm text-gray-500">or</span>
+                            <span className="text-sm text-muted-foreground">or</span>
           </div>
 
           <Button 
@@ -127,7 +127,7 @@ export function RegistrationExample() {
           </Button>
 
           {/* Demo Accounts */}
-          <div className="mt-6 p-4 bg-gray-50 rounded">
+          <div className="mt-6 p-4 bg-gray-50 dark:bg-muted rounded">
             <h4 className="font-medium mb-2">Demo Accounts:</h4>
             <div className="space-y-2 text-sm">
               <div>

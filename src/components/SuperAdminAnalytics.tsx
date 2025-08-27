@@ -222,7 +222,7 @@ export function SuperAdminAnalytics() {
   const getTrendIcon = (current: number, previous: number) => {
     if (current > previous) return <ArrowUp className="h-4 w-4 text-green-600" />;
     if (current < previous) return <ArrowDown className="h-4 w-4 text-red-600" />;
-    return <Minus className="h-4 w-4 text-gray-600" />;
+    return <Minus className="h-4 w-4 text-muted-foreground" />;
   };
 
   const getTrendPercentage = (current: number, previous: number) => {

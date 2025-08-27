@@ -40,8 +40,8 @@ export function UniversalLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white shadow-xl">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-xl">
         <CardContent className="p-8">
           {/* Logo */}
           <div className="flex justify-center mb-6">
@@ -51,12 +51,12 @@ export function UniversalLogin() {
           </div>
 
           {/* Welcome Title */}
-          <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-center text-foreground mb-2">
             Welcome
           </h1>
 
           {/* Instructions */}
-          <p className="text-sm text-gray-600 text-center mb-8">
+          <p className="text-sm text-muted-foreground text-center mb-8">
             Log in to SoftwareJV to continue to Software JV
           </p>
 
@@ -64,7 +64,7 @@ export function UniversalLogin() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
                 Email address*
               </Label>
               <Input
@@ -80,7 +80,7 @@ export function UniversalLogin() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
                 Password*
               </Label>
               <div className="relative">
@@ -99,9 +99,9 @@ export function UniversalLogin() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
+                    <Eye className="h-4 w-4 text-muted-foreground" />
                   )}
                 </button>
               </div>

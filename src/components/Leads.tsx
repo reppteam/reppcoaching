@@ -599,7 +599,7 @@ export function Leads() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      new: { label: 'New', color: 'bg-gray-100 text-gray-800' },
+      new: { label: 'New', color: 'bg-muted text-muted-foreground' },
       contacted: { label: 'Contacted', color: 'bg-blue-100 text-blue-800' },
       qualified: { label: 'Qualified', color: 'bg-yellow-100 text-yellow-800' },
       converted: { label: 'Converted', color: 'bg-green-100 text-green-800' },
@@ -1076,10 +1076,10 @@ export function Leads() {
                               ) : (
                                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
                               )}
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-3">
-                                  <div>
-                                    <h3 className="font-medium">{lead.lead_name}</h3>
+                                                              <div className="flex-1">
+                                  <div className="flex items-center space-x-3">
+                                    <div>
+                                      <h3 className="font-medium text-foreground">{lead.lead_name}</h3>
                                     
                                     {/* Contact Information */}
                                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
@@ -1224,7 +1224,7 @@ export function Leads() {
                                       className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                                         isCompleted 
                                           ? `${config.color} border-current text-white` 
-                                          : 'bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-700'
+                                          : 'bg-muted hover:bg-muted/80 border-border text-muted-foreground'
                                       }`}
                                       onClick={() => toggleEngagementTag(lead.id, config.type)}
                                     >
@@ -1495,7 +1495,7 @@ export function Leads() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="lead_name">Lead Name *</Label>
+                <Label htmlFor="lead_name" className="text-foreground">Lead Name *</Label>
                 <Input
                   id="lead_name"
                   value={formData.lead_name || ''}

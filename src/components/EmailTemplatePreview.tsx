@@ -136,10 +136,10 @@ export function EmailTemplatePreview({
             <div className="p-6 space-y-6">
               {/* Welcome Section */}
               <div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                <h2 className="text-xl font-bold text-foreground mb-2">
                   Welcome, {userName}!
                 </h2>
-                <p className="text-gray-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   {userInfo.welcomeMessage}
                 </p>
                 
@@ -149,7 +149,7 @@ export function EmailTemplatePreview({
                     <span className="ml-1">{userInfo.title} Account</span>
                   </Badge>
                   {createdBy && (
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       Created by {createdBy}
                     </span>
                   )}
@@ -159,15 +159,15 @@ export function EmailTemplatePreview({
               <Separator />
 
               {/* Login Information */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                              <div className="bg-gray-50 dark:bg-muted rounded-lg p-4">
+                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                   <Lock className="h-4 w-4" />
                   Your Login Information
                 </h3>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Login URL:</span>
+                    <span className="text-sm text-muted-foreground">Login URL:</span>
                     <a href={loginUrl} className="text-blue-600 text-sm hover:underline flex items-center gap-1">
                       {loginUrl}
                       <ExternalLink className="h-3 w-3" />
@@ -175,12 +175,12 @@ export function EmailTemplatePreview({
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Email:</span>
+                    <span className="text-sm text-muted-foreground">Email:</span>
                     <span className="text-sm font-medium">{userEmail}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Temporary Password:</span>
+                    <span className="text-sm text-muted-foreground">Temporary Password:</span>
                     <code className="text-sm font-mono bg-white px-2 py-1 rounded border">
                       {temporaryPassword}
                     </code>
@@ -196,12 +196,12 @@ export function EmailTemplatePreview({
 
               {/* Features & Access */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">
+                <h3 className="font-semibold text-foreground mb-3">
                   Your {userInfo.title} Access Includes:
                 </h3>
                 <ul className="space-y-2">
                   {userInfo.features.map((feature, index) => (
-                    <li key={index} className="flex items-start space-x-2 text-sm text-gray-600">
+                    <li key={index} className="flex items-start space-x-2 text-sm text-muted-foreground">
                       <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
                       <span>{feature}</span>
                     </li>
@@ -213,7 +213,7 @@ export function EmailTemplatePreview({
 
               {/* Next Steps */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">
+                <h3 className="font-semibold text-foreground mb-3">
                   Next Steps:
                 </h3>
                 <div className="space-y-3">
@@ -221,7 +221,7 @@ export function EmailTemplatePreview({
                     <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
                     <div>
                       <div className="font-medium text-sm">Log in to your account</div>
-                      <div className="text-sm text-gray-600">Use the credentials provided above</div>
+                      <div className="text-sm text-muted-foreground">Use the credentials provided above</div>
                     </div>
                   </div>
                   
@@ -229,7 +229,7 @@ export function EmailTemplatePreview({
                     <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
                     <div>
                       <div className="font-medium text-sm">Complete your profile</div>
-                      <div className="text-sm text-gray-600">Add your information and set your preferences</div>
+                      <div className="text-sm text-muted-foreground">Add your information and set your preferences</div>
                     </div>
                   </div>
                   
@@ -237,7 +237,7 @@ export function EmailTemplatePreview({
                     <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">3</div>
                     <div>
                       <div className="font-medium text-sm">Explore the platform</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-muted-foreground">
                         {userType === 'student' ? 'Set your goals and start learning' : 'Review your dashboard and available tools'}
                       </div>
                     </div>
@@ -274,11 +274,11 @@ export function EmailTemplatePreview({
             </div>
 
             {/* Email Footer */}
-            <div className="bg-gray-100 p-4 text-center">
-              <p className="text-xs text-gray-600">
+                          <div className="bg-gray-100 dark:bg-muted p-4 text-center">
+              <p className="text-xs text-muted-foreground">
                 © 2024 Real Estate Photographer Pro. All rights reserved.
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 This email was sent to {userEmail}
               </p>
             </div>

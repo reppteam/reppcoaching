@@ -25,6 +25,7 @@ export interface User {
   coaching_term_start?: string | null;
   coaching_term_end?: string | null;
   is_active?: boolean;
+  why?: string; // User's motivational "why" for their business
   roles?: {
     items: Array<{
       id: string;
@@ -61,7 +62,7 @@ export interface Goal {
   description: string;
   target_value: number;
   current_value: number;
-  goal_type: 'revenue' | 'clients' | 'shoots' | 'other';
+  goal_type: 'revenue' | 'clients' | 'shoots' | 'text' | 'other';
   deadline: string;
   priority: 'low' | 'medium' | 'high';
   status: 'active' | 'completed';

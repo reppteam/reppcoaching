@@ -43,8 +43,8 @@ export function AuthCallback() {
 
   if (isLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <Card className="w-full max-w-md bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Authenticating...</CardTitle>
             <CardDescription className="text-center">
@@ -63,8 +63,8 @@ export function AuthCallback() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <Card className="w-full max-w-md bg-white">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">
             {success ? 'Authentication Complete' : 'Authentication Failed'}

@@ -269,36 +269,39 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name *</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    placeholder="Enter first name"
-                    required
-                  />
+                  <Label htmlFor="firstName" className="text-foreground">First Name *</Label>
+                                                                           <Input
+                      id="firstName"
+                      value={formData.firstName}
+                      onChange={(e) => handleInputChange('firstName', e.target.value)}
+                      placeholder="Enter first name"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                      required
+                    />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name *</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    placeholder="Enter last name"
-                    required
-                  />
+                  <Label htmlFor="lastName" className="text-foreground">Last Name *</Label>
+                                                                           <Input
+                      id="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => handleInputChange('lastName', e.target.value)}
+                      placeholder="Enter last name"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                      required
+                    />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="Enter email address"
-                  required
-                />
+                <Label htmlFor="email" className="text-foreground">Email Address *</Label>
+                                                                   <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="Enter email address"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                    required
+                  />
               </div>
             </CardContent>
           </Card>
@@ -313,11 +316,11 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="role">User Role *</Label>
-                                 <Select value={formData.role} onValueChange={handleRoleChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
+                <Label htmlFor="role" className="text-foreground">User Role *</Label>
+                                                                                                                                     <Select value={formData.role} onValueChange={handleRoleChange}>
+                    <SelectTrigger className="bg-background border-border text-foreground">
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
                   <SelectContent>
                     {roles.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
@@ -349,11 +352,11 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="assigned_admin_id">Assigned Coach</Label>
-                  <Select value={formData.assigned_admin_id} onValueChange={(value) => handleInputChange('assigned_admin_id', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a coach (optional)" />
-                    </SelectTrigger>
+                  <Label htmlFor="assigned_admin_id" className="text-foreground">Assigned Coach</Label>
+                                                                           <Select value={formData.assigned_admin_id} onValueChange={(value) => handleInputChange('assigned_admin_id', value)}>
+                      <SelectTrigger className="bg-background border-border text-foreground">
+                        <SelectValue placeholder="Select a coach (optional)" />
+                      </SelectTrigger>
                                          <SelectContent>
                        <SelectItem value="none">No coach assigned</SelectItem>
                        {availableCoaches.map((coach) => (
@@ -372,22 +375,24 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="access_start">Access Start Date</Label>
-                    <Input
-                      id="access_start"
-                      type="date"
-                      value={formData.access_start}
-                      onChange={(e) => handleInputChange('access_start', e.target.value)}
-                    />
+                    <Label htmlFor="access_start" className="text-foreground">Access Start Date</Label>
+                                                                                   <Input
+                        id="access_start"
+                        type="date"
+                        value={formData.access_start}
+                        onChange={(e) => handleInputChange('access_start', e.target.value)}
+                        className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                      />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="access_end">Access End Date</Label>
-                    <Input
-                      id="access_end"
-                      type="date"
-                      value={formData.access_end}
-                      onChange={(e) => handleInputChange('access_end', e.target.value)}
-                    />
+                    <Label htmlFor="access_end" className="text-foreground">Access End Date</Label>
+                                                                                   <Input
+                        id="access_end"
+                        type="date"
+                        value={formData.access_end}
+                        onChange={(e) => handleInputChange('access_end', e.target.value)}
+                        className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                      />
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -396,7 +401,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                     checked={formData.has_paid}
                     onCheckedChange={(checked) => handleInputChange('has_paid', checked as boolean)}
                   />
-                  <Label htmlFor="has_paid">Has Paid Subscription</Label>
+                  <Label htmlFor="has_paid" className="text-foreground">Has Paid Subscription</Label>
                 </div>
                            </CardContent>
            </Card>
@@ -413,14 +418,14 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
              </CardHeader>
              <CardContent className="space-y-4">
                <div className="space-y-2">
-                 <Label htmlFor="assigned_students">Assigned Students (Optional)</Label>
-                 <Select 
-                   value={formData.assigned_students || 'none'} 
-                   onValueChange={(value) => handleInputChange('assigned_students', value)}
-                 >
-                   <SelectTrigger>
-                     <SelectValue placeholder="Select students to assign (optional)" />
-                   </SelectTrigger>
+                 <Label htmlFor="assigned_students" className="text-foreground">Assigned Students (Optional)</Label>
+                                                                       <Select 
+                     value={formData.assigned_students || 'none'} 
+                     onValueChange={(value) => handleInputChange('assigned_students', value)}
+                   >
+                     <SelectTrigger className="bg-background border-border text-foreground">
+                       <SelectValue placeholder="Select students to assign (optional)" />
+                     </SelectTrigger>
                    <SelectContent>
                      <SelectItem value="none">No students assigned</SelectItem>
                      {/* This would be populated with available students */}
@@ -448,14 +453,15 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label htmlFor="custom_message">Custom Message</Label>
-                <Textarea
-                  id="custom_message"
-                  value={formData.custom_message}
-                  onChange={(e) => handleInputChange('custom_message', e.target.value)}
-                  placeholder="Add a personal message to include in the invitation email..."
-                  rows={3}
-                />
+                <Label htmlFor="custom_message" className="text-foreground">Custom Message</Label>
+                                                                   <Textarea
+                    id="custom_message"
+                    value={formData.custom_message}
+                    onChange={(e) => handleInputChange('custom_message', e.target.value)}
+                    placeholder="Add a personal message to include in the invitation email..."
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                    rows={3}
+                  />
                 <p className="text-xs text-muted-foreground">
                   This message will be included in the invitation email sent to the user.
                 </p>
@@ -478,7 +484,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                   checked={formData.isActive}
                   onCheckedChange={(checked) => handleInputChange('isActive', checked as boolean)}
                 />
-                <Label htmlFor="isActive">Account is active</Label>
+                <Label htmlFor="isActive" className="text-foreground">Account is active</Label>
               </div>
             </CardContent>
           </Card>
@@ -500,14 +506,15 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
 
           {/* Action Buttons */}
           <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
+                         <Button
+               type="button"
+               variant="outline"
+               onClick={() => onOpenChange(false)}
+               disabled={loading}
+               className="text-foreground"
+             >
+               Cancel
+             </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <div className="flex items-center gap-2">

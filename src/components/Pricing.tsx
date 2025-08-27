@@ -141,7 +141,7 @@ export function Pricing() {
                   </DialogHeader>
             <div className="space-y-4">
                     <div>
-                      <Label htmlFor="service_name">Service Name</Label>
+                      <Label htmlFor="service_name" className="text-foreground">Service Name</Label>
                       <Input
                         id="service_name"
                   value={packageFormData.service_name}
@@ -152,7 +152,7 @@ export function Pricing() {
               
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                  <Label htmlFor="your_price">Your Price ($)</Label>
+                  <Label htmlFor="your_price" className="text-foreground">Your Price ($)</Label>
                         <Input
                           id="your_price"
                           type="number"
@@ -161,7 +161,7 @@ export function Pricing() {
                         />
                       </div>
                       <div>
-                  <Label htmlFor="competitor_price">Competitor Price ($)</Label>
+                  <Label htmlFor="competitor_price" className="text-foreground">Competitor Price ($)</Label>
                         <Input
                           id="competitor_price"
                           type="number"
@@ -173,7 +173,7 @@ export function Pricing() {
               
               <div className="grid grid-cols-2 gap-4">
                     <div>
-                  <Label htmlFor="estimated_cost">Estimated Cost ($)</Label>
+                  <Label htmlFor="estimated_cost" className="text-foreground">Estimated Cost ($)</Label>
                       <Input
                         id="estimated_cost"
                         type="number"
@@ -182,7 +182,7 @@ export function Pricing() {
                       />
                     </div>
                 <div>
-                  <Label htmlFor="estimated_profit">Estimated Profit ($)</Label>
+                  <Label htmlFor="estimated_profit" className="text-foreground">Estimated Profit ($)</Label>
                   <Input
                     id="estimated_profit"
                     type="number"
@@ -193,7 +193,7 @@ export function Pricing() {
               </div>
               
                     <div>
-                      <Label htmlFor="status">Status</Label>
+                      <Label htmlFor="status" className="text-foreground">Status</Label>
                       <Select 
                   value={packageFormData.status}
                   onValueChange={(value: 'active' | 'inactive') => setPackageFormData({...packageFormData, status: value})}
@@ -263,7 +263,7 @@ export function Pricing() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="font-medium text-gray-600">
+                      <div className="font-medium text-muted-foreground">
                         ${pricing.competitor_price.toLocaleString()}
                       </div>
                       {priceDifference !== 0 && (
