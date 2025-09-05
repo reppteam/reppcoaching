@@ -47,21 +47,53 @@ export const GET_ALL_8BASE_USERS = gql`
             name
           }
         }
-        assignedCoach {
-          id
-          firstName
-          lastName
-          email
-        }
+        assigned_admin_id
+        access_start
+        access_end
+        has_paid
+        is_active
         createdAt
         updatedAt
         student {
           id
-          goal
-         
+          firstName
+          lastName
+          email
+          phone
+          business_name
+          location
+          target_market
+          strengths
+          challenges
+          goals
+          preferred_contact_method
+          availability
+          notes
+          coach {
+            id
+            firstName
+            lastName
+            email
+            bio
+          }
         }
         coach {
           id
+          firstName
+          lastName
+          email
+          bio
+          profileImage {
+            downloadUrl
+          }
+          students {
+            id
+            firstName
+            lastName
+            email
+            phone
+            business_name
+          }
         }
       }
     }
@@ -82,6 +114,11 @@ export const GET_8BASE_USER_BY_ID = gql`
           name
         }
       }
+      assigned_admin_id
+      access_start
+      access_end
+      has_paid
+      is_active
       createdAt
       updatedAt
     }
@@ -103,6 +140,11 @@ export const GET_8BASE_USER_BY_EMAIL = gql`
             name
           }
         }
+        assigned_admin_id
+        access_start
+        access_end
+        has_paid
+        is_active
         createdAt
         updatedAt
       }
@@ -316,12 +358,11 @@ export const CREATE_STUDENT_USER = gql`
           name
         }
       }
-      assignedCoach {
-        id
-        firstName
-        lastName
-        email
-      }
+      assigned_admin_id
+      access_start
+      access_end
+      has_paid
+      is_active
       createdAt
       updatedAt
     }
@@ -340,21 +381,6 @@ export const CREATE_COACH_USER = gql`
         items {
           id
           name
-        }
-      }
-      student {
-        items {
-          id
-          phone
-          business_name
-          location
-          target_market
-          strengths
-          challenges
-          goals
-          preferred_contact_method
-          availability
-          notes
         }
       }
       createdAt
@@ -398,8 +424,191 @@ export const GET_USERS_WITH_CUSTOM_FIELDS = gql`
             name
           }
         }
+        assigned_admin_id
+        access_start
+        access_end
+        has_paid
+        is_active
         createdAt
         updatedAt
+      }
+    }
+  }
+`;
+
+// NEW: Create Student with Profile
+export const CREATE_STUDENT_WITH_PROFILE = gql`
+  mutation CreateStudentWithProfile(
+    $userData: UserCreateInput!
+    $studentData: StudentCreateInput!
+  ) {
+    # First create the user
+    user: userCreate(data: $userData) {
+      id
+      email
+      firstName
+      lastName
+      roles {
+        items {
+          id
+          name
+        }
+      }
+      createdAt
+    }
+    
+    # Then create the student profile
+    student: studentCreate(data: $studentData) {
+      id
+      phone
+      business_name
+      location
+      target_market
+      strengths
+      challenges
+      goals
+      preferred_contact_method
+      availability
+      notes
+      user {
+        id
+        email
+        firstName
+        lastName
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// NEW: Create Coach with Profile
+export const CREATE_COACH_WITH_PROFILE = gql`
+  mutation CreateCoachWithProfile(
+    $userData: UserCreateInput!
+    $coachData: CoachCreateInput!
+  ) {
+    # First create the user
+    user: userCreate(data: $userData) {
+      id
+      email
+      firstName
+      lastName
+      roles {
+        items {
+          id
+          name
+        }
+      }
+      createdAt
+    }
+    
+    # Then create the coach profile
+    coach: coachCreate(data: $coachData) {
+      id
+      firstName
+      lastName
+      email
+      bio
+      profileImage {
+        downloadUrl
+      }
+      user {
+        id
+        email
+        firstName
+        lastName
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+// NEW: Get Students with Profiles
+export const GET_STUDENTS_WITH_PROFILES = gql`
+  query GetStudentsWithProfiles {
+    usersList(filter: { roles: { items: { name: { equals: "student" } } } }) {
+      items {
+        id
+        firstName
+        lastName
+        email
+        roles {
+          items {
+            id
+            name
+          }
+        }
+        assigned_admin_id
+        access_start
+        access_end
+        has_paid
+        is_active
+        createdAt
+        updatedAt
+        student {
+          id
+          phone
+          business_name
+          location
+          target_market
+          strengths
+          challenges
+          goals
+          preferred_contact_method
+          availability
+          notes
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+`;
+
+// NEW: Get Coaches with Profiles
+export const GET_COACHES_WITH_PROFILES = gql`
+  query GetCoachesWithProfiles {
+    usersList(filter: { roles: { items: { name: { equals: "admin" } } } }) {
+      items {
+        id
+        firstName
+        lastName
+        email
+        roles {
+          items {
+            id
+            name
+          }
+        }
+        createdAt
+        is_active
+        coach {
+          id
+          firstName
+          lastName
+          email
+          bio
+          profileImage {
+            downloadUrl
+          }
+          assignedStudents {
+            id
+            email
+            firstName
+            lastName
+          }
+          session {
+            id
+            title
+            description
+            dateTime
+            status
+          }
+          createdAt
+          updatedAt
+        }
       }
     }
   }

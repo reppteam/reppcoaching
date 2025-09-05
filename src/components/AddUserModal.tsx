@@ -131,13 +131,15 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
     setSuccess('');
 
     try {
-                     // Prepare invitation data
+      let newUser;
+      
+      // Step 1: Always create user in User table first
         const invitationData: InvitationData = {
           email: formData.email,
           firstName: formData.firstName,
           lastName: formData.lastName,
           role: formData.role as 'user' | 'coach' | 'coach_manager' | 'super_admin',
-          selectedRoleId: formData.selectedRoleId, // Pass the 8base role ID
+        selectedRoleId: formData.selectedRoleId,
           assigned_admin_id: formData.assigned_admin_id === 'none' ? undefined : formData.assigned_admin_id,
           access_start: formData.access_start || undefined,
           access_end: formData.access_end || undefined,
@@ -146,39 +148,69 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
           custom_message: formData.custom_message || undefined
         };
 
-      // Create user with invitation
-      const result = await userInvitationService.createUserWithInvitation(invitationData);
-
-      if (result.success) {
-        setSuccess(`User created successfully! Invitation email ${result.emailSent ? 'sent' : 'failed to send'}.`);
-        onUserCreated?.(result.user);
+      console.log('Step 1: Creating user in User table:', invitationData);
+      const userResult = await userInvitationService.createUserWithInvitation(invitationData);
+      
+      if (!userResult.success) {
+        throw new Error(userResult.error || 'Failed to create user');
+      }
+      
+      newUser = userResult.user;
+      console.log('User created successfully:', newUser);
+      
+      // Step 2: Create additional record based on selected role ID
+      const selectedRole = STATIC_ROLES.find(role => role.id === formData.selectedRoleId);
+      console.log('Selected role:', selectedRole);
+      
+      if (selectedRole?.name === 'Coach' || selectedRole?.name === 'coach_manager') {
+        // Create coach in Coach table
+        const coachData = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          bio: ''
+        };
         
-                           // Reset form and set default role ID
-          const defaultRole = STATIC_ROLES.find(role => 
-            role.name.toLowerCase() === 'student'
-          );
-          
-          setFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            role: 'user', // Reset to default role
-            selectedRoleId: defaultRole?.id || '', // Set default role ID
-            assigned_admin_id: 'none',
-            assigned_students: 'none',
-            access_start: '',
-            access_end: '',
-            has_paid: false,
-            isActive: true,
-            custom_message: ''
-          });
+        console.log('Step 2: Creating coach in Coach table:', coachData);
+        const newCoach = await eightbaseService.createCoachDirect(coachData);
+        console.log('Coach created successfully:', newCoach);
+        
+      } else if (selectedRole?.name === 'Student') {
+        // Create student in Student table
+        const studentData = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: '',
+          business_name: '',
+          location: '',
+          target_market: '',
+          strengths: '',
+          challenges: '',
+          goals: '',
+          preferred_contact_method: '',
+          availability: '',
+          notes: ''
+        };
+        
+        console.log('Step 2: Creating student in Student table:', studentData);
+        const newStudent = await eightbaseService.createStudentDirect(studentData);
+        console.log('Student created successfully:', newStudent);
+      }
+      
+      // For super_admin, only User table creation is needed
 
-        // Close modal after a short delay
-        setTimeout(() => {
-          onOpenChange(false);
-        }, 3000);
+      if (newUser) {
+        let successMessage = 'User created successfully in User table!';
+        if (selectedRole?.name === 'Coach' || selectedRole?.name === 'coach_manager') {
+          successMessage += ' Coach record also created in Coach table!';
+        } else if (selectedRole?.name === 'Student') {
+          successMessage += ' Student record also created in Student table!';
+        }
+        setSuccess(successMessage);
+        onUserCreated?.(newUser);
       } else {
-        setError(result.error || 'Failed to create user and send invitation.');
+        setError('Failed to create user.');
       }
     } catch (error) {
       console.error('Failed to create user:', error);

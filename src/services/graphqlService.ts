@@ -16,7 +16,8 @@ export interface AuthResponse {
 }
 
 export interface StudentInput {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role?: string;
   assigned_admin_id?: string;
@@ -38,7 +39,7 @@ class GraphQLService {
         fetchPolicy: 'cache-first'
       });
 
-      return data.studentByEmail || null;
+      return data.usersList?.items?.[0] || null;
     } catch (error) {
       console.error('Error fetching student by email:', error);
       return null;
@@ -53,7 +54,7 @@ class GraphQLService {
         fetchPolicy: 'cache-first'
       });
 
-      return data.students || [];
+      return data.usersList?.items || [];
     } catch (error) {
       console.error('Error fetching all students:', error);
       return [];
@@ -69,7 +70,7 @@ class GraphQLService {
         refetchQueries: [{ query: GET_ALL_STUDENTS }]
       });
 
-      return data.createStudent;
+      return data.userCreate;
     } catch (error) {
       console.error('Error creating student:', error);
       throw new Error('Failed to create student');
@@ -85,7 +86,7 @@ class GraphQLService {
         refetchQueries: [{ query: GET_ALL_STUDENTS }]
       });
 
-      return data.updateStudent;
+      return data.userUpdate;
     } catch (error) {
       console.error('Error updating student:', error);
       throw new Error('Failed to update student');
@@ -117,7 +118,7 @@ class GraphQLService {
         fetchPolicy: 'cache-first'
       });
 
-      return data.studentWeeklyReports || [];
+      return data.weeklyReportsList?.items || [];
     } catch (error) {
       console.error('Error fetching student weekly reports:', error);
       return [];
@@ -133,7 +134,7 @@ class GraphQLService {
         fetchPolicy: 'cache-first'
       });
 
-      return data.studentGoals || [];
+      return data.goalsList?.items || [];
     } catch (error) {
       console.error('Error fetching student goals:', error);
       return [];

@@ -89,12 +89,14 @@ export function SuperAdminUserPanel() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const [fetchedUsers, fetchedCoaches] = await Promise.all([
-        eightbaseService.getAllUsersWithDetails(),
-        eightbaseService.getAllCoaches()
+      const [fetchedCoaches, fetchedStudents] = await Promise.all([
+        eightbaseService.getAllCoachesDirect(),
+        eightbaseService.getAllStudents()
       ]);
-      setUsers(fetchedUsers);
+      console.log('Fetched coaches from Coach table:', fetchedCoaches);
+      console.log('Fetched students from Student table:', fetchedStudents);
       setCoaches(fetchedCoaches);
+      setUsers(fetchedStudents); // Using users state to store students for compatibility
     } catch (error) {
       console.error('Failed to load users:', error);
     } finally {
@@ -104,9 +106,35 @@ export function SuperAdminUserPanel() {
 
   const handleAssignCoach = async () => {
     try {
-      // If coachId is "none", we're unassigning the coach
+      const studentId = assignCoachForm.studentId;
       const coachId = assignCoachForm.coachId === 'none' ? null : assignCoachForm.coachId;
-      await eightbaseService.assignStudentToCoach(assignCoachForm.studentId, coachId);
+      
+      // Prepare student data with coach connection
+      const studentData: any = {};
+      
+      if (coachId) {
+        // Connect coach
+        const selectedCoach = coaches.find(c => c.id === coachId);
+        if (selectedCoach) {
+          console.log('Assigning coach to student:', { studentId, coachId, coach: selectedCoach });
+          studentData.coach = {
+            connect: { id: selectedCoach.id }
+          };
+        }
+      } else {
+        // Disconnect coach - need to find the current coach ID
+        const currentStudent = users.find(s => s.id === studentId);
+        if (currentStudent?.coach?.id) {
+          console.log('Disconnecting coach from student:', studentId, 'coach ID:', currentStudent.coach.id);
+          studentData.coach = {
+            disconnect: { id: currentStudent.coach.id }
+          };
+        }
+      }
+      
+      console.log('Student data being sent for coach assignment:', studentData);
+      await eightbaseService.updateStudentDirect(studentId, studentData);
+      
       setAssignCoachDialogOpen(false);
       setAssignCoachForm({ studentId: '', coachId: '' });
       await loadUsers();
@@ -121,10 +149,10 @@ export function SuperAdminUserPanel() {
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       email: user.email || '',
-      role: user.role || '',
+      role: 'user', // All are students now
       is_active: user.is_active !== false,
       has_paid: user.has_paid || false,
-      assignedCoachId: user.assignedCoach?.id || ''
+      assignedCoachId: user.coach?.id || ''
     });
     setEditDialogOpen(true);
   };
@@ -133,20 +161,56 @@ export function SuperAdminUserPanel() {
     if (!editingUser) return;
     
     try {
-      // Update basic user information
-      await eightbaseService.updateUser(editingUser.id, {
+      // Determine if it's a coach or student
+      const isCoach = coaches.some(c => c.id === editingUser.id);
+      
+      if (isCoach) {
+        // Update coach using direct Coach table operations
+        const coachData = {
+          firstName: editForm.firstName,
+          lastName: editForm.lastName,
+          email: editForm.email,
+          bio: ''
+        };
+        
+        await eightbaseService.updateCoachDirect(editingUser.id, coachData);
+      } else {
+        // Update student using direct Student table operations
+        const studentData: any = {
         firstName: editForm.firstName,
         lastName: editForm.lastName,
         email: editForm.email,
-        role: editForm.role,
-        is_active: editForm.is_active,
-        has_paid: editForm.has_paid
-      });
-
-      // Update assigned coach if the user is a student and coach assignment changed
-      if (editForm.role === 'user' && editForm.assignedCoachId !== editingUser.assignedCoach?.id) {
-        const coachId = editForm.assignedCoachId || null;
-        await eightbaseService.assignStudentToCoach(editingUser.id, coachId);
+          phone: '',
+          business_name: '',
+          location: '',
+          target_market: '',
+          strengths: '',
+          challenges: '',
+          goals: '',
+          preferred_contact_method: '',
+          availability: '',
+          notes: ''
+        };
+        
+        // Handle coach assignment directly in the student update
+        if (editForm.assignedCoachId) {
+          const selectedCoach = coaches.find(c => c.id === editForm.assignedCoachId);
+          if (selectedCoach) {
+            console.log('Assigning coach in edit:', { studentId: editingUser.id, coachId: selectedCoach.id });
+            studentData.coach = {
+              connect: { id: selectedCoach.id }
+            };
+          }
+        } else if (!editForm.assignedCoachId && editingUser.coach?.id) {
+          // Disconnect coach if no coach is selected
+          console.log('Disconnecting coach in edit:', editingUser.id, 'coach ID:', editingUser.coach.id);
+          studentData.coach = {
+            disconnect: { id: editingUser.coach.id }
+          };
+        }
+        
+        console.log('Student data being sent for edit:', studentData);
+        await eightbaseService.updateStudentDirect(editingUser.id, studentData);
       }
 
       setEditDialogOpen(false);
@@ -212,20 +276,21 @@ export function SuperAdminUserPanel() {
     }
   };
 
+  // All users are now students from Student table, coaches are separate
+  const students = users; // All users are students from Student table
+  const coachManagers: any[] = []; // Coach managers would need to be fetched separately if needed
+  const superAdmins: any[] = []; // Super admins would need to be fetched separately if needed
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    const matchesRole = roleFilter === 'all' || roleFilter === 'user'; // All are students now
     const matchesStatus = statusFilter === 'all' || 
                          (statusFilter === 'active' && user.is_active !== false) ||
                          (statusFilter === 'inactive' && user.is_active === false);
     
     return matchesSearch && matchesRole && matchesStatus;
   });
-
-  const students = users.filter(u => u.role === 'user');
-  const coachManagers = users.filter(u => u.role === 'coach_manager');
-  const superAdmins = users.filter(u => u.role === 'super_admin');
 
   if (loading) {
     return (
@@ -483,15 +548,8 @@ export function SuperAdminUserPanel() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className={
-                      user.role === 'super_admin' ? 'bg-purple-100 text-purple-800' :
-                      user.role === 'coach_manager' ? 'bg-blue-100 text-blue-800' :
-                      user.role === 'coach' ? 'bg-green-100 text-green-800' :
-                      'bg-muted text-muted-foreground'
-                    }>
-                      {user.role === 'super_admin' ? 'Super Admin' :
-                       user.role === 'coach_manager' ? 'Coach Manager' :
-                       user.role === 'coach' ? 'Coach' : 'Student'}
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Student
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -505,19 +563,19 @@ export function SuperAdminUserPanel() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {user.role === 'user' && user.assignedCoach ? (
+                    {user.coach ? (
                       <span className="text-sm">
-                        {user.assignedCoach.firstName ? user.assignedCoach.firstName : 'Coach Assigned'}
+                        {user.coach.firstName ? user.coach.firstName : 'Coach Assigned'}
                       </span>
                     ) : (
                       <span className="text-sm text-muted-foreground">
-                        {user.role === 'user' ? 'Unassigned' : 'N/A'}
+                        Unassigned
                       </span>
                     )}
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      {user.role === 'user' && !user.assignedCoach && (
+                      {!user.coach && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -533,12 +591,12 @@ export function SuperAdminUserPanel() {
                           Assign Coach
                         </Button>
                       )}
-                      {user.role === 'user' && user.assignedCoach && (
+                      {user.coach && (
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => {
-                            const coach = coaches.find(c => c.id === user.assignedCoach?.id);
+                            const coach = coaches.find(c => c.id === user.coach?.id);
                             setAssignCoachForm({ 
                               studentId: user.id, 
                               coachId: coach ? coach.id : 'none' 
@@ -674,20 +732,14 @@ export function SuperAdminUserPanel() {
             
             <div>
               <Label htmlFor="role" className="text-foreground">Role</Label>
-              <Select value={editForm.role} onValueChange={(value) => setEditForm({...editForm, role: value})}>
-                <SelectTrigger className="bg-background border-border text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">Student</SelectItem>
-                  <SelectItem value="coach">Coach</SelectItem>
-                  <SelectItem value="coach_manager">Coach Manager</SelectItem>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                id="role"
+                value="Student"
+                disabled
+                className="bg-background border-border text-muted-foreground"
+              />
             </div>
             
-            {editForm.role === 'user' && (
               <div>
                 <Label htmlFor="assignedCoach" className="text-foreground">Assigned Coach</Label>
                 <Select 
@@ -706,9 +758,7 @@ export function SuperAdminUserPanel() {
                     ))}
                   </SelectContent>
                 </Select>
-
               </div>
-            )}
             
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center space-x-2">

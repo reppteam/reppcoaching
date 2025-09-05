@@ -38,6 +38,10 @@ export const PATH_DASHBOARD = {
   coachManagerDashboard: "/coach-manager-dashboard",
   coachPricing: "/coach-pricing",
   coachingTermInfo: "/coaching-term-info",
+  coachLogin: "/coach-login",
+  coachManagement: "/coach-management",
+  coachProfile: "/coach-profile",
+  studentProfileView: "/student-profile/:id",
   
   // Admin related
   adminDashboard: "/admin-dashboard",

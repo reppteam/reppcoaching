@@ -68,10 +68,15 @@ export function ProfitMarginCalculator() {
     
     setLoading(true);
     try {
+      console.log('Starting data load...');
+      
       const [globalVarsData, productsData] = await Promise.all([
         eightbaseService.getGlobalVariables(user.id),
         eightbaseService.getProducts(user.id)
       ]);
+      
+      console.log('Loaded global vars:', globalVarsData);
+      console.log('Loaded products:', productsData);
       
       setGlobalVars(globalVarsData);
       if (globalVarsData) {
@@ -87,29 +92,50 @@ export function ProfitMarginCalculator() {
       // Load all subitems for the products
       const allSubitems: Subitem[] = [];
       for (const product of productsData) {
+        console.log(`Loading subitems for product: ${product.name} (${product.id})`);
         const productSubitems = await eightbaseService.getSubitems(product.id);
+        console.log(`Loaded subitems for product ${product.name}:`, productSubitems);
         allSubitems.push(...productSubitems);
       }
       setSubitems(allSubitems);
+      console.log('All loaded subitems:', allSubitems);
       
     } catch (error) {
       console.error('Failed to load calculator data:', error);
     } finally {
       setLoading(false);
+      console.log('Data loading completed');
     }
   };
 
   // Calculate costs and derived values
   const calculateSubitemCost = (subitem: Subitem): number => {
+    // Debug logging
+    console.log('Calculating subitem cost:', {
+      id: subitem.id,
+      type: subitem.type,
+      value: subitem.value,
+      label: subitem.label
+    });
+    
+    // For fixed costs, we don't need globalVars
+    if (subitem.type === 'fixed') {
+      const cost = subitem.value || 0;
+      console.log(`Fixed cost calculation: ${subitem.value} = $${cost}`);
+      return cost;
+    }
+    
     if (!globalVars) return 0;
     
     switch (subitem.type) {
-      case 'fixed':
-        return subitem.value;
       case 'photo':
-        return subitem.value * globalVars.cost_per_photo;
+        const photoCost = (subitem.value || 0) * globalVars.cost_per_photo;
+        console.log(`Photo cost calculation: ${subitem.value} × $${globalVars.cost_per_photo} = $${photoCost}`);
+        return photoCost;
       case 'labor':
-        return subitem.value * globalVars.hourly_pay;
+        const laborCost = (subitem.value || 0) * globalVars.hourly_pay;
+        console.log(`Labor cost calculation: ${subitem.value} × $${globalVars.hourly_pay} = $${laborCost}`);
+        return laborCost;
       default:
         return 0;
     }
@@ -117,7 +143,13 @@ export function ProfitMarginCalculator() {
 
   const calculateProductTotalCost = (productId: string): number => {
     const productSubitems = subitems.filter(s => s.product_id === productId);
-    return productSubitems.reduce((total, subitem) => total + calculateSubitemCost(subitem), 0);
+    const totalCost = productSubitems.reduce((total, subitem) => {
+      const subitemCost = calculateSubitemCost(subitem);
+      console.log(`Adding subitem cost: ${subitem.label} = $${subitemCost}`);
+      return total + subitemCost;
+    }, 0);
+    console.log(`Total cost for product ${productId}: $${totalCost}`);
+    return totalCost;
   };
 
   const calculateProfit = (price: number, totalCost: number): number => {
@@ -130,6 +162,7 @@ export function ProfitMarginCalculator() {
 
   const calculateMinimumPrice = (totalCost: number): number => {
     if (!globalVars) return totalCost;
+    if (totalCost === 0) return 0; // If no costs, minimum price is 0
     const targetMarginDecimal = globalVars.target_profit_margin / 100;
     return totalCost / (1 - targetMarginDecimal);
   };
@@ -143,6 +176,16 @@ export function ProfitMarginCalculator() {
       const profit_margin = calculateProfitMargin(profit, product.price);
       const minimum_price = calculateMinimumPrice(total_cost);
 
+      // Debug logging
+      console.log(`Product: ${product.name}`, {
+        price: product.price,
+        subitems: productSubitems,
+        total_cost,
+        profit,
+        profit_margin,
+        minimum_price
+      });
+
       return {
         ...product,
         subitems: productSubitems,
@@ -153,6 +196,16 @@ export function ProfitMarginCalculator() {
       };
     });
   }, [products, subitems, globalVars]);
+
+  // Debug effect to log when calculations change
+  useEffect(() => {
+    console.log('Products with calculations updated:', productsWithCalculations);
+  }, [productsWithCalculations]);
+
+  // Debug effect to log when subitems change
+  useEffect(() => {
+    console.log('Subitems state updated:', subitems);
+  }, [subitems]);
 
   const handleSaveGlobalVars = async () => {
     if (!user) return;
@@ -174,8 +227,8 @@ export function ProfitMarginCalculator() {
         await eightbaseService.updateProduct(editingProduct.id, productForm);
       } else {
         await eightbaseService.createProduct({
-          user_id: user.id,
-          ...productForm
+          ...productForm,
+          user: { connect: { id: user.id } }
         });
       }
       
@@ -201,19 +254,29 @@ export function ProfitMarginCalculator() {
     if (!selectedProductId) return;
     
     try {
+      console.log('Saving subitem:', subitemForm);
+      console.log('Selected product ID:', selectedProductId);
+      
       if (editingSubitem) {
-        await eightbaseService.updateSubitem(editingSubitem.id, subitemForm);
+        console.log('Updating existing subitem:', editingSubitem.id);
+        const updatedSubitem = await eightbaseService.updateSubitem(editingSubitem.id, subitemForm);
+        console.log('Updated subitem result:', updatedSubitem);
       } else {
-        await eightbaseService.createSubitem({
-          product_id: selectedProductId,
-          ...subitemForm
+        console.log('Creating new subitem...');
+        const newSubitem = await eightbaseService.createSubitem({
+          ...subitemForm,
+          product: { connect: { id: selectedProductId } }
         });
+        console.log('Created new subitem result:', newSubitem);
       }
       
+      console.log('Reloading data after subitem save...');
       await loadData();
       setSubitemDialogOpen(false);
       setEditingSubitem(null);
-      setSubitemForm({ type: 'fixed', label: '', value: 0 });
+      const resetForm = { type: 'fixed' as 'fixed' | 'photo' | 'labor', label: '', value: 0 };
+      console.log('Resetting subitem form to:', resetForm);
+      setSubitemForm(resetForm);
     } catch (error) {
       console.error('Failed to save subitem:', error);
     }
@@ -248,20 +311,28 @@ export function ProfitMarginCalculator() {
   };
 
   const openAddSubitem = (productId: string) => {
+    console.log('Opening add subitem for product:', productId);
     setSelectedProductId(productId);
     setEditingSubitem(null);
-    setSubitemForm({ type: 'fixed', label: '', value: 0 });
+    const initialForm = { type: 'fixed' as 'fixed' | 'photo' | 'labor', label: '', value: 0 };
+    console.log('Setting initial subitem form:', initialForm);
+    setSubitemForm(initialForm);
     setSubitemDialogOpen(true);
   };
 
   const openEditSubitem = (subitem: Subitem) => {
-    setSelectedProductId(subitem.product_id);
+    console.log('Opening edit subitem:', subitem);
+    if (subitem.product_id) {
+      setSelectedProductId(subitem.product_id);
+    }
     setEditingSubitem(subitem);
-    setSubitemForm({
+    const formData = {
       type: subitem.type,
       label: subitem.label,
       value: subitem.value
-    });
+    };
+    console.log('Setting subitem form data:', formData);
+    setSubitemForm(formData);
     setSubitemDialogOpen(true);
   };
 
@@ -313,10 +384,30 @@ export function ProfitMarginCalculator() {
             Analyze your service costs and optimize pricing for maximum profitability
           </p>
         </div>
-        <Button onClick={() => setGlobalVarsDialogOpen(true)} variant="outline">
-          <Settings className="mr-2 h-4 w-4" />
-          Settings
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={() => {
+              console.log('Current state:', { products, subitems, globalVars });
+              console.log('Products with calculations:', productsWithCalculations);
+            }} 
+            variant="outline"
+          >
+            Debug
+          </Button>
+          <Button 
+            onClick={() => {
+              console.log('Force refreshing data...');
+              loadData();
+            }} 
+            variant="outline"
+          >
+            Refresh
+          </Button>
+          <Button onClick={() => setGlobalVarsDialogOpen(true)} variant="outline">
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </Button>
+        </div>
       </div>
 
       {/* Global Variables Summary */}
@@ -503,6 +594,15 @@ export function ProfitMarginCalculator() {
                                     const calculatedCost = calculateSubitemCost(subitem);
                                     let rate = '';
                                     let quantity = '';
+                                    
+                                    // Debug logging for table display
+                                    console.log(`Table display for subitem:`, {
+                                      id: subitem.id,
+                                      type: subitem.type,
+                                      value: subitem.value,
+                                      label: subitem.label,
+                                      calculatedCost
+                                    });
                                     
                                     switch (subitem.type) {
                                       case 'fixed':
@@ -757,10 +857,14 @@ export function ProfitMarginCalculator() {
                 type="number"
                 step={subitemForm.type === 'labor' ? '0.25' : '1'}
                 value={subitemForm.value}
-                onChange={(e) => setSubitemForm({
-                  ...subitemForm,
-                  value: parseFloat(e.target.value) || 0
-                })}
+                onChange={(e) => {
+                  const newValue = parseFloat(e.target.value) || 0;
+                  console.log(`Setting subitem value: ${e.target.value} -> ${newValue}`);
+                  setSubitemForm({
+                    ...subitemForm,
+                    value: newValue
+                  });
+                }}
                 placeholder={
                   subitemForm.type === 'fixed' ? '15.00' :
                   subitemForm.type === 'photo' ? '30' :
@@ -785,7 +889,12 @@ export function ProfitMarginCalculator() {
               <Button variant="outline" onClick={() => setSubitemDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSaveSubitem}>
+              <Button onClick={() => {
+                console.log('Subitem form submit clicked');
+                console.log('Current form state:', subitemForm);
+                console.log('Selected product ID:', selectedProductId);
+                handleSaveSubitem();
+              }}>
                 {editingSubitem ? 'Update' : 'Add'} Cost Item
               </Button>
             </div>

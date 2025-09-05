@@ -33,6 +33,7 @@ const Loadable = (Component: React.ComponentType<any>) => {
 export const LoginPage = Loadable(lazy(() => import("../components/Login").then(module => ({ default: module.Login }))));
 export const AuthCallbackPage = Loadable(lazy(() => import("../components/AuthCallback").then(module => ({ default: module.AuthCallback }))));
 export const StudentLoginPage = Loadable(lazy(() => import("../components/StudentLogin").then(module => ({ default: module.StudentLogin }))));
+export const CoachLoginPage = Loadable(lazy(() => import("../components/CoachLogin").then(module => ({ default: module.CoachLogin }))));
 
 // Main dashboard pages
 export const Dashboard = Loadable(lazy(() => import("../components/Dashboard").then(module => ({ default: module.Dashboard }))));
@@ -49,10 +50,14 @@ export const StudentSignUpModal = Loadable(lazy(() => import("../components/Stud
 export const StudentDashboard = Loadable(lazy(() => import("../components/Dashboard").then(module => ({ default: module.Dashboard }))));
 
 // Coaching related
-export const CoachDashboard = Loadable(lazy(() => import("../components/Dashboard").then(module => ({ default: module.Dashboard }))));
+export const CoachDashboard = Loadable(lazy(() => import("../components/CoachInterface").then(module => ({ default: module.CoachInterface }))));
 export const CoachManagerDashboard = Loadable(lazy(() => import("../components/CoachManagerDashboard").then(module => ({ default: module.CoachManagerDashboard }))));
 export const CoachPricing = Loadable(lazy(() => import("../components/CoachPricing").then(module => ({ default: module.CoachPricing }))));
 export const CoachingTermInfo = Loadable(lazy(() => import("../components/CoachingTermInfo").then(module => ({ default: module.CoachingTermInfo }))));
+export const CoachManagement = Loadable(lazy(() => import("../components/CoachManagement").then(module => ({ default: module.CoachManagement }))));
+export const CoachProfileDashboard = Loadable(lazy(() => import("../components/CoachProfileDashboard").then(module => ({ default: module.CoachProfileDashboard }))));
+export const EnhancedCoachDashboard = Loadable(lazy(() => import("../components/EnhancedCoachDashboard").then(module => ({ default: module.EnhancedCoachDashboard }))));
+export const StudentProfileView = Loadable(lazy(() => import("../components/StudentProfileView").then(module => ({ default: module.StudentProfileView }))));
 
 // Admin related
 export const AdminDashboard = Loadable(lazy(() => import("../components/AdminDashboard").then(module => ({ default: module.AdminDashboard }))));
@@ -71,7 +76,7 @@ export const Goals = Loadable(lazy(() => import("../components/Goals").then(modu
 export const WeeklyReports = Loadable(lazy(() => import("../components/WeeklyReports").then(module => ({ default: module.WeeklyReports }))));
 export const WeekTracker = Loadable(lazy(() => import("../components/WeekTracker").then(module => ({ default: module.WeekTracker }))));
 export const KPIDashboard = Loadable(lazy(() => import("../components/KPIDashboard").then(module => ({ default: module.KPIDashboard }))));
-export const ProfitMarginCalculator = Loadable(lazy(() => import("../components/ProfitMarginCalculator").then(module => ({ default: module.ProfitMarginCalculator }))));
+export const ProfitMarginCalculator = Loadable(lazy(() => import("../components/ProfitCalculator")));
 export const Pricing = Loadable(lazy(() => import("../components/Pricing").then(module => ({ default: module.Pricing }))));
 
 // User profile

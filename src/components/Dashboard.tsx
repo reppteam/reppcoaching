@@ -115,6 +115,11 @@ export function Dashboard() {
           icon: FileText,
         },
         { id: "leads", label: "My Leads", icon: Users },
+        {
+          id: "calculator",
+          label: "Profit Calculator",
+          icon: Calculator,
+        },
       ];
     }
 
@@ -153,6 +158,11 @@ export function Dashboard() {
         },
         { id: "kpis", label: "KPI Dashboard", icon: BarChart3 },
         {
+          id: "calculator",
+          label: "Profit Calculator",
+          icon: Calculator,
+        },
+        {
           id: "user-management",
           label: "User Management",
           icon: Users,
@@ -181,6 +191,11 @@ export function Dashboard() {
           icon: DollarSign,
         },
         { id: "kpis", label: "KPI Dashboard", icon: BarChart3 },
+        {
+          id: "calculator",
+          label: "Profit Calculator",
+          icon: Calculator,
+        },
         {
           id: "user-management",
           label: "User Management",

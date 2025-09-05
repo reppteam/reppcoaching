@@ -19,6 +19,7 @@ import {
   LoginPage,
   AuthCallbackPage,
   StudentLoginPage,
+  CoachLoginPage,
   Dashboard,
   Home,
   UserManagementPage,
@@ -26,9 +27,14 @@ import {
   StudentWeekOverview,
   StudentSignUpModal,
   StudentDashboard,
+  CoachDashboard,
   CoachManagerDashboard,
   CoachPricing,
   CoachingTermInfo,
+  CoachManagement,
+  CoachProfileDashboard,
+  EnhancedCoachDashboard,
+  StudentProfileView,
   AdminDashboard,
   SuperAdminDashboard,
   SuperAdminUserPanel,
@@ -73,6 +79,16 @@ export default function Router() {
       ],
     },
 
+    // Coach Login (public)
+    {
+      path: "coach-login",
+      element: (
+        <GuestGuard>
+          <CoachLoginPage />
+        </GuestGuard>
+      ),
+    },
+
     // Careers route (public)
     {
       path: "careers/:id?/:apply?",
@@ -80,6 +96,18 @@ export default function Router() {
         <GuestGuard>
           <CareersPage />
         </GuestGuard>
+      ),
+    },
+
+    // Coach Dashboard (standalone)
+    {
+      path: "coach-dashboard",
+      element: (
+        <AuthGuard>
+          <ProtectedRoute requiredRole="Coach">
+            <EnhancedCoachDashboard />
+          </ProtectedRoute>
+        </AuthGuard>
       ),
     },
 
@@ -135,14 +163,22 @@ export default function Router() {
         },
 
         // Coaching related
-                 {
-           path: "coach-manager-dashboard",
-           element: (
-             <ProtectedRoute requiredRole="Coach Manager">
-               <CoachManagerDashboard />
-             </ProtectedRoute>
-           ),
-         },
+        {
+          path: "coach-dashboard",
+          element: (
+            <ProtectedRoute requiredRole="Coach">
+              <EnhancedCoachDashboard />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "coach-manager-dashboard",
+          element: (
+            <ProtectedRoute requiredRole="Coach Manager">
+              <CoachManagerDashboard />
+            </ProtectedRoute>
+          ),
+        },
          {
            path: "coach-pricing",
            element: (
@@ -154,6 +190,30 @@ export default function Router() {
         {
           path: "coaching-term-info",
           element: <CoachingTermInfo />,
+        },
+        {
+          path: "coach-management",
+          element: (
+            <ProtectedRoute requiredRole="Coach Manager">
+              <CoachManagement />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "coach-profile",
+          element: (
+            <ProtectedRoute requiredRole="Coach">
+              <CoachProfileDashboard />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "student-profile/:id",
+          element: (
+            <ProtectedRoute requiredRole="Coach">
+              <StudentProfileView />
+            </ProtectedRoute>
+          ),
         },
 
         // Admin related
@@ -247,11 +307,7 @@ export default function Router() {
         },
         {
           path: "profit-margin-calculator",
-          element: (
-            <ProtectedRoute requiredRole="Administrator">
-              <ProfitMarginCalculator />
-            </ProtectedRoute>
-          ),
+          element: <ProfitMarginCalculator />,
         },
         {
           path: "pricing",

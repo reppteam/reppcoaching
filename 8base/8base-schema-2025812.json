@@ -156,33 +156,6 @@
           "relation": null
         },
         {
-          "id": "687a2de15cf76000025f6c9d",
-          "name": "user",
-          "displayName": "user",
-          "description": null,
-          "fieldType": "RELATION",
-          "fieldTypeAttributes": null,
-          "isList": false,
-          "isRequired": false,
-          "isUnique": null,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": {
-            "refFieldName": "coach",
-            "refFieldDisplayName": "coach",
-            "relationTableName": "CoachUser",
-            "relationFieldName": "coachAId",
-            "refTable": {
-              "id": "687a2b1b94afc0000245199a",
-              "name": "Users",
-              "displayName": "Users"
-            },
-            "refFieldIsList": false,
-            "refFieldIsRequired": false
-          }
-        },
-        {
           "id": "687a2e9de172db0002f968d9",
           "name": "session",
           "displayName": "session",
@@ -264,60 +237,6 @@
           }
         },
         {
-          "id": "68a2fee370c8e0000279c717",
-          "name": "assignedCoach",
-          "displayName": "assignedCoach",
-          "description": null,
-          "fieldType": "RELATION",
-          "fieldTypeAttributes": null,
-          "isList": true,
-          "isRequired": false,
-          "isUnique": false,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": {
-            "refFieldName": "assignedCoach",
-            "refFieldDisplayName": "assignedCoach",
-            "relationTableName": "CoachesUser",
-            "relationFieldName": "coachAId",
-            "refTable": {
-              "id": "687a2b1b94afc0000245199a",
-              "name": "Users",
-              "displayName": "Users"
-            },
-            "refFieldIsList": false,
-            "refFieldIsRequired": false
-          }
-        },
-        {
-          "id": "68a315ea5736b500024afb55",
-          "name": "assignedStudent",
-          "displayName": "assignedStudent",
-          "description": null,
-          "fieldType": "RELATION",
-          "fieldTypeAttributes": null,
-          "isList": true,
-          "isRequired": false,
-          "isUnique": false,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": {
-            "refFieldName": "assignedStudent",
-            "refFieldDisplayName": "assignedStudent",
-            "relationTableName": "CoachesStudent",
-            "relationFieldName": "coachAId",
-            "refTable": {
-              "id": "687a2cb7ff9eee00029966e1",
-              "name": "Student",
-              "displayName": "Student"
-            },
-            "refFieldIsList": false,
-            "refFieldIsRequired": false
-          }
-        },
-        {
           "id": "68a316cb7b169f0002102254",
           "name": "lastName",
           "displayName": "Last Name",
@@ -334,6 +253,87 @@
           "isSystem": false,
           "isMeta": false,
           "relation": null
+        },
+        {
+          "id": "68b6ecf133ed55000252a30d",
+          "name": "callLogBId",
+          "displayName": "callLogBId",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": true,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "coach",
+            "refFieldDisplayName": "coach",
+            "relationTableName": "CallLogCoaches",
+            "relationFieldName": "coachBId",
+            "refTable": {
+              "id": "688b3401e86e4800026a3c99",
+              "name": "CallLog",
+              "displayName": "CallLog"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68b9917b7e4e9600023229f4",
+          "name": "users",
+          "displayName": "Users",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "coach",
+            "refFieldDisplayName": "Coach",
+            "relationTableName": "CoachUser",
+            "relationFieldName": "coachAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68b991cc609ab100024bc289",
+          "name": "students",
+          "displayName": "Students",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": true,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "coach",
+            "refFieldDisplayName": "Coach",
+            "relationTableName": "CoachesStudent",
+            "relationFieldName": "coachAId",
+            "refTable": {
+              "id": "687a2cb7ff9eee00029966e1",
+              "name": "Student",
+              "displayName": "Student"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
         }
       ]
     },
@@ -436,33 +436,6 @@
           "isSystem": false,
           "isMeta": false,
           "relation": null
-        },
-        {
-          "id": "687a2d8da287d600021646a9",
-          "name": "user",
-          "displayName": "user",
-          "description": null,
-          "fieldType": "RELATION",
-          "fieldTypeAttributes": null,
-          "isList": false,
-          "isRequired": false,
-          "isUnique": null,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": {
-            "refFieldName": "student",
-            "refFieldDisplayName": "student",
-            "relationTableName": "StudentUser",
-            "relationFieldName": "studentAId",
-            "refTable": {
-              "id": "687a2b1b94afc0000245199a",
-              "name": "Users",
-              "displayName": "Users"
-            },
-            "refFieldIsList": false,
-            "refFieldIsRequired": false
-          }
         },
         {
           "id": "688b135178e4180002068468",
@@ -627,36 +600,9 @@
           "relation": null
         },
         {
-          "id": "68a2ff0baf53b7000239f615",
-          "name": "assignedStudent",
-          "displayName": "assignedStudent",
-          "description": null,
-          "fieldType": "RELATION",
-          "fieldTypeAttributes": null,
-          "isList": false,
-          "isRequired": false,
-          "isUnique": false,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": {
-            "refFieldName": "assignedStudent",
-            "refFieldDisplayName": "assignedStudent",
-            "relationTableName": "CoachesStudent",
-            "relationFieldName": "studentBId",
-            "refTable": {
-              "id": "687a2c7139f48b0002f93d4e",
-              "name": "Coach",
-              "displayName": "Coach"
-            },
-            "refFieldIsList": true,
-            "refFieldIsRequired": false
-          }
-        },
-        {
           "id": "68a316987b169f00021021df",
           "name": "firstName",
-          "displayName": "First Name",
+          "displayName": "firstName",
           "description": null,
           "fieldType": "TEXT",
           "fieldTypeAttributes": {
@@ -674,7 +620,7 @@
         {
           "id": "68a316a82690190002d7c954",
           "name": "lastName",
-          "displayName": "Last Name",
+          "displayName": "lastName",
           "description": null,
           "fieldType": "TEXT",
           "fieldTypeAttributes": {
@@ -688,6 +634,186 @@
           "isSystem": false,
           "isMeta": false,
           "relation": null
+        },
+        {
+          "id": "68ac6ba5e210390002e868e4",
+          "name": "user",
+          "displayName": "user",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "student",
+            "refFieldDisplayName": "student",
+            "relationTableName": "StudentUser",
+            "relationFieldName": "studentAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68b7ec5085a89a0002a6bda8",
+          "name": "student",
+          "displayName": "student",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": true,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "student",
+            "refFieldDisplayName": "student",
+            "relationTableName": "StudentsWeeklyReport",
+            "relationFieldName": "studentAId",
+            "refTable": {
+              "id": "688b13c6d00f5c00025cef54",
+              "name": "WeeklyReport",
+              "displayName": "WeeklyReport"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68b83df85b37a30002c9a19b",
+          "name": "globalVariables",
+          "displayName": "GlobalVariables",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": true,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "globalVariables",
+            "refFieldDisplayName": "GlobalVariables",
+            "relationTableName": "GlobalVariableStudents",
+            "relationFieldName": "studentBId",
+            "refTable": {
+              "id": "688b371a4b19920002cd9473",
+              "name": "GlobalVariables",
+              "displayName": "GlobalVariables"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68b83e2af0d6db00020c6d83",
+          "name": "product",
+          "displayName": "Product",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": true,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "student",
+            "refFieldDisplayName": "student",
+            "relationTableName": "ProductStudents",
+            "relationFieldName": "studentBId",
+            "refTable": {
+              "id": "688b37c1e86e4800026a3ca5",
+              "name": "Product",
+              "displayName": "Product"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68b966603845490002730ad1",
+          "name": "email",
+          "displayName": "email",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68b991cc609ab100024bc288",
+          "name": "coach",
+          "displayName": "Coach",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "students",
+            "refFieldDisplayName": "Students",
+            "relationTableName": "CoachesStudent",
+            "relationFieldName": "studentBId",
+            "refTable": {
+              "id": "687a2c7139f48b0002f93d4e",
+              "name": "Coach",
+              "displayName": "Coach"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68b994da395eaf000213fe3e",
+          "name": "studentNote",
+          "displayName": "studentNote",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "studentNote",
+            "refFieldDisplayName": "studentNote",
+            "relationTableName": "NoteStudent",
+            "relationFieldName": "studentBId",
+            "refTable": {
+              "id": "687a3304a287d60002164782",
+              "name": "Note",
+              "displayName": "Note"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
         }
       ]
     },
@@ -1068,33 +1194,6 @@
           }
         },
         {
-          "id": "687a32c056d09a00027279fc",
-          "name": "student",
-          "displayName": "student",
-          "description": null,
-          "fieldType": "RELATION",
-          "fieldTypeAttributes": null,
-          "isList": false,
-          "isRequired": false,
-          "isUnique": null,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": {
-            "refFieldName": "assignmentStudent",
-            "refFieldDisplayName": "assignmentStudent",
-            "relationTableName": "AssignmentUser",
-            "relationFieldName": "assignmentAId",
-            "refTable": {
-              "id": "687a2b1b94afc0000245199a",
-              "name": "Users",
-              "displayName": "Users"
-            },
-            "refFieldIsList": false,
-            "refFieldIsRequired": false
-          }
-        },
-        {
           "id": "687a32cca810ae000222175b",
           "name": "dueDate",
           "displayName": "dueDate",
@@ -1150,6 +1249,33 @@
           "isSystem": false,
           "isMeta": false,
           "relation": null
+        },
+        {
+          "id": "68a86f584302730002d45416",
+          "name": "assignmentStudent",
+          "displayName": "assignmentStudent",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "assignmentStudent",
+            "refFieldDisplayName": "assignmentStudent",
+            "relationTableName": "AssignmentUser",
+            "relationFieldName": "assignmentAId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
         }
       ]
     },
@@ -1300,8 +1426,8 @@
         },
         {
           "id": "687a335039f48b0002f93fcc",
-          "name": "student",
-          "displayName": "student",
+          "name": "studentNote",
+          "displayName": "studentNote",
           "description": null,
           "fieldType": "RELATION",
           "fieldTypeAttributes": null,
@@ -1314,12 +1440,12 @@
           "relation": {
             "refFieldName": "studentNote",
             "refFieldDisplayName": "studentNote",
-            "relationTableName": "NoteUser",
+            "relationTableName": "NoteStudent",
             "relationFieldName": "noteAId",
             "refTable": {
-              "id": "687a2b1b94afc0000245199a",
-              "name": "Users",
-              "displayName": "Users"
+              "id": "687a2cb7ff9eee00029966e1",
+              "name": "Student",
+              "displayName": "Student"
             },
             "refFieldIsList": false,
             "refFieldIsRequired": false
@@ -1851,7 +1977,10 @@
             "format": "CUSTOM",
             "listOptions": [
               "active",
-              "completed"
+              "completed",
+              "draft",
+              "submitted",
+              "reviewed"
             ]
           },
           "isList": false,
@@ -1864,6 +1993,33 @@
         },
         {
           "id": "688b150de909370002f6deef",
+          "name": "weekly_Report",
+          "displayName": "weekly_Report",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "weeklyReportBId",
+            "refFieldDisplayName": "weeklyReportBId",
+            "relationTableName": "UsersWeeklyReport",
+            "relationFieldName": "weeklyReportBId",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68b7ec5085a89a0002a6bda7",
           "name": "student",
           "displayName": "student",
           "description": null,
@@ -1876,14 +2032,14 @@
           "isSystem": false,
           "isMeta": false,
           "relation": {
-            "refFieldName": "weekly_Report",
-            "refFieldDisplayName": "weekly_Report",
-            "relationTableName": "UsersWeeklyReport",
+            "refFieldName": "student",
+            "refFieldDisplayName": "student",
+            "relationTableName": "StudentsWeeklyReport",
             "relationFieldName": "weeklyReportBId",
             "refTable": {
-              "id": "687a2b1b94afc0000245199a",
-              "name": "Users",
-              "displayName": "Users"
+              "id": "687a2cb7ff9eee00029966e1",
+              "name": "Student",
+              "displayName": "Student"
             },
             "refFieldIsList": true,
             "refFieldIsRequired": false
@@ -1987,8 +2143,8 @@
           "isSystem": false,
           "isMeta": false,
           "relation": {
-            "refFieldName": "goal",
-            "refFieldDisplayName": "goal",
+            "refFieldName": "goalAId",
+            "refFieldDisplayName": "goalAId",
             "relationTableName": "GoalUsers",
             "relationFieldName": "goalAId",
             "refTable": {
@@ -2420,8 +2576,8 @@
           "isSystem": false,
           "isMeta": false,
           "relation": {
-            "refFieldName": "price",
-            "refFieldDisplayName": "price",
+            "refFieldName": "pricingAId",
+            "refFieldDisplayName": "pricingAId",
             "relationTableName": "PricingUsers",
             "relationFieldName": "pricingAId",
             "refTable": {
@@ -2462,24 +2618,6 @@
             "fieldSize": 500
           },
           "isList": false,
-          "isRequired": false,
-          "isUnique": false,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": null
-        },
-        {
-          "id": "68931da5547b5000023ce6c6",
-          "name": "packageFeatures",
-          "displayName": "Package Features",
-          "description": null,
-          "fieldType": "TEXT",
-          "fieldTypeAttributes": {
-            "format": "UNFORMATTED",
-            "fieldSize": 100
-          },
-          "isList": true,
           "isRequired": false,
           "isUnique": false,
           "defaultValue": null,
@@ -2672,6 +2810,21 @@
           "isSystem": false,
           "isMeta": false,
           "relation": null
+        },
+        {
+          "id": "68ad91142b334b000235c123",
+          "name": "package_Features",
+          "displayName": "package_Features",
+          "description": null,
+          "fieldType": "JSON",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
         }
       ]
     },
@@ -2771,8 +2924,8 @@
           "isSystem": false,
           "isMeta": false,
           "relation": {
-            "refFieldName": "lead",
-            "refFieldDisplayName": "lead",
+            "refFieldName": "leadAId",
+            "refFieldDisplayName": "leadAId",
             "relationTableName": "LeadUsers",
             "relationFieldName": "leadAId",
             "refTable": {
@@ -3040,58 +3193,34 @@
           "relation": null
         },
         {
-          "id": "688b1f5a4a46b800026ae058",
-          "name": "engagementTag",
-          "displayName": "EngagementTag",
+          "id": "68b6edd25ca66d0002010452",
+          "name": "engagement_statuses",
+          "displayName": "engagement_statuses",
           "description": null,
-          "fieldType": "RELATION",
-          "fieldTypeAttributes": null,
-          "isList": true,
-          "isRequired": false,
-          "isUnique": false,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": {
-            "refFieldName": "lead",
-            "refFieldDisplayName": "lead",
-            "relationTableName": "EngagementTagLeads",
-            "relationFieldName": "leadBId",
-            "refTable": {
-              "id": "688b1a058ae301000238e987",
-              "name": "EngagementTag",
-              "displayName": "EngagementTag"
-            },
-            "refFieldIsList": false,
-            "refFieldIsRequired": false
-          }
-        },
-        {
-          "id": "688b33f54b19920002cd93d7",
-          "name": "script_Component",
-          "displayName": "script_Component",
-          "description": null,
-          "fieldType": "RELATION",
+          "fieldType": "JSON",
           "fieldTypeAttributes": null,
           "isList": false,
           "isRequired": false,
-          "isUnique": false,
+          "isUnique": null,
           "defaultValue": null,
           "isSystem": false,
           "isMeta": false,
-          "relation": {
-            "refFieldName": "lead",
-            "refFieldDisplayName": "lead",
-            "relationTableName": "LeadScriptComponent",
-            "relationFieldName": "leadAId",
-            "refTable": {
-              "id": "688b33644b19920002cd93ca",
-              "name": "ScriptComponents",
-              "displayName": "ScriptComponents"
-            },
-            "refFieldIsList": false,
-            "refFieldIsRequired": false
-          }
+          "relation": null
+        },
+        {
+          "id": "68b6eddfe9e3bc0002b1531f",
+          "name": "script_components",
+          "displayName": "script_components",
+          "description": null,
+          "fieldType": "JSON",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
         }
       ]
     },
@@ -3219,33 +3348,6 @@
           "isSystem": false,
           "isMeta": false,
           "relation": null
-        },
-        {
-          "id": "688b1f5a4a46b800026ae057",
-          "name": "lead",
-          "displayName": "lead",
-          "description": null,
-          "fieldType": "RELATION",
-          "fieldTypeAttributes": null,
-          "isList": false,
-          "isRequired": false,
-          "isUnique": null,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": {
-            "refFieldName": "engagementTag",
-            "refFieldDisplayName": "EngagementTag",
-            "relationTableName": "EngagementTagLeads",
-            "relationFieldName": "engagementTagAId",
-            "refTable": {
-              "id": "688b183217d8d30002de43be",
-              "name": "Lead",
-              "displayName": "Lead"
-            },
-            "refFieldIsList": true,
-            "refFieldIsRequired": false
-          }
         }
       ]
     },
@@ -3420,33 +3522,6 @@
           "isSystem": false,
           "isMeta": false,
           "relation": null
-        },
-        {
-          "id": "688b33f54b19920002cd93d6",
-          "name": "lead",
-          "displayName": "lead",
-          "description": null,
-          "fieldType": "RELATION",
-          "fieldTypeAttributes": null,
-          "isList": false,
-          "isRequired": false,
-          "isUnique": null,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": {
-            "refFieldName": "script_Component",
-            "refFieldDisplayName": "script_Component",
-            "relationTableName": "LeadScriptComponent",
-            "relationFieldName": "scriptComponentBId",
-            "refTable": {
-              "id": "688b183217d8d30002de43be",
-              "name": "Lead",
-              "displayName": "Lead"
-            },
-            "refFieldIsList": false,
-            "refFieldIsRequired": false
-          }
         }
       ]
     },
@@ -3546,8 +3621,8 @@
           "isSystem": false,
           "isMeta": false,
           "relation": {
-            "refFieldName": "call_Log",
-            "refFieldDisplayName": "call_Log",
+            "refFieldName": "callLogAId",
+            "refFieldDisplayName": "callLogAId",
             "relationTableName": "CallLogUsers",
             "relationFieldName": "callLogAId",
             "refTable": {
@@ -3693,6 +3768,33 @@
           "isSystem": false,
           "isMeta": false,
           "relation": null
+        },
+        {
+          "id": "68b6ecf133ed55000252a30c",
+          "name": "coach",
+          "displayName": "coach",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "callLogBId",
+            "refFieldDisplayName": "callLogBId",
+            "relationTableName": "CallLogCoaches",
+            "relationFieldName": "callLogAId",
+            "refTable": {
+              "id": "687a2c7139f48b0002f93d4e",
+              "name": "Coach",
+              "displayName": "Coach"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
         }
       ]
     },
@@ -4054,6 +4156,33 @@
             "refFieldIsList": false,
             "refFieldIsRequired": false
           }
+        },
+        {
+          "id": "68b83df85b37a30002c9a19a",
+          "name": "globalVariables",
+          "displayName": "GlobalVariables",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "globalVariables",
+            "refFieldDisplayName": "GlobalVariables",
+            "relationTableName": "GlobalVariableStudents",
+            "relationFieldName": "globalVariableAId",
+            "refTable": {
+              "id": "687a2cb7ff9eee00029966e1",
+              "name": "Student",
+              "displayName": "Student"
+            },
+            "refFieldIsList": true,
+            "refFieldIsRequired": false
+          }
         }
       ]
     },
@@ -4193,8 +4322,8 @@
           "isSystem": false,
           "isMeta": false,
           "relation": {
-            "refFieldName": "product",
-            "refFieldDisplayName": "Product",
+            "refFieldName": "productAId",
+            "refFieldDisplayName": "productAId",
             "relationTableName": "ProductUsers",
             "relationFieldName": "productAId",
             "refTable": {
@@ -4230,6 +4359,33 @@
               "displayName": "Subitem"
             },
             "refFieldIsList": false,
+            "refFieldIsRequired": false
+          }
+        },
+        {
+          "id": "68b83e2af0d6db00020c6d82",
+          "name": "student",
+          "displayName": "student",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": {
+            "refFieldName": "product",
+            "refFieldDisplayName": "Product",
+            "relationTableName": "ProductStudents",
+            "relationFieldName": "productAId",
+            "refTable": {
+              "id": "687a2cb7ff9eee00029966e1",
+              "name": "Student",
+              "displayName": "Student"
+            },
+            "refFieldIsList": true,
             "refFieldIsRequired": false
           }
         }
@@ -4404,6 +4560,90 @@
             },
             "refFieldIsList": true,
             "refFieldIsRequired": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "68b83cd84b1f120002dbd197",
+      "name": "UntitledTable",
+      "displayName": "Untitled Table",
+      "isSystem": false,
+      "fields": [
+        {
+          "id": "68b83cd84b1f120002dbd198",
+          "name": "id",
+          "displayName": "ID",
+          "description": null,
+          "fieldType": "ID",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": true,
+          "isUnique": true,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "68b83cd84b1f120002dbd199",
+          "name": "createdAt",
+          "displayName": "Created At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "68b83cd84b1f120002dbd19a",
+          "name": "updatedAt",
+          "displayName": "Updated At",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATETIME"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": null
+        },
+        {
+          "id": "68b83cd84b1f120002dbd19c",
+          "name": "createdBy",
+          "displayName": "Created By",
+          "description": null,
+          "fieldType": "RELATION",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": true,
+          "isMeta": true,
+          "relation": {
+            "refFieldName": null,
+            "refFieldDisplayName": null,
+            "relationTableName": null,
+            "relationFieldName": "createdById",
+            "refTable": {
+              "id": "687a2b1b94afc0000245199a",
+              "name": "Users",
+              "displayName": "Users"
+            },
+            "refFieldIsList": null,
+            "refFieldIsRequired": null
           }
         }
       ]

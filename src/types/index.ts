@@ -237,7 +237,7 @@ export interface GlobalVariables {
 
 export interface Product {
   id: string;
-  user_id: string;
+  user_id?: string;
   name: string;
   price: number;
   created_at: string;
@@ -246,7 +246,7 @@ export interface Product {
 
 export interface Subitem {
   id: string;
-  product_id: string;
+  product_id?: string;
   type: 'fixed' | 'photo' | 'labor';
   label: string;
   value: number; // For fixed: amount, for photo: # of photos, for labor: # of hours

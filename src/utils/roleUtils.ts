@@ -44,19 +44,23 @@ export function hasAnyRole(user: any, roles: string[]): boolean {
 export function getDashboardRoute(user: any): string {
   const roles = getUserRoles(user);
   
-  if (roles.includes('SuperAdmin') || roles.includes('Administrator')) {
+  // Check for Super Admin roles
+  if (roles.includes('SuperAdmin') || roles.includes('Super Admin') || roles.includes('Administrator') || roles.includes('super_admin')) {
     return '/super-admin-dashboard';
   }
   
-  if (roles.includes('Coach Manager')) {
+  // Check for Coach Manager roles
+  if (roles.includes('Coach Manager') || roles.includes('coach_manager')) {
     return '/coach-manager-dashboard';
   }
   
-  if (roles.includes('Coach')) {
+  // Check for Coach roles
+  if (roles.includes('Coach') || roles.includes('coach') || roles.includes('admin')) {
     return '/coach-dashboard';
   }
   
-  if (roles.includes('Student')) {
+  // Check for Student roles
+  if (roles.includes('Student') || roles.includes('user')) {
     return '/student-dashboard';
   }
   

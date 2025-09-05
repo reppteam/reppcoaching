@@ -48,16 +48,34 @@ export const WeeklyReports: React.FC = () => {
 
   useEffect(() => {
     if (user?.id) {
-    loadReports();
+      loadReports();
+      resetForm(); // Reset form when user changes
     }
   }, [user?.id]);
 
   const loadReports = async () => {
     try {
       setLoading(true);
-      const userId = user?.role === 'user' ? user.id : undefined;
+      
+      const shouldFilterByUser = user?.role === 'user';
+      const userId = shouldFilterByUser ? user.id : undefined;
+      
+      console.log('Loading weekly reports:', {
+        userRole: user?.role,
+        shouldFilterByUser,
+        userId,
+        userEmail: user?.email
+      });
+      
       const data = await eightbaseService.getWeeklyReports(userId);
       setReports(data);
+      
+      console.log('Loaded reports:', {
+        totalReports: data.length,
+        filteredByUser: shouldFilterByUser,
+        userId: userId
+      });
+      
     } catch (error) {
       console.error('Error loading reports:', error);
     } finally {
@@ -71,8 +89,28 @@ export const WeeklyReports: React.FC = () => {
 
     try {
       const netProfit = formData.revenue - formData.expenses - formData.editing_cost;
+      
+      // Get the actual student profile ID from the student table
+      let studentId: string | undefined;
+      
+      try {
+        // Try to find the student profile for this user
+        const studentProfile = await eightbaseService.getStudentProfileByUserId(user.id);
+        if (studentProfile?.id && studentProfile.id !== user.id) {
+          studentId = studentProfile.id;
+          console.log('Found student profile ID:', studentId);
+        } else {
+          console.log('No separate student profile found, using user ID for both connections');
+          studentId = user.id;
+        }
+      } catch (error) {
+        console.log('Error fetching student profile, using user ID for both connections:', error);
+        studentId = user.id;
+      }
+      
       const report = await eightbaseService.createWeeklyReport({
         user_id: user.id,
+        student_id: studentId, // Use actual student profile ID if available
         ...formData,
         net_profit: netProfit
       });
@@ -87,27 +125,96 @@ export const WeeklyReports: React.FC = () => {
 
   const handleUpdate = async (reportId: string) => {
     try {
-      const updatedReport = await eightbaseService.updateWeeklyReport(reportId, formData);
-      setReports(reports.map(r => r.id === reportId ? updatedReport : r));
+      console.log('=== UPDATE PROCESS START ===');
+      console.log('Report ID to update:', reportId);
+      console.log('Current editingReport state:', editingReport);
+      console.log('Form data to update with:', formData);
+      
+      // Verify we have the correct report ID
+      if (!reportId || reportId !== editingReport) {
+        console.error('Report ID mismatch! Expected:', editingReport, 'Got:', reportId);
+        return;
+      }
+      
+      // Find the original report to verify we're updating the right one
+      const originalReport = reports.find(r => r.id === reportId);
+      if (!originalReport) {
+        console.error('Original report not found for ID:', reportId);
+        return;
+      }
+      
+      console.log('Original report found:', originalReport);
+      console.log('Form data to update with:', formData);
+      
+      // Verify the form data is reasonable (basic sanity check)
+      if (formData.revenue < 0 || formData.expenses < 0 || formData.editing_cost < 0) {
+        console.error('Invalid form data detected:', formData);
+        return;
+      }
+      
+      // Calculate expected values for verification
+      const expectedNetProfit = formData.revenue - formData.expenses - formData.editing_cost;
+      const totalShoots = formData.paid_shoots + formData.free_shoots;
+      const expectedAOV = totalShoots > 0 ? formData.revenue / totalShoots : 0;
+      
+      console.log('Calculated values - Net Profit:', expectedNetProfit, 'AOV:', expectedAOV);
+      console.log('Original stored net profit:', originalReport.net_profit);
+      console.log('Net profit difference:', expectedNetProfit - originalReport.net_profit);
+      
+      // Ensure the net profit is included in the update data
+      const updateDataWithNetProfit = {
+        ...formData,
+        net_profit: expectedNetProfit
+      };
+      
+      console.log('Updating report with data (including net profit):', updateDataWithNetProfit);
+      
+      const updatedReport = await eightbaseService.updateWeeklyReport(reportId, updateDataWithNetProfit);
+      console.log('Report updated successfully:', updatedReport);
+      
+      // Update the reports list with the new data
+      const updatedReports = reports.map(r => r.id === reportId ? updatedReport : r);
+      setReports(updatedReports);
+      
+      // Verify the update was applied correctly
+      const updatedReportInList = updatedReports.find(r => r.id === reportId);
+      console.log('Reports list updated. Updated report in list:', updatedReportInList);
+      
+      // Verify the old report is no longer in the list
+      const oldReportStillExists = updatedReports.find(r => 
+        r.id === reportId && 
+        r.revenue === originalReport.revenue && 
+        r.net_profit === originalReport.net_profit
+      );
+      
+      if (oldReportStillExists) {
+        console.warn('Old report data still exists after update!');
+      } else {
+        console.log('Report successfully updated in the list');
+      }
+      
+      // Close the edit dialog and reset form only after successful update
       setEditingReport(null);
       resetForm();
+      console.log('=== UPDATE PROCESS COMPLETE ===');
     } catch (error) {
       console.error('Error updating report:', error);
+      // Don't close dialog or reset form on error - let user see the error and try again
     }
   };
 
-    const resetForm = () => {
-      setFormData({
-        start_date: '',
-        end_date: '',
-        new_clients: 0,
-        paid_shoots: 0,
-        free_shoots: 0,
-        unique_clients: 0,
-        aov: 0,
-        revenue: 0,
-        expenses: 0,
-        editing_cost: 0,
+  const resetForm = () => {
+    setFormData({
+      start_date: '',
+      end_date: '',
+      new_clients: 0,
+      paid_shoots: 0,
+      free_shoots: 0,
+      unique_clients: 0,
+      aov: 0,
+      revenue: 0,
+      expenses: 0,
+      editing_cost: 0,
       status: 'active' as 'active' | 'completed'
     });
   };
@@ -142,9 +249,14 @@ export const WeeklyReports: React.FC = () => {
             Track your weekly performance and revenue
           </p>
       </div>
-        <Dialog open={addingReport} onOpenChange={setAddingReport}>
+        <Dialog open={addingReport} onOpenChange={(open) => {
+          if (!open) {
+            resetForm();
+          }
+          setAddingReport(open);
+        }}>
                 <DialogTrigger asChild>
-                  <Button>
+                  <Button onClick={() => resetForm()}>
               <Plus className="h-4 w-4 mr-2" />
                     Add Report
                   </Button>
@@ -307,7 +419,10 @@ export const WeeklyReports: React.FC = () => {
               </Card>
 
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setAddingReport(false)} className="text-foreground">
+                <Button type="button" variant="outline" onClick={() => {
+                  resetForm();
+                  setAddingReport(false);
+                }} className="text-foreground">
                         Cancel
                       </Button>
                 <Button type="submit">Save Report</Button>
@@ -442,7 +557,16 @@ export const WeeklyReports: React.FC = () => {
                     <div className="font-medium text-green-600">
                       ${report.net_profit.toFixed(2)}
                     </div>
-                      </TableCell>
+                    {(() => {
+                      const calculatedNetProfit = report.revenue - report.expenses - report.editing_cost;
+                      const hasMismatch = Math.abs(calculatedNetProfit - report.net_profit) > 0.01;
+                      return hasMismatch ? (
+                        <div className="text-xs text-orange-600">
+                          Calc: ${calculatedNetProfit.toFixed(2)}
+                        </div>
+                      ) : null;
+                    })()}
+                  </TableCell>
                   <TableCell>
                     <Badge variant={report.status === 'completed' ? 'default' : 'secondary'}>
                       {report.status}
@@ -461,7 +585,16 @@ export const WeeklyReports: React.FC = () => {
                         variant="ghost" 
                         size="sm"
                         onClick={() => {
-                          setFormData({
+                          // Safety check: ensure we're not already editing another report
+                          if (editingReport && editingReport !== report.id) {
+                            console.warn('Already editing report:', editingReport, 'Cannot edit:', report.id);
+                            return;
+                          }
+                          
+                          // Calculate the actual net profit from the stored data
+                          const actualNetProfit = report.revenue - report.expenses - report.editing_cost;
+                          
+                          const editData: any = {
                             start_date: report.start_date,
                             end_date: report.end_date,
                             new_clients: report.new_clients,
@@ -473,8 +606,32 @@ export const WeeklyReports: React.FC = () => {
                             expenses: report.expenses,
                             editing_cost: report.editing_cost,
                             status: report.status
-                          });
+                          };
+                          
+                          console.log('=== EDITING REPORT ===');
+                          console.log('Report ID to edit:', report.id);
+                          console.log('Populating form with edit data:', editData);
+                          console.log('Original report data:', report);
+                          console.log('Stored net profit:', report.net_profit);
+                          console.log('Calculated net profit from stored data:', actualNetProfit);
+                          console.log('Current editingReport state:', editingReport);
+                          
+                          // Verify data consistency
+                          if (Math.abs(actualNetProfit - report.net_profit) > 0.01) {
+                            console.warn('⚠️ NET PROFIT MISMATCH DETECTED!');
+                            console.warn('Stored net profit:', report.net_profit);
+                            console.warn('Calculated net profit:', actualNetProfit);
+                            console.warn('Difference:', report.net_profit - actualNetProfit);
+                            
+                            // Auto-fix: Update the edit data to include the correct net profit
+                            editData.net_profit = actualNetProfit;
+                            console.log('Auto-fixed net profit in edit data:', editData);
+                          }
+                          
+                          setFormData(editData);
                           setEditingReport(report.id);
+                          
+                          console.log('=== FORM POPULATED ===');
                         }}
                       >
                         <Edit className="h-4 w-4" />
@@ -489,7 +646,17 @@ export const WeeklyReports: React.FC = () => {
       </Card>
 
       {/* Edit Report Dialog */}
-      <Dialog open={!!editingReport} onOpenChange={() => setEditingReport(null)}>
+      <Dialog open={!!editingReport} onOpenChange={(open) => {
+        if (!open) {
+          // Don't reset form immediately when closing, let handleUpdate handle it
+          setEditingReport(null);
+        }
+      }}>
+        {editingReport && (
+          <div className="text-xs text-muted-foreground mb-2">
+            Editing Report ID: {editingReport}
+          </div>
+        )}
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit Weekly Report</DialogTitle>
@@ -581,6 +748,9 @@ export const WeeklyReports: React.FC = () => {
                   value={formData.revenue}
                   onChange={(e) => setFormData({...formData, revenue: parseFloat(e.target.value) || 0})}
                 />
+                <div className="text-xs text-muted-foreground mt-1">
+                  Net Profit: ${(formData.revenue - formData.expenses - formData.editing_cost).toFixed(2)}
+                </div>
               </div>
               <div>
                 <Label htmlFor="edit_expenses">Expenses ($)</Label>
@@ -590,6 +760,9 @@ export const WeeklyReports: React.FC = () => {
                   value={formData.expenses}
                   onChange={(e) => setFormData({...formData, expenses: parseFloat(e.target.value) || 0})}
                 />
+                <div className="text-xs text-muted-foreground mt-1">
+                  Net Profit: ${(formData.revenue - formData.expenses - formData.editing_cost).toFixed(2)}
+                </div>
               </div>
               <div>
                 <Label htmlFor="edit_editing_cost">Editing Cost ($)</Label>
@@ -599,6 +772,9 @@ export const WeeklyReports: React.FC = () => {
                   value={formData.editing_cost}
                   onChange={(e) => setFormData({...formData, editing_cost: parseFloat(e.target.value) || 0})}
                 />
+                <div className="text-xs text-muted-foreground mt-1">
+                  Net Profit: ${(formData.revenue - formData.expenses - formData.editing_cost).toFixed(2)}
+                </div>
               </div>
             </div>
 
@@ -631,17 +807,41 @@ export const WeeklyReports: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Net Profit</p>
-                    <p className="text-2xl font-bold text-green-600">${calculateNetProfit().toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      ${calculateNetProfit().toFixed(2)}
+                    </p>
+                    {editingReport && (
+                      <div className="text-xs text-muted-foreground">
+                        Stored: ${(() => {
+                          const report = reports.find(r => r.id === editingReport);
+                          return report ? report.net_profit.toFixed(2) : 'N/A';
+                        })()}
+                      </div>
+                    )}
+                    <div className="text-xs text-blue-600 font-medium">
+                      Calc: ${calculateNetProfit().toFixed(2)}
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setEditingReport(null)} className="text-foreground">
+              <Button variant="outline" onClick={() => {
+                resetForm();
+                setEditingReport(null);
+              }} className="text-foreground">
                 Cancel
               </Button>
-              <Button onClick={() => editingReport && handleUpdate(editingReport)}>
+              <Button 
+                onClick={() => {
+                  if (editingReport) {
+                    console.log('Update button clicked for report ID:', editingReport);
+                    console.log('Current form data:', formData);
+                    handleUpdate(editingReport);
+                  }
+                }}
+              >
                 Update Report
               </Button>
             </div>

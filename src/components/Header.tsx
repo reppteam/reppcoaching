@@ -75,7 +75,7 @@ export function Header({
         <div className="flex flex-wrap items-center justify-between gap-2 py-2 md:flex-nowrap">
           {/* Left: Logo + Brand */}
           <div className="flex items-center gap-3 flex-shrink-0">
-            <img src="/logo192.png" alt="Logo" className="h-10 w-auto" />
+            <img src="/hedderlogo.png" alt="Logo" className="h-10 w-auto" />
             <div className="hidden md:block">
               <h1 className="text-lg font-bold text-brand-gray">
                 REAL <span className="text-brand-blue">ESTATE</span>
