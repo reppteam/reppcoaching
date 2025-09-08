@@ -62,11 +62,6 @@ export function SuperAdminSystemMonitor() {
   useEffect(() => {
     if (user?.role === 'super_admin') {
       loadSystemMetrics();
-      
-      if (autoRefresh) {
-        const interval = setInterval(loadSystemMetrics, 30000); // Refresh every 30 seconds
-        return () => clearInterval(interval);
-      }
     }
   }, [user, autoRefresh]);
 

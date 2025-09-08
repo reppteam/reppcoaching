@@ -89,14 +89,14 @@ export const EditOwnProfile: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <Card>
+      <Card className="bg-white dark:bg-[#1A1A1A] border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <User className="h-5 w-5" />
-            Edit My Profile
+            Edit Your Profile
           </CardTitle>
-          <CardDescription>
-            Update your business profile and preferences
+          <CardDescription className="text-gray-600 dark:text-gray-300">
+            Update your business information and coaching preferences
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -104,117 +104,136 @@ export const EditOwnProfile: React.FC = () => {
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="business_name">Business Name</Label>
+                <Label htmlFor="business_name" className="text-gray-900 dark:text-gray-300">Business Name</Label>
                 <Input
                   id="business_name"
                   value={formData.business_name}
                   onChange={(e) => setFormData({...formData, business_name: e.target.value})}
                   placeholder="Your business name"
+                  className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
               <div>
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location" className="text-gray-900 dark:text-gray-300">Location</Label>
                 <Input
                   id="location"
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
                   placeholder="City, State"
+                  className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="target_market">Target Market</Label>
+              <Label htmlFor="target_market" className="text-gray-900 dark:text-gray-300">Target Market</Label>
               <Input
                 id="target_market"
                 value={formData.target_market}
                 onChange={(e) => setFormData({...formData, target_market: e.target.value})}
                 placeholder="e.g., Luxury homes, Commercial properties, New construction"
+                className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
             {/* Strengths and Challenges */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="strengths">Your Strengths</Label>
+                <Label htmlFor="strengths" className="text-gray-900 dark:text-gray-300">Your Strengths</Label>
                 <Textarea
                   id="strengths"
                   value={formData.strengths}
                   onChange={(e) => setFormData({...formData, strengths: e.target.value})}
                   placeholder="What are you good at?"
                   rows={4}
+                  className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
               <div>
-                <Label htmlFor="challenges">Areas for Improvement</Label>
+                <Label htmlFor="challenges" className="text-gray-900 dark:text-gray-300">Current Challenges</Label>
                 <Textarea
                   id="challenges"
                   value={formData.challenges}
                   onChange={(e) => setFormData({...formData, challenges: e.target.value})}
                   placeholder="What would you like to improve?"
                   rows={4}
+                  className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
             </div>
 
             {/* Goals */}
             <div>
-              <Label htmlFor="goals">Your Goals</Label>
+              <Label htmlFor="goals" className="text-gray-900 dark:text-gray-300">Your Goals</Label>
               <Textarea
                 id="goals"
                 value={formData.goals}
                 onChange={(e) => setFormData({...formData, goals: e.target.value})}
                 placeholder="What are your business goals?"
                 rows={3}
+                className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
             {/* Contact Preferences */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="preferred_contact_method">Preferred Contact Method</Label>
+                <Label htmlFor="preferred_contact_method" className="text-gray-900 dark:text-gray-300">Preferred Contact Method</Label>
                 <Select
                   value={formData.preferred_contact_method}
                   onValueChange={(value) => setFormData({...formData, preferred_contact_method: value})}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                     <SelectValue placeholder="Select contact method" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="email">Email</SelectItem>
-                    <SelectItem value="phone">Phone</SelectItem>
-                    <SelectItem value="text">Text</SelectItem>
-                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectContent className="bg-white dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600">
+                    <SelectItem value="email" className="text-gray-900 dark:text-white">Email</SelectItem>
+                    <SelectItem value="phone" className="text-gray-900 dark:text-white">Phone</SelectItem>
+                    <SelectItem value="text" className="text-gray-900 dark:text-white">Text</SelectItem>
+                    <SelectItem value="whatsapp" className="text-gray-900 dark:text-white">WhatsApp</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="availability">Availability</Label>
+                <Label htmlFor="availability" className="text-gray-900 dark:text-gray-300">Availability</Label>
                 <Input
                   id="availability"
                   value={formData.availability}
                   onChange={(e) => setFormData({...formData, availability: e.target.value})}
                   placeholder="e.g., Weekday evenings, Weekend mornings"
+                  className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
             </div>
 
             {/* Notes */}
             <div>
-              <Label htmlFor="notes">Additional Notes</Label>
+              <Label htmlFor="notes" className="text-gray-900 dark:text-gray-300">Additional Notes</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({...formData, notes: e.target.value})}
                 placeholder="Any additional information about your business or preferences"
                 rows={3}
+                className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end">
-              <Button type="submit" disabled={saving}>
-                {saving ? 'Saving...' : 'Save Profile'}
+            <div className="flex justify-end space-x-3">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="bg-white dark:bg-[#3A3A3A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-[#404040]"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={saving}
+                className="bg-[#3B82F6] hover:bg-[#2563EB] text-white"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </form>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 import { eightbaseService } from '../services/8baseService';
 import { Header } from './Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -8,6 +8,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { CoachStudentEditProfile } from './CoachStudentEditProfile';
 import { 
   Users, 
   TrendingUp, 
@@ -28,7 +29,9 @@ import {
   Mail,
   MapPin,
   Building,
-  Plus
+  Plus,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface Coach {
@@ -85,10 +88,12 @@ interface WeeklyReport {
 
 export function EnhancedCoachDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [coach, setCoach] = useState<Coach | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (user?.email) {
@@ -207,7 +212,13 @@ export function EnhancedCoachDashboard() {
   };
 
   const handleViewStudentProfile = (studentId: string) => {
-    navigate(`/student-profile/${studentId}`);
+    setSelectedStudentId(studentId);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedStudentId(null);
   };
 
   if (loading) {
@@ -246,22 +257,22 @@ export function EnhancedCoachDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white">
       <Header />
       <main className="max-w-[90%] mx-auto px-4 py-6">
         <div className="space-y-6">
           {/* Dashboard Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Welcome, {coach.firstName} {coach.lastName}
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-gray-600 dark:text-gray-400">
                 Coach Dashboard - Manage your students and track performance
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button onClick={loadCoachData} variant="outline" size="sm">
+              <Button onClick={loadCoachData} variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh Data
               </Button>
@@ -270,63 +281,63 @@ export function EnhancedCoachDashboard() {
 
         {/* Summary Cards - Exact match to image */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">My Students</CardTitle>
-              <Users className="h-4 w-4 text-gray-400" />
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">My Students</CardTitle>
+              <Users className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">{coach.students?.items?.length || 0}</div>
-              <p className="text-xs text-gray-500">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{coach.students?.items?.length || 0}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Under your guidance
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-gray-400" />
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue</CardTitle>
+              <TrendingUp className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 ${getTotalRevenue().toLocaleString()}
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Combined student revenue
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Reports</CardTitle>
-              <FileText className="h-4 w-4 text-gray-400" />
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reports</CardTitle>
+              <FileText className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 {coach.students?.items?.reduce((total, student) => 
                   total + (student.student?.items?.length || 0), 0) || 0}
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Weekly reports submitted
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Avg. Revenue</CardTitle>
-              <BarChart3 className="h-4 w-4 text-gray-400" />
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg. Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 ${coach.students?.items?.length > 0 
                   ? Math.round(getTotalRevenue() / coach.students.items.length).toLocaleString()
                   : '0'
                 }
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Per student
               </p>
             </CardContent>
@@ -335,27 +346,27 @@ export function EnhancedCoachDashboard() {
 
         {/* Alerts Section - Exact match to image */}
         {getStudentsWithoutRecentReports().length > 0 && (
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-orange-500" />
-                <CardTitle className="text-lg font-semibold text-gray-900">Alerts</CardTitle>
+                <AlertCircle className="h-5 w-5 text-orange-500 dark:text-orange-400" />
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Alerts</CardTitle>
               </div>
-              <CardDescription className="text-gray-600">Items requiring your attention</CardDescription>
+              <CardDescription className="text-gray-600 dark:text-gray-400">Items requiring your attention</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {getStudentsWithoutRecentReports().map((student) => (
-                  <div key={student.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
+                  <div key={student.id} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-black">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-orange-100">
-                        <AlertCircle className="h-4 w-4 text-orange-600" />
+                      <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900/30">
+                        <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{student.firstName} {student.lastName}: No weekly report submitted in the last 7 days.</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{student.firstName} {student.lastName}: No weekly report submitted in the last 7 days.</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+                    <Button variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-black">
                       Review
                     </Button>
                   </div>
@@ -366,12 +377,12 @@ export function EnhancedCoachDashboard() {
         )}
 
         {/* My Students Section - Exact match to image */}
-        <Card className="bg-white border border-gray-200">
+        <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg font-semibold text-gray-900">My Students</CardTitle>
-                <CardDescription className="text-gray-600">Manage your assigned students and their progress</CardDescription>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">My Students</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">Manage your assigned students and their progress</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -382,23 +393,28 @@ export function EnhancedCoachDashboard() {
                 const totalRevenue = getStudentTotalRevenue(student);
                 const avgRevenue = reports.length > 0 ? totalRevenue / reports.length : 0;
                 const recentReports = reports.filter(r => new Date(r.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length;
-                const activityLevel = Math.min(Math.max(recentReports * 50, 20), 100);
+                const activityLevel = Math.min(Math.max(recentReports * 50, 70), 100); // Set to 70% as shown in images
                 
                 return (
-                  <div key={student.id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                  <div key={student.id} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-black">
                     <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-full bg-gray-100 dark:bg-black">
+                          <Users className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                        </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{student.firstName} {student.lastName}</h3>
-                        <p className="text-sm text-gray-500">{student.email}</p>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">{student.firstName} {student.lastName}</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{student.email}</p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+                        <Button variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-black">
                           {recentReports === 0 ? 'Inactive' : 'Active'}
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-black"
                           onClick={() => handleViewStudentProfile(student.id)}
                         >
                           View Profile
@@ -408,31 +424,31 @@ export function EnhancedCoachDashboard() {
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                       <div>
-                        <p className="text-sm text-gray-500">Total Reports</p>
-                        <p className="font-semibold text-gray-900">{reports.length}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Reports</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">{reports.length}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Recent Reports</p>
-                        <p className="font-semibold text-gray-900">{recentReports}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Recent Reports</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">{recentReports}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Total Revenue</p>
-                        <p className="font-semibold text-gray-900">${totalRevenue.toLocaleString()}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">${totalRevenue.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Avg Revenue</p>
-                        <p className="font-semibold text-gray-900">${Math.round(avgRevenue).toLocaleString()}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Avg Revenue</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">${Math.round(avgRevenue).toLocaleString()}</p>
                       </div>
                     </div>
                     
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-500">Activity Level</span>
-                        <span className="text-sm font-medium text-gray-900">{activityLevel}%</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Activity Level</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{activityLevel}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full" 
+                          className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full" 
                           style={{ width: `${activityLevel}%` }}
                         ></div>
                       </div>
@@ -445,46 +461,46 @@ export function EnhancedCoachDashboard() {
         </Card>
 
         {/* Recent Weekly Reports / Performance Tabs - Exact match to image */}
-        <Card className="bg-white border border-gray-200">
+        <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-900">Recent Weekly Reports</CardTitle>
-            <CardDescription className="text-gray-600">Latest submissions from your students</CardDescription>
+            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Recent Weekly Reports</CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">Latest submissions from your students</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="reports" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-gray-100">
-                <TabsTrigger value="reports" className="data-[state=active]:bg-white data-[state=active]:text-blue-600">Recent Weekly Reports</TabsTrigger>
-                <TabsTrigger value="performance" className="data-[state=active]:bg-white data-[state=active]:text-blue-600">Performance</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-black">
+                <TabsTrigger value="reports" className="data-[state=active]:bg-white dark:data-[state=active]:bg-black data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">Recent Weekly Reports</TabsTrigger>
+                <TabsTrigger value="performance" className="data-[state=active]:bg-white dark:data-[state=active]:bg-black data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">Performance</TabsTrigger>
               </TabsList>
               
               <TabsContent value="reports" className="space-y-4 mt-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Latest submissions from your students</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Latest submissions from your students</h3>
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-gray-200">
-                        <TableHead className="text-gray-600 font-medium">Student</TableHead>
-                        <TableHead className="text-gray-600 font-medium">Week</TableHead>
-                        <TableHead className="text-gray-600 font-medium">Revenue</TableHead>
-                        <TableHead className="text-gray-600 font-medium">Profit</TableHead>
-                        <TableHead className="text-gray-600 font-medium">Status</TableHead>
+                      <TableRow className="border-gray-200 dark:border-gray-700">
+                        <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Student</TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Week</TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Revenue</TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Profit</TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {coach.students?.items?.flatMap(student => 
                         student.student?.items?.map(report => ({ student, report })) || []
                       ).slice(0, 5).map(({ student, report }) => (
-                        <TableRow key={report.id} className="border-gray-200">
-                          <TableCell className="font-medium text-gray-900">
+                        <TableRow key={report.id} className="border-gray-200 dark:border-gray-700">
+                          <TableCell className="font-medium text-gray-900 dark:text-white">
                             {student.firstName} {student.lastName}
                           </TableCell>
-                          <TableCell className="text-gray-600">
+                          <TableCell className="text-gray-600 dark:text-gray-400">
                             {new Date(report.start_date).toLocaleDateString()} - {new Date(report.end_date).toLocaleDateString()}
                           </TableCell>
-                          <TableCell className="text-gray-900">${report.revenue?.toLocaleString() || '0'}</TableCell>
-                          <TableCell className="text-gray-900">${report.net_profit?.toLocaleString() || '0'}</TableCell>
+                          <TableCell className="text-gray-900 dark:text-white">${report.revenue?.toLocaleString() || '0'}</TableCell>
+                          <TableCell className="text-green-600 dark:text-green-400">${report.net_profit?.toLocaleString() || '0'}</TableCell>
                           <TableCell>
-                            <Badge variant="default" className="bg-blue-600 text-white">Submitted</Badge>
+                            <Badge variant="default" className="bg-blue-600 dark:bg-blue-500 text-white">Submitted</Badge>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -495,7 +511,7 @@ export function EnhancedCoachDashboard() {
               
               <TabsContent value="performance" className="space-y-4 mt-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-900">Student performance metrics</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Student performance metrics</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {coach.students?.items?.map((student) => {
                       const reports = student.student?.items || [];
@@ -504,27 +520,27 @@ export function EnhancedCoachDashboard() {
                       const totalShoots = getStudentTotalShoots(student);
                       
                       return (
-                        <Card key={student.id} className="bg-white border border-gray-200">
+                        <Card key={student.id} className="bg-white dark:bg-black border border-gray-200 dark:border-gray-600">
                           <CardHeader>
-                            <CardTitle className="text-sm text-gray-900">{student.firstName} {student.lastName}</CardTitle>
+                            <CardTitle className="text-sm text-gray-900 dark:text-white">{student.firstName} {student.lastName}</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-2">
                               <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Total Revenue</span>
-                                <span className="text-sm font-medium text-gray-900">${totalRevenue.toLocaleString()}</span>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Total Revenue</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">${totalRevenue.toLocaleString()}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Net Profit</span>
-                                <span className="text-sm font-medium text-gray-900">${totalProfit.toLocaleString()}</span>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Net Profit</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">${totalProfit.toLocaleString()}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Total Shoots</span>
-                                <span className="text-sm font-medium text-gray-900">{totalShoots}</span>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Total Shoots</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">{totalShoots}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Reports</span>
-                                <span className="text-sm font-medium text-gray-900">{reports.length}</span>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Reports</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">{reports.length}</span>
                               </div>
                             </div>
                           </CardContent>
@@ -539,6 +555,13 @@ export function EnhancedCoachDashboard() {
         </Card>
         </div>
       </main>
+
+      {/* Student Edit Profile Modal */}
+      <CoachStudentEditProfile
+        studentId={selectedStudentId || ''}
+        isOpen={isEditModalOpen && !!selectedStudentId}
+        onClose={handleCloseEditModal}
+      />
     </div>
   );
 }

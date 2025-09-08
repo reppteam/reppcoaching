@@ -67,7 +67,9 @@ export function AdminDashboard() {
   });
 
   useEffect(() => {
-    loadData();
+    if (authState.user) {
+      loadData();
+    }
   }, [authState.user]);
 
   const loadData = async () => {
@@ -114,7 +116,6 @@ export function AdminDashboard() {
         next_steps: '',
         student_mood: 'positive'
       });
-      await loadData();
     } catch (error) {
       console.error('Failed to create call log:', error);
     }
@@ -136,7 +137,6 @@ export function AdminDashboard() {
         content: '',
         visibility: 'public'
       });
-      await loadData();
     } catch (error) {
       console.error('Failed to create note:', error);
     }

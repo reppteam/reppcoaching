@@ -284,7 +284,7 @@ export function StudentProfileView({ studentId, onClose }: StudentProfileViewPro
             {/* Student Profile Card */}
             <Card className="bg-white border border-gray-200">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold text-gray-900">Student Profile</CardTitle>
+                <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">Student Profile</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -292,32 +292,32 @@ export function StudentProfileView({ studentId, onClose }: StudentProfileViewPro
                   <div className="space-y-6">
                     <div>
                       <Label className="text-sm font-medium text-gray-500">Business Name</Label>
-                      <p className="text-lg text-gray-900 mt-1">{student.business_name}</p>
+                      <p className="text-lg text-gray-900 dark:text-white mt-1">{student.business_name}</p>
                     </div>
                     
                     <div>
                       <Label className="text-sm font-medium text-gray-500">Target Market</Label>
-                      <p className="text-lg text-gray-900 mt-1">{student.target_market}</p>
+                      <p className="text-lg text-gray-900 dark:text-white mt-1">{student.target_market}</p>
                     </div>
                     
                     <div>
                       <Label className="text-sm font-medium text-gray-500">Strengths</Label>
-                      <p className="text-lg text-gray-900 mt-1">{student.strengths}</p>
+                      <p className="text-lg text-gray-900 dark:text-white mt-1">{student.strengths}</p>
                     </div>
                     
                     <div>
                       <Label className="text-sm font-medium text-gray-500">Goals</Label>
-                      <p className="text-lg text-gray-900 mt-1">{student.goals}</p>
+                      <p className="text-lg text-gray-900 dark:text-white mt-1">{student.goals}</p>
                     </div>
                     
                     <div>
                       <Label className="text-sm font-medium text-gray-500">Preferred Contact</Label>
-                      <p className="text-lg text-gray-900 mt-1">{student.preferred_contact_method}</p>
+                      <p className="text-lg text-gray-900 dark:text-white mt-1">{student.preferred_contact_method}</p>
                     </div>
                     
                     <div>
                       <Label className="text-sm font-medium text-gray-500">Notes</Label>
-                      <p className="text-lg text-gray-900 mt-1">{student.notes}</p>
+                      <p className="text-lg text-gray-900 dark:text-white mt-1">{student.notes}</p>
                     </div>
                   </div>
 
@@ -325,22 +325,22 @@ export function StudentProfileView({ studentId, onClose }: StudentProfileViewPro
                   <div className="space-y-6">
                     <div>
                       <Label className="text-sm font-medium text-gray-500">Location</Label>
-                      <p className="text-lg text-gray-900 mt-1">{student.location}</p>
+                      <p className="text-lg text-gray-900 dark:text-white mt-1">{student.location}</p>
                     </div>
                     
                     <div>
                       <Label className="text-sm font-medium text-gray-500">Challenges</Label>
-                      <p className="text-lg text-gray-900 mt-1">{student.challenges}</p>
+                      <p className="text-lg text-gray-900 dark:text-white mt-1">{student.challenges}</p>
                     </div>
                     
                     <div>
                       <Label className="text-sm font-medium text-gray-500">Availability</Label>
-                      <p className="text-lg text-gray-900 mt-1">{student.availability}</p>
+                      <p className="text-lg text-gray-900 dark:text-white mt-1">{student.availability}</p>
                     </div>
 
                     {/* Performance Summary */}
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Summary</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Performance Summary</h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label className="text-sm font-medium text-gray-500">Total Revenue</Label>
@@ -352,11 +352,11 @@ export function StudentProfileView({ studentId, onClose }: StudentProfileViewPro
                         </div>
                         <div>
                           <Label className="text-sm font-medium text-gray-500">Total Shoots</Label>
-                          <p className="text-xl font-bold text-gray-900 mt-1">{getTotalShoots()}</p>
+                          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{getTotalShoots()}</p>
                         </div>
                         <div>
                           <Label className="text-sm font-medium text-gray-500">Reports</Label>
-                          <p className="text-xl font-bold text-gray-900 mt-1">{student.student?.items?.length || 0}</p>
+                          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">{student.student?.items?.length || 0}</p>
                         </div>
                       </div>
                     </div>
@@ -369,7 +369,7 @@ export function StudentProfileView({ studentId, onClose }: StudentProfileViewPro
           <TabsContent value="calls" className="mt-6">
             <Card className="bg-white border border-gray-200">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold text-gray-900">Call History</CardTitle>
+                <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">Call History</CardTitle>
                 <CardDescription>Communication history with this student</CardDescription>
               </CardHeader>
               <CardContent>
@@ -385,7 +385,7 @@ export function StudentProfileView({ studentId, onClose }: StudentProfileViewPro
           <TabsContent value="notes" className="mt-6">
             <Card className="bg-white border border-gray-200">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold text-gray-900">Notes</CardTitle>
+                <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">Notes</CardTitle>
                 <CardDescription>Additional notes and observations about this student</CardDescription>
               </CardHeader>
               <CardContent>
@@ -395,7 +395,7 @@ export function StudentProfileView({ studentId, onClose }: StudentProfileViewPro
                       <FileText className="h-4 w-4 text-gray-500" />
                       <span className="text-sm font-medium text-gray-700">General Notes</span>
                     </div>
-                    <p className="text-gray-900">{student.notes}</p>
+                    <p className="text-gray-900 dark:text-white">{student.notes}</p>
                   </div>
                 </div>
               </CardContent>

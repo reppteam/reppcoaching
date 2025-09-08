@@ -446,15 +446,15 @@ export function Dashboard() {
       {/* Edit Profile Modal/Overlay */}
       {editProfileOpen && userRole === "user" && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-foreground">Edit Profile</h2>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Your Profile</h2>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setEditProfileOpen(false)}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   <X className="h-4 w-4" />
                 </Button>

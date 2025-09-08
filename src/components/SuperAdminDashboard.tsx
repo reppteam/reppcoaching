@@ -68,20 +68,11 @@ export function SuperAdminDashboard() {
 
   useEffect(() => {
     loadDashboardData();
-    
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(() => {
-      console.log('Auto-refreshing dashboard data...');
-      loadDashboardData();
-    }, 30000); // 30 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
+  }, []); // Empty dependency array - only runs once on mount
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      console.log('Loading dynamic dashboard data...');
       
       // Fetch all users dynamically
       console.log('About to fetch users...');
@@ -211,7 +202,6 @@ export function SuperAdminDashboard() {
       setStats(finalStats);
       
       setLastUpdated(new Date());
-      console.log('Dashboard data updated at:', new Date().toLocaleTimeString());
         } catch (error) {
       console.error('Error loading dynamic dashboard data:', error);
       console.error('Error details:', {
