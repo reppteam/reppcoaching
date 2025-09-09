@@ -1485,105 +1485,119 @@ export function Leads() {
 
       {/* Add Lead Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>Add New Lead</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-white">Add New Lead</DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Add a new real estate agent to your outreach pipeline.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="lead_name" className="text-foreground">Lead Name *</Label>
+                <Label htmlFor="lead_name" className="text-gray-900 dark:text-white">Lead Name *</Label>
                 <Input
                   id="lead_name"
                   value={formData.lead_name || ''}
                   onChange={(e) => setFormData({...formData, lead_name: e.target.value})}
                   placeholder="Jennifer Martinez"
                   required
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-gray-900 dark:text-white">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email || ''}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   placeholder="jennifer@coldwellbanker.com"
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone" className="text-gray-900 dark:text-white">Phone</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={formData.phone || ''}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   placeholder="(555) 123-4567"
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
-                <Label htmlFor="instagram_handle">Instagram Handle</Label>
+                <Label htmlFor="instagram_handle" className="text-gray-900 dark:text-white">Instagram Handle</Label>
                 <Input
                   id="instagram_handle"
                   value={formData.instagram_handle || ''}
                   onChange={(e) => setFormData({...formData, instagram_handle: e.target.value})}
                   placeholder="@jenmartinez_realtor"
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="source">Source</Label>
+                <Label htmlFor="source" className="text-gray-900 dark:text-white">Source</Label>
                 <Select 
                   value={formData.lead_source || 'Instagram'} 
                   onValueChange={(value) => setFormData({...formData, lead_source: value})}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Instagram">📱 Instagram</SelectItem>
-                    <SelectItem value="Facebook">📘 Facebook</SelectItem>
-                    <SelectItem value="Zillow">🏠 Zillow</SelectItem>
-                    <SelectItem value="Realtor.com">🏡 Realtor.com</SelectItem>
-                    <SelectItem value="Referral">👥 Referral</SelectItem>
-                    <SelectItem value="Website">🌐 Website</SelectItem>
-                    <SelectItem value="Other">📋 Other</SelectItem>
+                  <SelectContent className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                    <SelectItem value="Instagram" className="text-gray-900 dark:text-white">📱 Instagram</SelectItem>
+                    <SelectItem value="Facebook" className="text-gray-900 dark:text-white">📘 Facebook</SelectItem>
+                    <SelectItem value="Zillow" className="text-gray-900 dark:text-white">🏠 Zillow</SelectItem>
+                    <SelectItem value="Realtor.com" className="text-gray-900 dark:text-white">🏡 Realtor.com</SelectItem>
+                    <SelectItem value="Referral" className="text-gray-900 dark:text-white">👥 Referral</SelectItem>
+                    <SelectItem value="Website" className="text-gray-900 dark:text-white">🌐 Website</SelectItem>
+                    <SelectItem value="Other" className="text-gray-900 dark:text-white">📋 Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status" className="text-gray-900 dark:text-white">Status</Label>
                 <Select 
                   value={formData.status || 'new'} 
                   onValueChange={(value) => setFormData({...formData, status: value as any})}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="new">New</SelectItem>
-                    <SelectItem value="contacted">Contacted</SelectItem>
-                    <SelectItem value="qualified">Qualified</SelectItem>
-                    <SelectItem value="converted">Converted</SelectItem>
-                    <SelectItem value="lost">Lost</SelectItem>
+                  <SelectContent className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                    <SelectItem value="new" className="text-gray-900 dark:text-white">New</SelectItem>
+                    <SelectItem value="contacted" className="text-gray-900 dark:text-white">Contacted</SelectItem>
+                    <SelectItem value="qualified" className="text-gray-900 dark:text-white">Qualified</SelectItem>
+                    <SelectItem value="converted" className="text-gray-900 dark:text-white">Converted</SelectItem>
+                    <SelectItem value="lost" className="text-gray-900 dark:text-white">Lost</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setDialogOpen(false)}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
                 Cancel
               </Button>
-              <Button type="submit">Add Lead</Button>
+              <Button 
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Add Lead
+              </Button>
             </div>
           </form>
         </DialogContent>

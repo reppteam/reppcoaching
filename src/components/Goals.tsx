@@ -189,16 +189,30 @@ export const Goals: React.FC = () => {
 
   const activeGoals = goals.filter(g => g.status === 'active');
   const completedGoals = goals.filter(g => g.status === 'completed');
+  
+  // Debug logging
+  console.log('Goals:', goals);
+  console.log('Active goals:', activeGoals);
+  console.log('Completed goals:', completedGoals);
+  
   const totalProgress = activeGoals.length > 0
-    ? activeGoals.reduce((sum, g) => sum + (g.progress_percentage || 0), 0) / activeGoals.length
+    ? activeGoals.reduce((sum, g) => {
+        if (g.goal_type === 'text') return sum + 0; // Text goals don't have numeric progress
+        const progress = g.target_value > 0 ? (g.current_value / g.target_value) * 100 : 0;
+        console.log(`Goal ${g.title}: current=${g.current_value}, target=${g.target_value}, progress=${progress}%`);
+        return sum + Math.min(progress, 100);
+      }, 0) / activeGoals.length
     : 0;
+    
+  console.log('Total progress:', totalProgress);
+  console.log('Completion rate:', goals.length > 0 ? ((completedGoals.length / goals.length) * 100).toFixed(1) : 0);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Goals</h2>
+          <h2 className="text-3xl font-bold tracking-tight dark:text-white">Goals</h2>
           <p className="text-muted-foreground">
             Set and track your business goals
           </p>
@@ -219,7 +233,7 @@ export const Goals: React.FC = () => {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="title">Goal Title</Label>
+                <Label htmlFor="title" className="text-gray-900 dark:text-white">Goal Title</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -230,7 +244,7 @@ export const Goals: React.FC = () => {
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-gray-900 dark:text-white">Description</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -242,7 +256,7 @@ export const Goals: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="goal_type">Goal Type</Label>
+                  <Label htmlFor="goal_type" className="text-gray-900 dark:text-white">Goal Type</Label>
                   <Select
                     value={formData.goal_type}
                     onValueChange={(value: 'revenue' | 'clients' | 'shoots' | 'other') =>
@@ -261,7 +275,7 @@ export const Goals: React.FC = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="priority">Priority</Label>
+                  <Label htmlFor="priority" className="text-gray-900 dark:text-white">Priority</Label>
                   <Select
                     value={formData.priority}
                     onValueChange={(value: 'low' | 'medium' | 'high') =>
@@ -281,7 +295,7 @@ export const Goals: React.FC = () => {
 
               {formData.goal_type === 'text' ? (
                 <div>
-                  <Label htmlFor="deadline">Deadline</Label>
+                  <Label htmlFor="deadline" className="text-gray-900 dark:text-white">Deadline</Label>
                   <Input
                     id="deadline"
                     type="date"
@@ -293,7 +307,7 @@ export const Goals: React.FC = () => {
               ) : (
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="target_value">Target Value</Label>
+                    <Label htmlFor="target_value" className="text-gray-900 dark:text-white">Target Value</Label>
                     <Input
                       id="target_value"
                       type="number"
@@ -303,7 +317,7 @@ export const Goals: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="current_value">Current Value</Label>
+                    <Label htmlFor="current_value" className="text-gray-900 dark:text-white">Current Value</Label>
                     <Input
                       id="current_value"
                       type="number"
@@ -313,7 +327,7 @@ export const Goals: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="deadline">Deadline</Label>
+                    <Label htmlFor="deadline" className="text-gray-900 dark:text-white">Deadline</Label>
                     <Input
                       id="deadline"
                       type="date"
@@ -328,7 +342,7 @@ export const Goals: React.FC = () => {
               {/* Additional 8base Fields */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="month_start">Month Start</Label>
+                  <Label htmlFor="month_start" className="text-gray-900 dark:text-white">Month Start</Label>
                   <Input
                     id="month_start"
                     type="date"
@@ -337,7 +351,7 @@ export const Goals: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="aov">Average Order Value (AOV)</Label>
+                  <Label htmlFor="aov" className="text-gray-900 dark:text-white">Average Order Value (AOV)</Label>
                   <Input
                     id="aov"
                     type="number"
@@ -353,7 +367,7 @@ export const Goals: React.FC = () => {
                 <h4 className="text-sm font-medium text-muted-foreground">Revenue Goal Details</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="low_goal_revenue">Low Goal Revenue</Label>
+                    <Label htmlFor="low_goal_revenue" className="text-gray-900 dark:text-white">Low Goal Revenue</Label>
                     <Input
                       id="low_goal_revenue"
                       type="number"
@@ -363,7 +377,7 @@ export const Goals: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="success_goal_revenue">Success Goal Revenue</Label>
+                    <Label htmlFor="success_goal_revenue" className="text-gray-900 dark:text-white">Success Goal Revenue</Label>
                     <Input
                       id="success_goal_revenue"
                       type="number"
@@ -373,7 +387,7 @@ export const Goals: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="actual_revenue">Actual Revenue</Label>
+                    <Label htmlFor="actual_revenue" className="text-gray-900 dark:text-white">Actual Revenue</Label>
                     <Input
                       id="actual_revenue"
                       type="number"
@@ -390,7 +404,7 @@ export const Goals: React.FC = () => {
                 <h4 className="text-sm font-medium text-muted-foreground">Shoot Goal Details</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="low_goal_shoots">Low Goal Shoots</Label>
+                    <Label htmlFor="low_goal_shoots" className="text-gray-900 dark:text-white">Low Goal Shoots</Label>
                     <Input
                       id="low_goal_shoots"
                       type="number"
@@ -399,7 +413,7 @@ export const Goals: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="success_goal_shoots">Success Goal Shoots</Label>
+                    <Label htmlFor="success_goal_shoots" className="text-gray-900 dark:text-white">Success Goal Shoots</Label>
                     <Input
                       id="success_goal_shoots"
                       type="number"
@@ -408,7 +422,7 @@ export const Goals: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="actual_shoots">Actual Shoots</Label>
+                    <Label htmlFor="actual_shoots" className="text-gray-900 dark:text-white">Actual Shoots</Label>
                     <Input
                       id="actual_shoots"
                       type="number"
@@ -606,7 +620,7 @@ export const Goals: React.FC = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="edit_title">Goal Title</Label>
+              <Label htmlFor="edit_title" className="text-gray-900 dark:text-white">Goal Title</Label>
               <Input
                 id="edit_title"
                 value={formData.title}
@@ -616,7 +630,7 @@ export const Goals: React.FC = () => {
             </div>
 
             <div>
-              <Label htmlFor="edit_description">Description</Label>
+              <Label htmlFor="edit_description" className="text-gray-900 dark:text-white">Description</Label>
               <Textarea
                 id="edit_description"
                 value={formData.description}
@@ -628,7 +642,7 @@ export const Goals: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="edit_goal_type">Goal Type</Label>
+                <Label htmlFor="edit_goal_type" className="text-gray-900 dark:text-white">Goal Type</Label>
                 <Select
                   value={formData.goal_type}
                   onValueChange={(value: 'revenue' | 'clients' | 'shoots' | 'other') =>
@@ -647,7 +661,7 @@ export const Goals: React.FC = () => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="edit_priority">Priority</Label>
+                <Label htmlFor="edit_priority" className="text-gray-900 dark:text-white">Priority</Label>
                 <Select
                   value={formData.priority}
                   onValueChange={(value: 'low' | 'medium' | 'high') =>
@@ -667,7 +681,7 @@ export const Goals: React.FC = () => {
 
             {formData.goal_type === 'text' ? (
               <div>
-                <Label htmlFor="edit_deadline">Deadline</Label>
+                <Label htmlFor="edit_deadline" className="text-gray-900 dark:text-white">Deadline</Label>
                 <Input
                   id="edit_deadline"
                   type="date"
@@ -678,7 +692,7 @@ export const Goals: React.FC = () => {
             ) : (
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="edit_target_value">Target Value</Label>
+                  <Label htmlFor="edit_target_value" className="text-gray-900 dark:text-white">Target Value</Label>
                   <Input
                     id="edit_target_value"
                     type="number"
@@ -687,7 +701,7 @@ export const Goals: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit_current_value">Current Value</Label>
+                  <Label htmlFor="edit_current_value" className="text-gray-900 dark:text-white">Current Value</Label>
                   <Input
                     id="edit_current_value"
                     type="number"
@@ -696,7 +710,7 @@ export const Goals: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit_deadline">Deadline</Label>
+                  <Label htmlFor="edit_deadline" className="text-gray-900 dark:text-white">Deadline</Label>
                   <Input
                     id="edit_deadline"
                     type="date"
@@ -708,7 +722,7 @@ export const Goals: React.FC = () => {
             )}
 
             <div>
-              <Label htmlFor="edit_status">Status</Label>
+              <Label htmlFor="edit_status" className="text-gray-900 dark:text-white">Status</Label>
               <Select
                 value={formData.status}
                 onValueChange={(value: 'active' | 'completed') =>
@@ -727,7 +741,7 @@ export const Goals: React.FC = () => {
             {/* Additional 8base Fields for Edit */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="edit_month_start">Month Start</Label>
+                <Label htmlFor="edit_month_start" className="text-gray-900 dark:text-white">Month Start</Label>
                 <Input
                   id="edit_month_start"
                   type="date"
@@ -736,7 +750,7 @@ export const Goals: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit_aov">Average Order Value (AOV)</Label>
+                <Label htmlFor="edit_aov" className="text-gray-900 dark:text-white">Average Order Value (AOV)</Label>
                 <Input
                   id="edit_aov"
                   type="number"
@@ -752,7 +766,7 @@ export const Goals: React.FC = () => {
               <h4 className="text-sm font-medium text-muted-foreground">Revenue Goal Details</h4>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="edit_low_goal_revenue">Low Goal Revenue</Label>
+                  <Label htmlFor="edit_low_goal_revenue" className="text-gray-900 dark:text-white">Low Goal Revenue</Label>
                   <Input
                     id="edit_low_goal_revenue"
                     type="number"
@@ -762,7 +776,7 @@ export const Goals: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit_success_goal_revenue">Success Goal Revenue</Label>
+                  <Label htmlFor="edit_success_goal_revenue" className="text-gray-900 dark:text-white">Success Goal Revenue</Label>
                   <Input
                     id="edit_success_goal_revenue"
                     type="number"
@@ -772,7 +786,7 @@ export const Goals: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit_actual_revenue">Actual Revenue</Label>
+                  <Label htmlFor="edit_actual_revenue" className="text-gray-900 dark:text-white">Actual Revenue</Label>
                   <Input
                     id="edit_actual_revenue"
                     type="number"
@@ -789,7 +803,7 @@ export const Goals: React.FC = () => {
               <h4 className="text-sm font-medium text-muted-foreground">Shoot Goal Details</h4>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="edit_low_goal_shoots">Low Goal Shoots</Label>
+                  <Label htmlFor="edit_low_goal_shoots" className="text-gray-900 dark:text-white">Low Goal Shoots</Label>
                   <Input
                     id="edit_low_goal_shoots"
                     type="number"
@@ -798,7 +812,7 @@ export const Goals: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit_success_goal_shoots">Success Goal Shoots</Label>
+                  <Label htmlFor="edit_success_goal_shoots" className="text-gray-900 dark:text-white">Success Goal Shoots</Label>
                   <Input
                     id="edit_success_goal_shoots"
                     type="number"
@@ -807,7 +821,7 @@ export const Goals: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit_actual_shoots">Actual Shoots</Label>
+                  <Label htmlFor="edit_actual_shoots" className="text-gray-900 dark:text-white">Actual Shoots</Label>
                   <Input
                     id="edit_actual_shoots"
                     type="number"

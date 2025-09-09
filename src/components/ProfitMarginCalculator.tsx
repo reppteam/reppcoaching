@@ -372,35 +372,26 @@ export function ProfitMarginCalculator() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white dark:bg-black text-gray-900 dark:text-white">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2">
-            <Calculator className="h-6 w-6 text-brand-blue" />
+          <h2 className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <Calculator className="h-6 w-6 text-brand-blue dark:text-white" />
             Profit Margin Calculator
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600 dark:text-gray-400">
             Analyze your service costs and optimize pricing for maximum profitability
           </p>
         </div>
         <div className="flex space-x-2">
           <Button 
             onClick={() => {
-              console.log('Current state:', { products, subitems, globalVars });
-              console.log('Products with calculations:', productsWithCalculations);
-            }} 
-            variant="outline"
-          >
-            Debug
-          </Button>
-          <Button 
-            onClick={() => {
-              console.log('Force refreshing data...');
               loadData();
             }} 
             variant="outline"
           >
+            
             Refresh
           </Button>
           <Button onClick={() => setGlobalVarsDialogOpen(true)} variant="outline">
@@ -412,23 +403,23 @@ export function ProfitMarginCalculator() {
 
       {/* Global Variables Summary */}
       {globalVars && (
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="text-lg">Current Settings</CardTitle>
+            <CardTitle className="text-lg text-gray-900 dark:text-white">Current Settings</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                <div className="font-medium text-brand-blue">Hourly Pay</div>
-                <div>{formatCurrency(globalVars.hourly_pay)}/hr</div>
+                <div className="font-medium text-blue-600 dark:text-blue-400">Hourly Pay</div>
+                <div className="text-gray-900 dark:text-white">{formatCurrency(globalVars.hourly_pay)}/hr</div>
               </div>
               <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                <div className="font-medium text-green-600">Cost Per Photo</div>
-                <div>{formatCurrency(globalVars.cost_per_photo)}</div>
+                <div className="font-medium text-green-600 dark:text-green-400">Cost Per Photo</div>
+                <div className="text-gray-900 dark:text-white">{formatCurrency(globalVars.cost_per_photo)}</div>
               </div>
               <div className="text-center p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-                <div className="font-medium text-purple-600">Target Margin</div>
-                <div>{globalVars.target_profit_margin}%</div>
+                <div className="font-medium text-purple-600 dark:text-purple-400">Target Margin</div>
+                <div className="text-gray-900 dark:text-white">{globalVars.target_profit_margin}%</div>
               </div>
             </div>
           </CardContent>
@@ -436,12 +427,12 @@ export function ProfitMarginCalculator() {
       )}
 
       {/* Products List */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Your Services</CardTitle>
-              <CardDescription>Click on a service to see detailed cost breakdown</CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">Your Services</CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">Click on a service to see detailed cost breakdown</CardDescription>
             </div>
             <Button 
               onClick={() => {
@@ -458,9 +449,9 @@ export function ProfitMarginCalculator() {
         <CardContent>
           {productsWithCalculations.length === 0 ? (
             <div className="text-center py-8">
-              <Calculator className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No services added yet.</p>
-              <p className="text-sm text-muted-foreground">Add your first service to start calculating profit margins.</p>
+              <Calculator className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+              <p className="text-gray-600 dark:text-gray-400">No services added yet.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-500">Add your first service to start calculating profit margins.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -470,22 +461,22 @@ export function ProfitMarginCalculator() {
                 const profitMarginColor = getProfitMarginColor(product.profit_margin);
                 
                 return (
-                  <div key={product.id} className="border rounded-lg overflow-hidden">
+                  <div key={product.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
                     {/* Product Header */}
                     <div 
-                      className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                      className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => toggleProductExpanded(product.id)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           {isExpanded ? (
-                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                           ) : (
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                           )}
                           <div>
-                            <h3 className="font-medium">{product.name}</h3>
-                            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                            <h3 className="font-medium text-gray-900 dark:text-white">{product.name}</h3>
+                            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                               <span>Price: {formatCurrency(product.price)}</span>
                               <span>Cost: {formatCurrency(product.total_cost)}</span>
                               <span className={profitMarginColor}>
@@ -533,40 +524,41 @@ export function ProfitMarginCalculator() {
 
                     {/* Expanded Content */}
                     {isExpanded && (
-                      <div className="border-t bg-muted/25">
+                      <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
                         <div className="p-4 space-y-4">
                           {/* Key Metrics */}
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="text-center p-3 bg-background rounded-lg">
-                              <div className="text-sm text-muted-foreground">Total Cost</div>
-                              <div className="font-medium">{formatCurrency(product.total_cost)}</div>
+                            <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Total Cost</div>
+                              <div className="font-medium text-gray-900 dark:text-white">{formatCurrency(product.total_cost)}</div>
                             </div>
-                            <div className="text-center p-3 bg-background rounded-lg">
-                              <div className="text-sm text-muted-foreground">Profit</div>
-                              <div className={`font-medium ${product.profit > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Profit</div>
+                              <div className={`font-medium ${product.profit > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                 {formatCurrency(product.profit)}
                               </div>
                             </div>
-                            <div className="text-center p-3 bg-background rounded-lg">
-                              <div className="text-sm text-muted-foreground">Profit Margin</div>
+                            <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Profit Margin</div>
                               <div className={`font-medium ${profitMarginColor}`}>
                                 {product.profit_margin.toFixed(1)}%
                               </div>
                             </div>
-                            <div className="text-center p-3 bg-background rounded-lg">
-                              <div className="text-sm text-muted-foreground">Min. Price</div>
-                              <div className="font-medium">{formatCurrency(product.minimum_price)}</div>
+                            <div className="text-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Min. Price</div>
+                              <div className="font-medium text-gray-900 dark:text-white">{formatCurrency(product.minimum_price)}</div>
                             </div>
                           </div>
 
                           {/* Cost Breakdown */}
                           <div>
                             <div className="flex justify-between items-center mb-3">
-                              <h4 className="font-medium">Cost Breakdown</h4>
+                              <h4 className="font-medium text-gray-900 dark:text-white">Cost Breakdown</h4>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => openAddSubitem(product.id)}
+                                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                               >
                                 <Plus className="mr-2 h-3 w-3" />
                                 Add Cost
@@ -574,19 +566,19 @@ export function ProfitMarginCalculator() {
                             </div>
                             
                             {product.subitems.length === 0 ? (
-                              <div className="text-center py-4 text-muted-foreground">
+                              <div className="text-center py-4 text-gray-600 dark:text-gray-400">
                                 No cost items added yet.
                               </div>
                             ) : (
                               <Table>
                                 <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead>Quantity</TableHead>
-                                    <TableHead>Rate</TableHead>
-                                    <TableHead>Cost</TableHead>
-                                    <TableHead className="w-20">Actions</TableHead>
+                                  <TableRow className="border-gray-200 dark:border-gray-700">
+                                    <TableHead className="text-gray-900 dark:text-white">Type</TableHead>
+                                    <TableHead className="text-gray-900 dark:text-white">Description</TableHead>
+                                    <TableHead className="text-gray-900 dark:text-white">Quantity</TableHead>
+                                    <TableHead className="text-gray-900 dark:text-white">Rate</TableHead>
+                                    <TableHead className="text-gray-900 dark:text-white">Cost</TableHead>
+                                    <TableHead className="w-20 text-gray-900 dark:text-white">Actions</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -621,16 +613,16 @@ export function ProfitMarginCalculator() {
                                     
                                     return (
                                       <TableRow key={subitem.id}>
-                                        <TableCell>
+                                        <TableCell className="text-gray-900 dark:text-white">
                                           <div className="flex items-center space-x-2">
                                             <span>{getSubitemIcon(subitem.type)}</span>
                                             <span className="capitalize">{subitem.type}</span>
                                           </div>
                                         </TableCell>
-                                        <TableCell>{subitem.label}</TableCell>
-                                        <TableCell>{quantity}</TableCell>
-                                        <TableCell>{rate}</TableCell>
-                                        <TableCell className="font-medium">
+                                        <TableCell className="text-gray-900 dark:text-white">{subitem.label}</TableCell>
+                                        <TableCell className="text-gray-900 dark:text-white">{quantity}</TableCell>
+                                        <TableCell className="text-gray-900 dark:text-white">{rate}</TableCell>
+                                        <TableCell className="font-medium text-gray-900 dark:text-white">
                                           {formatCurrency(calculatedCost)}
                                         </TableCell>
                                         <TableCell>
@@ -661,9 +653,9 @@ export function ProfitMarginCalculator() {
 
                           {/* Pricing Recommendations */}
                           {isUnderpriced && (
-                            <Alert>
-                              <AlertTriangle className="h-4 w-4" />
-                              <AlertDescription>
+                            <Alert className="bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800">
+                              <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                              <AlertDescription className="text-orange-800 dark:text-orange-200">
                                 <strong>Pricing Alert:</strong> Your current price of {formatCurrency(product.price)} is 
                                 below the minimum recommended price of {formatCurrency(product.minimum_price)} for 
                                 a {globalVars?.target_profit_margin}% profit margin. 
@@ -684,16 +676,16 @@ export function ProfitMarginCalculator() {
 
       {/* Global Variables Dialog */}
       <Dialog open={globalVarsDialogOpen} onOpenChange={setGlobalVarsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>Calculator Settings</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-white">Calculator Settings</DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               These settings affect all cost calculations across your services.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="hourly_pay">Hourly Pay Rate</Label>
+              <Label htmlFor="hourly_pay" className="text-gray-900 dark:text-white">Hourly Pay Rate</Label>
               <Input
                 id="hourly_pay"
                 type="number"
@@ -703,13 +695,14 @@ export function ProfitMarginCalculator() {
                   ...globalVarsForm,
                   hourly_pay: parseFloat(e.target.value) || 0
                 })}
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Used to calculate labor costs for time-based work
               </p>
             </div>
             <div>
-              <Label htmlFor="cost_per_photo">Cost Per Photo</Label>
+              <Label htmlFor="cost_per_photo" className="text-gray-900 dark:text-white">Cost Per Photo</Label>
               <Input
                 id="cost_per_photo"
                 type="number"
@@ -719,13 +712,14 @@ export function ProfitMarginCalculator() {
                   ...globalVarsForm,
                   cost_per_photo: parseFloat(e.target.value) || 0
                 })}
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Cost for editing/processing each photo
               </p>
             </div>
             <div>
-              <Label htmlFor="target_profit_margin">Target Profit Margin (%)</Label>
+              <Label htmlFor="target_profit_margin" className="text-gray-900 dark:text-white">Target Profit Margin (%)</Label>
               <Input
                 id="target_profit_margin"
                 type="number"
@@ -737,16 +731,24 @@ export function ProfitMarginCalculator() {
                   ...globalVarsForm,
                   target_profit_margin: parseFloat(e.target.value) || 0
                 })}
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Used to calculate minimum pricing recommendations
               </p>
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setGlobalVarsDialogOpen(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setGlobalVarsDialogOpen(false)}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSaveGlobalVars}>
+              <Button 
+                onClick={handleSaveGlobalVars}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 Save Settings
               </Button>
             </div>
@@ -756,16 +758,16 @@ export function ProfitMarginCalculator() {
 
       {/* Product Dialog */}
       <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>{editingProduct ? 'Edit Service' : 'Add New Service'}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-white">{editingProduct ? 'Edit Service' : 'Add New Service'}</DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Create a service package to analyze its profitability.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="product_name">Service Name</Label>
+              <Label htmlFor="product_name" className="text-gray-900 dark:text-white">Service Name</Label>
               <Input
                 id="product_name"
                 value={productForm.name}
@@ -774,10 +776,11 @@ export function ProfitMarginCalculator() {
                   name: e.target.value
                 })}
                 placeholder="e.g., Standard Photo Shoot"
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
             </div>
             <div>
-              <Label htmlFor="product_price">Price (What you charge)</Label>
+              <Label htmlFor="product_price" className="text-gray-900 dark:text-white">Price (What you charge)</Label>
               <Input
                 id="product_price"
                 type="number"
@@ -788,13 +791,21 @@ export function ProfitMarginCalculator() {
                   price: parseFloat(e.target.value) || 0
                 })}
                 placeholder="250.00"
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setProductDialogOpen(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setProductDialogOpen(false)}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSaveProduct}>
+              <Button 
+                onClick={handleSaveProduct}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 {editingProduct ? 'Update' : 'Create'} Service
               </Button>
             </div>
@@ -804,34 +815,34 @@ export function ProfitMarginCalculator() {
 
       {/* Subitem Dialog */}
       <Dialog open={subitemDialogOpen} onOpenChange={setSubitemDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <DialogHeader>
-            <DialogTitle>{editingSubitem ? 'Edit Cost Item' : 'Add Cost Item'}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-white">{editingSubitem ? 'Edit Cost Item' : 'Add Cost Item'}</DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Add a cost component to this service package.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="subitem_type">Cost Type</Label>
+              <Label htmlFor="subitem_type" className="text-gray-900 dark:text-white">Cost Type</Label>
               <Select 
                 value={subitemForm.type} 
                 onValueChange={(value: 'fixed' | 'photo' | 'labor') => 
                   setSubitemForm({ ...subitemForm, type: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fixed">💰 Fixed Cost</SelectItem>
-                  <SelectItem value="photo">📸 Photo Cost</SelectItem>
-                  <SelectItem value="labor">⏱️ Labor Cost</SelectItem>
+                <SelectContent className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                  <SelectItem value="fixed" className="text-gray-900 dark:text-white">💰 Fixed Cost</SelectItem>
+                  <SelectItem value="photo" className="text-gray-900 dark:text-white">📸 Photo Cost</SelectItem>
+                  <SelectItem value="labor" className="text-gray-900 dark:text-white">⏱️ Labor Cost</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="subitem_label">Description</Label>
+              <Label htmlFor="subitem_label" className="text-gray-900 dark:text-white">Description</Label>
               <Input
                 id="subitem_label"
                 value={subitemForm.label}
@@ -844,10 +855,11 @@ export function ProfitMarginCalculator() {
                   subitemForm.type === 'photo' ? 'e.g., Photo Editing' :
                   'e.g., Shooting Time'
                 }
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
             </div>
             <div>
-              <Label htmlFor="subitem_value">
+              <Label htmlFor="subitem_value" className="text-gray-900 dark:text-white">
                 {subitemForm.type === 'fixed' ? 'Amount ($)' :
                  subitemForm.type === 'photo' ? 'Number of Photos' :
                  'Hours'}
@@ -870,9 +882,10 @@ export function ProfitMarginCalculator() {
                   subitemForm.type === 'photo' ? '30' :
                   '1.5'
                 }
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
               {globalVars && (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {subitemForm.type === 'photo' && 
                     `Will be calculated as: ${subitemForm.value} × ${formatCurrency(globalVars.cost_per_photo)} = ${formatCurrency(subitemForm.value * globalVars.cost_per_photo)}`
                   }
@@ -886,15 +899,22 @@ export function ProfitMarginCalculator() {
               )}
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setSubitemDialogOpen(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setSubitemDialogOpen(false)}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
                 Cancel
               </Button>
-              <Button onClick={() => {
-                console.log('Subitem form submit clicked');
-                console.log('Current form state:', subitemForm);
-                console.log('Selected product ID:', selectedProductId);
-                handleSaveSubitem();
-              }}>
+              <Button 
+                onClick={() => {
+                  console.log('Subitem form submit clicked');
+                  console.log('Current form state:', subitemForm);
+                  console.log('Selected product ID:', selectedProductId);
+                  handleSaveSubitem();
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 {editingSubitem ? 'Update' : 'Add'} Cost Item
               </Button>
             </div>

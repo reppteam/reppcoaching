@@ -244,7 +244,7 @@ export const WeeklyReports: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
             <div>
-          <h2 className="text-3xl font-bold tracking-tight">Weekly Reports</h2>
+          <h2 className="text-3xl font-bold tracking-tight dark:text-white">Weekly Reports</h2>
           <p className="text-muted-foreground">
             Track your weekly performance and revenue
           </p>
@@ -810,7 +810,7 @@ export const WeeklyReports: React.FC = () => {
                     <p className="text-2xl font-bold text-green-600">
                       ${calculateNetProfit().toFixed(2)}
                     </p>
-                    {editingReport && (
+                    {/* {editingReport && (
                       <div className="text-xs text-muted-foreground">
                         Stored: ${(() => {
                           const report = reports.find(r => r.id === editingReport);
@@ -820,7 +820,7 @@ export const WeeklyReports: React.FC = () => {
                     )}
                     <div className="text-xs text-blue-600 font-medium">
                       Calc: ${calculateNetProfit().toFixed(2)}
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </CardContent>

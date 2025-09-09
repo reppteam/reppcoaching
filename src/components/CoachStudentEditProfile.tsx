@@ -302,7 +302,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
   if (loading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose} className="w-full">
-        <DialogContent className="w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-[95vw] overflow-y-auto">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -317,7 +317,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
   if (!student) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose} className="w-full">
-        <DialogContent className="w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-[95vw] overflow-y-auto">
           <div className="text-center py-12">
             <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Student Not Found</h3>
@@ -329,8 +329,8 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-6xl max-h-[90vh] overflow-y-auto p-0 bg-background text-foreground">
+    <Dialog open={isOpen} onOpenChange={onClose} className="w-full">
+      <DialogContent className="sm:w-[80vw] sm:max-w-[80vw] overflow-y-auto p-0 bg-background text-foreground">
         <div className="p-6">
           {/* Profile Header - Exact match to image */}
           <div className="flex items-center justify-between mb-6">
