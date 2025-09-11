@@ -582,24 +582,6 @@
           "relation": null
         },
         {
-          "id": "688b13c08a5fd60002b84362",
-          "name": "notes",
-          "displayName": "notes",
-          "description": null,
-          "fieldType": "TEXT",
-          "fieldTypeAttributes": {
-            "format": "UNFORMATTED",
-            "fieldSize": 100
-          },
-          "isList": false,
-          "isRequired": false,
-          "isUnique": false,
-          "defaultValue": null,
-          "isSystem": false,
-          "isMeta": false,
-          "relation": null
-        },
-        {
           "id": "68a316987b169f00021021df",
           "name": "firstName",
           "displayName": "firstName",
@@ -795,7 +777,7 @@
           "description": null,
           "fieldType": "RELATION",
           "fieldTypeAttributes": null,
-          "isList": false,
+          "isList": true,
           "isRequired": false,
           "isUnique": false,
           "defaultValue": null,
@@ -804,7 +786,7 @@
           "relation": {
             "refFieldName": "studentNote",
             "refFieldDisplayName": "studentNote",
-            "relationTableName": "NoteStudent",
+            "relationTableName": "NoteStudents",
             "relationFieldName": "studentBId",
             "refTable": {
               "id": "687a3304a287d60002164782",
@@ -814,6 +796,318 @@
             "refFieldIsList": false,
             "refFieldIsRequired": false
           }
+        },
+        {
+          "id": "68bea3de4fc7350002884634",
+          "name": "notes",
+          "displayName": "notes",
+          "description": null,
+          "fieldType": "JSON",
+          "fieldTypeAttributes": null,
+          "isList": false,
+          "isRequired": false,
+          "isUnique": null,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2c974601cbc00026d1de8",
+          "name": "current_goal",
+          "displayName": "current_goal",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2c986b6dc1e000226e935",
+          "name": "goal_progress",
+          "displayName": "goal_progress",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2c9965a1dc8000224ae58",
+          "name": "next_milestone",
+          "displayName": "next_milestone",
+          "description": null,
+          "fieldType": "TEXT",
+          "fieldTypeAttributes": {
+            "format": "UNFORMATTED",
+            "fieldSize": 100
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2c9b3b6dc1e000226e942",
+          "name": "coaching_term_start",
+          "displayName": "coaching_term_start",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2c9ece709f600027dafd4",
+          "name": "coaching_term_end",
+          "displayName": "coaching_term_end",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2ca0cb6dc1e000226e997",
+          "name": "access_start",
+          "displayName": "access_start",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2ca2d6f681b000289dbb2",
+          "name": "access_end",
+          "displayName": "access_end",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2ca49c556150002ad2f6b",
+          "name": "total_revenue",
+          "displayName": "total_revenue",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2cabf7502aa000270faea",
+          "name": "total_shoots",
+          "displayName": "total_shoots",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2cae87d0d7a00026efbfa",
+          "name": "total_expenses",
+          "displayName": "total_expenses",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2cbb60184b200023bcd11",
+          "name": "total_editing_cost",
+          "displayName": "total_editing_cost",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2cbfc9b86d90002db8cf4",
+          "name": "average_order_value",
+          "displayName": "average_order_value",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 2,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2cc0dc83aec000282dd9c",
+          "name": "last_report_date",
+          "displayName": "last_report_date",
+          "description": null,
+          "fieldType": "DATE",
+          "fieldTypeAttributes": {
+            "format": "DATE"
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2cc41601cbc00026d1ea9",
+          "name": "reports_this_month",
+          "displayName": "reports_this_month",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
+        },
+        {
+          "id": "68c2ce04669c9f0002e75a39",
+          "name": "engagement_score",
+          "displayName": "engagement_score",
+          "description": null,
+          "fieldType": "NUMBER",
+          "fieldTypeAttributes": {
+            "format": "NUMBER",
+            "precision": 0,
+            "currency": null,
+            "minValue": null,
+            "maxValue": null,
+            "isBigInt": null
+          },
+          "isList": false,
+          "isRequired": false,
+          "isUnique": false,
+          "defaultValue": null,
+          "isSystem": false,
+          "isMeta": false,
+          "relation": null
         }
       ]
     },
@@ -1440,14 +1734,14 @@
           "relation": {
             "refFieldName": "studentNote",
             "refFieldDisplayName": "studentNote",
-            "relationTableName": "NoteStudent",
+            "relationTableName": "NoteStudents",
             "relationFieldName": "noteAId",
             "refTable": {
               "id": "687a2cb7ff9eee00029966e1",
               "name": "Student",
               "displayName": "Student"
             },
-            "refFieldIsList": false,
+            "refFieldIsList": true,
             "refFieldIsRequired": false
           }
         },
