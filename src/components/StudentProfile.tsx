@@ -32,7 +32,8 @@ import {
   Users,
   DollarSign,
   CheckCircle,
-  XCircle
+  XCircle,
+  Eye
 } from 'lucide-react';
 import { StudentProfile as StudentProfileType, CallLog, Note } from '../types';
 
@@ -252,6 +253,13 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="calls">Call Logs</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
+          {currentUser?.role === 'coach' && (
+            <>
+              <TabsTrigger value="goals">Goals & Progress</TabsTrigger>
+              <TabsTrigger value="leads">Lead Insights</TabsTrigger>
+              <TabsTrigger value="profit">Profit Calculator</TabsTrigger>
+            </>
+          )}
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -413,6 +421,358 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
             ))}
           </div>
         </TabsContent>
+
+        {/* Coach-specific tabs */}
+        {currentUser?.role === 'coach' && (
+          <>
+            {/* Goals & Progress Tab */}
+            <TabsContent value="goals" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Current Goals */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5 text-blue-600" />
+                      Current Goals
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <h4 className="font-semibold text-blue-900 dark:text-blue-100">Primary Goal</h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          {profile?.goals || 'No primary goal set'}
+                        </p>
+                        <div className="mt-2">
+                          <div className="flex justify-between text-xs text-blue-600 dark:text-blue-400">
+                            <span>Progress</span>
+                            <span>75%</span>
+                          </div>
+                          <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2 mt-1">
+                            <div className="bg-blue-600 h-2 rounded-full" style={{width: '75%'}}></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <h4 className="font-semibold text-green-900 dark:text-green-100">Secondary Goal</h4>
+                        <p className="text-sm text-green-700 dark:text-green-300">
+                          Increase client base by 20%
+                        </p>
+                        <div className="mt-2">
+                          <div className="flex justify-between text-xs text-green-600 dark:text-green-400">
+                            <span>Progress</span>
+                            <span>45%</span>
+                          </div>
+                          <div className="w-full bg-green-200 dark:bg-green-800 rounded-full h-2 mt-1">
+                            <div className="bg-green-600 h-2 rounded-full" style={{width: '45%'}}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Goal History */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                      Goal History
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div>
+                          <p className="font-medium text-sm">Complete 10 shoots</p>
+                          <p className="text-xs text-muted-foreground">Completed 2 weeks ago</p>
+                        </div>
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div>
+                          <p className="font-medium text-sm">Increase revenue by 30%</p>
+                          <p className="text-xs text-muted-foreground">Completed 1 month ago</p>
+                        </div>
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div>
+                          <p className="font-medium text-sm">Build portfolio website</p>
+                          <p className="text-xs text-muted-foreground">In progress</p>
+                        </div>
+                        <Clock className="h-5 w-5 text-orange-600" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Lead Insights Tab */}
+            <TabsContent value="leads" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Lead Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      Lead Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Total Leads:</span>
+                        <span className="font-semibold">24</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Converted:</span>
+                        <span className="font-semibold text-green-600">18</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Conversion Rate:</span>
+                        <span className="font-semibold text-blue-600">75%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-muted-foreground">Pipeline Value:</span>
+                        <span className="font-semibold text-green-600">$12,500</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Top Sources */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                      Top Sources
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Referrals</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div className="bg-blue-600 h-2 rounded-full" style={{width: '40%'}}></div>
+                          </div>
+                          <span className="text-xs font-medium">40%</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Social Media</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div className="bg-green-600 h-2 rounded-full" style={{width: '30%'}}></div>
+                          </div>
+                          <span className="text-xs font-medium">30%</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Website</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div className="bg-orange-600 h-2 rounded-full" style={{width: '20%'}}></div>
+                          </div>
+                          <span className="text-xs font-medium">20%</span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Other</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div className="bg-gray-600 h-2 rounded-full" style={{width: '10%'}}></div>
+                          </div>
+                          <span className="text-xs font-medium">10%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-orange-600" />
+                      Recent Activity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div>
+                          <p className="text-sm font-medium">New lead from referral</p>
+                          <p className="text-xs text-muted-foreground">2 hours ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <div>
+                          <p className="text-sm font-medium">Lead converted to client</p>
+                          <p className="text-xs text-muted-foreground">1 day ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                        <div>
+                          <p className="text-sm font-medium">Follow-up scheduled</p>
+                          <p className="text-xs text-muted-foreground">2 days ago</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Profit Calculator Tab */}
+            <TabsContent value="profit" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-green-600" />
+                    Student's Profit Calculator
+                  </CardTitle>
+                  <CardDescription>
+                    View the student's profit calculations and financial insights
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Quick Financial Overview */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-green-600" />
+                          <span className="text-sm font-medium text-green-900 dark:text-green-100">Total Revenue</span>
+                        </div>
+                        <p className="text-2xl font-bold text-green-600 mt-1">$15,420</p>
+                        <p className="text-xs text-green-700 dark:text-green-300">This month</p>
+                      </div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-5 w-5 text-blue-600" />
+                          <span className="text-sm font-medium text-blue-900 dark:text-blue-100">Net Profit</span>
+                        </div>
+                        <p className="text-2xl font-bold text-blue-600 mt-1">$8,750</p>
+                        <p className="text-xs text-blue-700 dark:text-blue-300">After expenses</p>
+                      </div>
+                      <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Target className="h-5 w-5 text-orange-600" />
+                          <span className="text-sm font-medium text-orange-900 dark:text-orange-100">Profit Margin</span>
+                        </div>
+                        <p className="text-2xl font-bold text-orange-600 mt-1">56.7%</p>
+                        <p className="text-xs text-orange-700 dark:text-orange-300">Industry avg: 45%</p>
+                      </div>
+                      <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-5 w-5 text-purple-600" />
+                          <span className="text-sm font-medium text-purple-900 dark:text-purple-100">Avg. Order Value</span>
+                        </div>
+                        <p className="text-2xl font-bold text-purple-600 mt-1">$1,285</p>
+                        <p className="text-xs text-purple-700 dark:text-purple-300">Per shoot</p>
+                      </div>
+                    </div>
+
+                    {/* Expense Breakdown */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Expense Breakdown</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex justify-between">
+                              <span className="text-sm">Equipment & Supplies</span>
+                              <span className="font-medium">$2,100</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Marketing & Advertising</span>
+                              <span className="font-medium">$1,850</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Transportation</span>
+                              <span className="font-medium">$1,200</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Software & Tools</span>
+                              <span className="font-medium">$520</span>
+                            </div>
+                            <div className="flex justify-between border-t pt-2">
+                              <span className="font-medium">Total Expenses</span>
+                              <span className="font-bold">$5,670</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Revenue by Service</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex justify-between">
+                              <span className="text-sm">Real Estate Photography</span>
+                              <span className="font-medium">$12,500</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Virtual Tours</span>
+                              <span className="font-medium">$1,920</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Drone Services</span>
+                              <span className="font-medium">$1,000</span>
+                            </div>
+                            <div className="flex justify-between border-t pt-2">
+                              <span className="font-medium">Total Revenue</span>
+                              <span className="font-bold">$15,420</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => window.open('/dashboard?view=profit-calculator', '_blank')}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Full Calculator
+                      </Button>
+                      <Button variant="outline" onClick={() => window.open('/dashboard?view=profit-calculator&edit=true', '_blank')}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Settings
+                      </Button>
+                      <Button variant="outline" onClick={() => window.open('/dashboard?view=reports', '_blank')}>
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        View Reports
+                      </Button>
+                      {currentUser?.role === 'coach' && (
+                        <Button variant="outline" onClick={() => {
+                          // For coaches, provide option to log in as student
+                          const confirmLogin = window.confirm(
+                            `This will open the student's dashboard in a new tab. Do you want to continue?`
+                          );
+                          if (confirmLogin) {
+                            window.open(`/dashboard?student=${student.id}`, '_blank');
+                          }
+                        }}>
+                          <User className="h-4 w-4 mr-2" />
+                          Log in as Student
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </>
+        )}
       </Tabs>
 
       {/* Edit Profile Dialog */}

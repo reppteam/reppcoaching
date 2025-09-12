@@ -119,6 +119,7 @@ export interface Lead {
   last_followup_outcome?: string;
   date_of_last_followup?: string;
   next_followup_date?: string;
+  notes?: string; // Lead notes for quick jotting after calls
   // New engagement tracking system - array of tags
   engagementTag: EngagementTag[];
   script_components: {

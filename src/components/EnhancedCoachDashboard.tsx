@@ -9,6 +9,9 @@ import { Badge } from './ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { CoachStudentEditProfile } from './CoachStudentEditProfile';
+import { CompanyWeekDisplay } from './CompanyWeekDisplay';
+import { LogCallModal } from './LogCallModal';
+import { CreateNoteModal } from './CreateNoteModal';
 import { 
   Users, 
   TrendingUp, 
@@ -29,9 +32,15 @@ import {
   Mail,
   MapPin,
   Building,
-  Plus,
-  Sun,
-  Moon
+  Camera,
+  Star,
+  Award,
+  TrendingDown,
+  Zap,
+  Heart,
+  Shield,
+  Crown,
+  Sparkles
 } from 'lucide-react';
 
 interface Coach {
@@ -94,6 +103,8 @@ export function EnhancedCoachDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLogCallModalOpen, setIsLogCallModalOpen] = useState(false);
+  const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
 
   useEffect(() => {
     if (user?.email) {
@@ -181,6 +192,73 @@ export function EnhancedCoachDashboard() {
     }, 0);
   };
 
+  const getTotalPaidShoots = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const studentPaidShoots = student.student?.items?.reduce((studentTotal, report) => 
+        studentTotal + (report.paid_shoots || 0), 0) || 0;
+      return total + studentPaidShoots;
+    }, 0);
+  };
+
+  const getTotalFreeShoots = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const studentFreeShoots = student.student?.items?.reduce((studentTotal, report) => 
+        studentTotal + (report.free_shoots || 0), 0) || 0;
+      return total + studentFreeShoots;
+    }, 0);
+  };
+
+  const getTotalExpenses = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const studentExpenses = student.student?.items?.reduce((studentTotal, report) => 
+        studentTotal + (report.expenses || 0), 0) || 0;
+      return total + studentExpenses;
+    }, 0);
+  };
+
+  const getTotalEditingCost = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const studentEditingCost = student.student?.items?.reduce((studentTotal, report) => 
+        studentTotal + (report.editing_cost || 0), 0) || 0;
+      return total + studentEditingCost;
+    }, 0);
+  };
+
+  const getAverageOrderValue = () => {
+    const totalRevenue = getTotalRevenue();
+    const totalShoots = getTotalShoots();
+    return totalShoots > 0 ? totalRevenue / totalShoots : 0;
+  };
+
+  const getDateRange = (): { start: Date | null; end: Date | null } => {
+    if (!coach?.students?.items) return { start: null, end: null };
+    
+    let earliestDate: Date | null = null;
+    let latestDate: Date | null = null;
+    
+    coach.students.items.forEach(student => {
+      student.student?.items?.forEach(report => {
+        const reportDate = new Date(report.createdAt);
+        if (!earliestDate || reportDate < earliestDate) {
+          earliestDate = reportDate;
+        }
+        if (!latestDate || reportDate > latestDate) {
+          latestDate = reportDate;
+        }
+      });
+    });
+    
+    return { start: earliestDate, end: latestDate };
+  };
+
   const getStudentTotalRevenue = (student: Student) => {
     return student.student?.items?.reduce((total, report) => total + (report.revenue || 0), 0) || 0;
   };
@@ -196,6 +274,39 @@ export function EnhancedCoachDashboard() {
 
   const getStudentReportsCount = (student: Student) => {
     return student.student?.items?.length || 0;
+  };
+
+  const getStudentTotalFreeShoots = (student: Student) => {
+    return student.student?.items?.reduce((total, report) => total + (report.free_shoots || 0), 0) || 0;
+  };
+
+  const getStudentTotalExpenses = (student: Student) => {
+    return student.student?.items?.reduce((total, report) => total + (report.expenses || 0), 0) || 0;
+  };
+
+  const getStudentTotalEditingCost = (student: Student) => {
+    return student.student?.items?.reduce((total, report) => total + (report.editing_cost || 0), 0) || 0;
+  };
+
+  const getStudentTotalNewClients = (student: Student) => {
+    return student.student?.items?.reduce((total, report) => total + (report.new_clients || 0), 0) || 0;
+  };
+
+  const getStudentTotalPaidShoots = (student: Student) => {
+    return student.student?.items?.reduce((total, report) => total + (report.paid_shoots || 0), 0) || 0;
+  };
+
+  const getStudentAverageOrderValue = (student: Student) => {
+    const reports = student.student?.items || [];
+    if (reports.length === 0) return 0;
+    const totalAOV = reports.reduce((total, report) => total + (report.aov || 0), 0);
+    return totalAOV / reports.length;
+  };
+
+  const getStudentLatestReport = (student: Student) => {
+    const reports = student.student?.items || [];
+    if (reports.length === 0) return null;
+    return reports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
   };
 
   const getStudentsWithoutRecentReports = () => {
@@ -219,6 +330,48 @@ export function EnhancedCoachDashboard() {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setSelectedStudentId(null);
+  };
+
+  const handleLogCall = async (callData: any) => {
+    try {
+      console.log('Logging call:', callData);
+      await eightbaseService.createCallLog({
+        student_id: callData.studentId,
+        coach_id: coach?.id || '',
+        call_date: callData.date,
+        call_duration: callData.duration,
+        call_type: callData.callType,
+        student_mood: callData.studentMood,
+        topics_discussed: callData.topics ? [callData.topics] : [],
+        outcome: callData.outcome,
+        next_steps: callData.nextSteps || ''
+      });
+      console.log('Call logged successfully');
+      // Optionally refresh the dashboard data or show a success message
+    } catch (error) {
+      console.error('Error logging call:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
+  };
+
+  const handleCreateNote = async (noteData: any) => {
+    try {
+      console.log('Creating note:', noteData);
+      await eightbaseService.createNote({
+        target_type: noteData.target,
+        target_id: noteData.studentId || '',
+        user_id: coach?.id || '',
+        content: `${noteData.title}\n\n${noteData.content}`,
+        visibility: noteData.visibility,
+        created_by: user?.id || '',
+        created_by_name: `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+      });
+      console.log('Note created successfully');
+      // Optionally refresh the dashboard data or show a success message
+    } catch (error) {
+      console.error('Error creating note:', error);
+      throw error; // Re-throw to let the modal handle the error display
+    }
   };
 
   if (loading) {
@@ -270,16 +423,37 @@ export function EnhancedCoachDashboard() {
               <p className="text-gray-600 dark:text-gray-400">
                 Coach Dashboard - Manage your students and track performance
               </p>
+              <div className="mt-2">
+                <CompanyWeekDisplay variant="compact" />
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Button onClick={loadCoachData} variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh Data
               </Button>
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => setIsLogCallModalOpen(true)}
+              >
+                <Phone className="h-4 w-4 mr-2" />
+                Log a Call
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => setIsCreateNoteModalOpen(true)}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Create a Note
+              </Button>
             </div>
           </div>
 
-        {/* Summary Cards - Exact match to image */}
+        {/* Enhanced Summary Cards with Detailed Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -311,38 +485,124 @@ export function EnhancedCoachDashboard() {
 
           <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reports</CardTitle>
-              <FileText className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Profit</CardTitle>
+              <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                {coach.students?.items?.reduce((total, student) => 
-                  total + (student.student?.items?.length || 0), 0) || 0}
+                ${getTotalNetProfit().toLocaleString()}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Weekly reports submitted
+                After expenses & editing costs
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg. Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">AOV</CardTitle>
+              <BarChart3 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${coach.students?.items?.length > 0 
-                  ? Math.round(getTotalRevenue() / coach.students.items.length).toLocaleString()
-                  : '0'
-                }
+                ${getAverageOrderValue().toLocaleString()}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Per student
+                Average order value
               </p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Additional Metrics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">New Clients</CardTitle>
+              <UserCheck className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{getTotalClients()}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Total new clients
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Paid Shoots</CardTitle>
+              <Camera className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{getTotalPaidShoots()}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Revenue-generating shoots
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Free Shoots</CardTitle>
+              <Camera className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{getTotalFreeShoots()}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Marketing & portfolio shoots
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</CardTitle>
+              <TrendingUp className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                ${(getTotalExpenses() + getTotalEditingCost()).toLocaleString()}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Expenses + editing costs
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Company Week Display & Performance Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CompanyWeekDisplay variant="detailed" />
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Performance Overview</CardTitle>
+              <Activity className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Total Reports:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {coach.students?.items?.reduce((total, student) => 
+                      total + (student.student?.items?.length || 0), 0) || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Avg. per Student:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {coach.students?.items?.length > 0 
+                      ? Math.round((coach.students.items.reduce((total, student) => 
+                          total + (student.student?.items?.length || 0), 0) || 0) / coach.students.items.length)
+                      : '0'
+                    }
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
 
         {/* Alerts Section - Exact match to image */}
         {getStudentsWithoutRecentReports().length > 0 && (
@@ -391,66 +651,231 @@ export function EnhancedCoachDashboard() {
               {coach.students?.items?.map((student) => {
                 const reports = student.student?.items || [];
                 const totalRevenue = getStudentTotalRevenue(student);
-                const avgRevenue = reports.length > 0 ? totalRevenue / reports.length : 0;
+                const totalProfit = getStudentTotalProfit(student);
+                const totalFreeShoots = getStudentTotalFreeShoots(student);
+                const totalExpenses = getStudentTotalExpenses(student);
+                const totalEditingCost = getStudentTotalEditingCost(student);
+                const totalNewClients = getStudentTotalNewClients(student);
+                const totalPaidShoots = getStudentTotalPaidShoots(student);
+                const avgAOV = getStudentAverageOrderValue(student);
+                const latestReport = getStudentLatestReport(student);
                 const recentReports = reports.filter(r => new Date(r.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length;
                 const activityLevel = Math.min(Math.max(recentReports * 50, 70), 100); // Set to 70% as shown in images
                 
                 return (
-                  <div key={student.id} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-black">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-full bg-gray-100 dark:bg-black">
-                          <Users className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                  <div key={student.id} className="border border-gray-200 dark:border-gray-600 rounded-xl p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <div className="p-3 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30">
+                            <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          {recentReports > 0 && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900"></div>
+                          )}
                         </div>
-                      <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-white">{student.firstName} {student.lastName}</h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{student.email}</p>
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            {student.firstName} {student.lastName}
+                            {totalRevenue > 1000 && <Crown className="h-4 w-4 text-yellow-500" />}
+                            {recentReports > 0 && <Sparkles className="h-4 w-4 text-blue-500" />}
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            {student.email}
+                          </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-black">
+                      <div className="flex items-center gap-3">
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          recentReports === 0 
+                            ? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' 
+                            : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        }`}>
                           {recentReports === 0 ? 'Inactive' : 'Active'}
-                        </Button>
+                        </div>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-black"
+                          className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20"
                           onClick={() => handleViewStudentProfile(student.id)}
                         >
+                          <Eye className="h-4 w-4 mr-1" />
                           View Profile
                         </Button>
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Reports</p>
-                        <p className="font-semibold text-gray-900 dark:text-white">{reports.length}</p>
+                    {/* First Row - Basic Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="h-4 w-4 text-blue-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reports</p>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{reports.length}</p>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Recent Reports</p>
-                        <p className="font-semibold text-gray-900 dark:text-white">{recentReports}</p>
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Clock className="h-4 w-4 text-green-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Recent Reports</p>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{recentReports}</p>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Revenue</p>
-                        <p className="font-semibold text-gray-900 dark:text-white">${totalRevenue.toLocaleString()}</p>
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingUp className="h-4 w-4 text-emerald-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue</p>
+                        </div>
+                        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">${totalRevenue.toLocaleString()}</p>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Avg Revenue</p>
-                        <p className="font-semibold text-gray-900 dark:text-white">${Math.round(avgRevenue).toLocaleString()}</p>
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <DollarSign className="h-4 w-4 text-green-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Profit</p>
+                        </div>
+                        <p className="text-2xl font-bold text-green-600 dark:text-green-400">${totalProfit.toLocaleString()}</p>
                       </div>
                     </div>
-                    
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-500 dark:text-gray-400">Activity Level</span>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">{activityLevel}%</span>
+
+                    {/* Second Row - Shoot Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Camera className="h-4 w-4 text-purple-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Paid Shoots</p>
+                        </div>
+                        <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{totalPaidShoots}</p>
                       </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Zap className="h-4 w-4 text-orange-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Free Shoots</p>
+                        </div>
+                        <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{totalFreeShoots}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <UserCheck className="h-4 w-4 text-indigo-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">New Clients</p>
+                        </div>
+                        <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{totalNewClients}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <BarChart3 className="h-4 w-4 text-cyan-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg AOV</p>
+                        </div>
+                        <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">${Math.round(avgAOV).toLocaleString()}</p>
+                      </div>
+                    </div>
+
+                    {/* Third Row - Cost Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingDown className="h-4 w-4 text-red-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
+                        </div>
+                        <p className="text-2xl font-bold text-red-600 dark:text-red-400">${totalExpenses.toLocaleString()}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Shield className="h-4 w-4 text-amber-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Editing Cost</p>
+                        </div>
+                        <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">${totalEditingCost.toLocaleString()}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Award className="h-4 w-4 text-pink-500" />
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Latest Status</p>
+                        </div>
+                        <div className="flex items-center">
+                          {latestReport ? (
+                            <Badge variant="default" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-3 py-1">
+                              {latestReport.status || 'Completed'}
+                            </Badge>
+                          ) : (
+                            <span className="text-gray-500 text-sm">No Reports</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Latest Report Details */}
+                    {latestReport && (
+                      <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Star className="h-5 w-5 text-yellow-500" />
+                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Latest Report Details</h4>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="flex items-center gap-1 mb-1">
+                              <Calendar className="h-3 w-3 text-blue-500" />
+                              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Period</span>
+                            </div>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {new Date(latestReport.start_date).toLocaleDateString()} - {new Date(latestReport.end_date).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="flex items-center gap-1 mb-1">
+                              <TrendingUp className="h-3 w-3 text-emerald-500" />
+                              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Revenue</span>
+                            </div>
+                            <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">${latestReport.revenue?.toLocaleString() || '0'}</p>
+                          </div>
+                          <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="flex items-center gap-1 mb-1">
+                              <DollarSign className="h-3 w-3 text-green-500" />
+                              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Profit</span>
+                            </div>
+                            <p className="text-sm font-semibold text-green-600 dark:text-green-400">${latestReport.net_profit?.toLocaleString() || '0'}</p>
+                          </div>
+                          <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="flex items-center gap-1 mb-1">
+                              <Clock className="h-3 w-3 text-purple-500" />
+                              <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Submitted</span>
+                            </div>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {new Date(latestReport.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Activity className="h-4 w-4 text-blue-500" />
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Activity Level</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-gray-900 dark:text-white">{activityLevel}%</span>
+                          {activityLevel >= 80 && <Heart className="h-4 w-4 text-red-500" />}
+                          {activityLevel >= 60 && activityLevel < 80 && <Zap className="h-4 w-4 text-yellow-500" />}
+                          {activityLevel < 60 && <AlertCircle className="h-4 w-4 text-orange-500" />}
+                        </div>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3 overflow-hidden">
                         <div 
-                          className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full" 
+                          className={`h-3 rounded-full transition-all duration-1000 ${
+                            activityLevel >= 80 
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                              : activityLevel >= 60 
+                              ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
+                              : 'bg-gradient-to-r from-red-500 to-pink-500'
+                          }`}
                           style={{ width: `${activityLevel}%` }}
                         ></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <span>Low</span>
+                        <span>Medium</span>
+                        <span>High</span>
                       </div>
                     </div>
                   </div>
@@ -476,6 +901,7 @@ export function EnhancedCoachDashboard() {
               <TabsContent value="reports" className="space-y-4 mt-4">
                 <div>
                   <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Latest submissions from your students</h3>
+                  <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow className="border-gray-200 dark:border-gray-700">
@@ -483,6 +909,11 @@ export function EnhancedCoachDashboard() {
                         <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Week</TableHead>
                         <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Revenue</TableHead>
                         <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Profit</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Paid Shoots</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Free Shoots</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-400 font-medium">New Clients</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-400 font-medium">AOV</TableHead>
+                          <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Expenses</TableHead>
                         <TableHead className="text-gray-600 dark:text-gray-400 font-medium">Status</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -499,13 +930,21 @@ export function EnhancedCoachDashboard() {
                           </TableCell>
                           <TableCell className="text-gray-900 dark:text-white">${report.revenue?.toLocaleString() || '0'}</TableCell>
                           <TableCell className="text-green-600 dark:text-green-400">${report.net_profit?.toLocaleString() || '0'}</TableCell>
+                            <TableCell className="text-gray-900 dark:text-white">{report.paid_shoots || 0}</TableCell>
+                            <TableCell className="text-gray-900 dark:text-white">{report.free_shoots || 0}</TableCell>
+                            <TableCell className="text-gray-900 dark:text-white">{report.new_clients || 0}</TableCell>
+                            <TableCell className="text-gray-900 dark:text-white">${report.aov?.toLocaleString() || '0'}</TableCell>
+                            <TableCell className="text-red-600 dark:text-red-400">${(report.expenses || 0).toLocaleString()}</TableCell>
                           <TableCell>
-                            <Badge variant="default" className="bg-blue-600 dark:bg-blue-500 text-white">Submitted</Badge>
+                              <Badge variant="default" className="bg-blue-600 dark:bg-blue-500 text-white">
+                                {report.status || 'Submitted'}
+                              </Badge>
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
                 </div>
               </TabsContent>
               
@@ -561,6 +1000,22 @@ export function EnhancedCoachDashboard() {
         studentId={selectedStudentId || ''}
         isOpen={isEditModalOpen && !!selectedStudentId}
         onClose={handleCloseEditModal}
+      />
+
+      {/* Log Call Modal */}
+      <LogCallModal
+        isOpen={isLogCallModalOpen}
+        onClose={() => setIsLogCallModalOpen(false)}
+        students={coach?.students?.items || []}
+        onLogCall={handleLogCall}
+      />
+
+      {/* Create Note Modal */}
+      <CreateNoteModal
+        isOpen={isCreateNoteModalOpen}
+        onClose={() => setIsCreateNoteModalOpen(false)}
+        students={coach?.students?.items || []}
+        onCreateNote={handleCreateNote}
       />
     </div>
   );

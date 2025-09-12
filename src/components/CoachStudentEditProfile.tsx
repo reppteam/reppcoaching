@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../contexts/ThemeContext';
 import { eightbaseService } from '../services/8baseService';
+import { CallLog } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -56,6 +57,7 @@ interface WeeklyReport {
   createdAt: string;
 }
 
+
 interface CoachStudentEditProfileProps {
   studentId: string;
   isOpen: boolean;
@@ -93,14 +95,16 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
     updatedAt: string;
   }>>([]);
 
-  const [newNote, setNewNote] = useState({
-    title: '',
-    content: ''
-  });
+  const [callLogs, setCallLogs] = useState<CallLog[]>([]);
+  const [callLogsLoading, setCallLogsLoading] = useState(false);
+  const [notesLoading, setNotesLoading] = useState(false);
+
 
   useEffect(() => {
     if (studentId && isOpen) {
       loadStudentData();
+      loadCallLogs();
+      loadNotes();
     }
   }, [studentId, isOpen]);
 
@@ -222,6 +226,50 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
     }
   };
 
+  const loadCallLogs = async () => {
+    if (!studentId || !isOpen) return;
+
+    try {
+      setCallLogsLoading(true);
+      
+      // Get call logs for this student
+      const logs = await eightbaseService.getCallLogs(studentId);
+      setCallLogs(logs || []);
+    } catch (error) {
+      console.error('Error loading call logs:', error);
+      setCallLogs([]);
+    } finally {
+      setCallLogsLoading(false);
+    }
+  };
+
+  const loadNotes = async () => {
+    if (!studentId || !isOpen) return;
+
+    try {
+      setNotesLoading(true);
+      
+      // Get notes for this student
+      const fetchedNotes = await eightbaseService.getNotes('student', studentId, user?.role);
+      
+      // Transform the notes to match our local structure
+      const transformedNotes = fetchedNotes.map(note => ({
+        id: note.id,
+        title: note.content.split('\n')[0] || 'Untitled Note', // Extract title from first line of content
+        content: note.content,
+        createdAt: note.created_at,
+        updatedAt: note.created_at // Use created_at since updated_at doesn't exist in Note type
+      }));
+      
+      setNotes(transformedNotes);
+    } catch (error) {
+      console.error('Error loading notes:', error);
+      setNotes([]);
+    } finally {
+      setNotesLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!student) return;
 
@@ -273,22 +321,18 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
     onClose();
   };
 
-  const handleAddNote = () => {
-    if (newNote.title.trim() && newNote.content.trim()) {
-      const note = {
-        id: Date.now().toString(),
-        title: newNote.title.trim(),
-        content: newNote.content.trim(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      setNotes([...notes, note]);
-      setNewNote({ title: '', content: '' });
-    }
-  };
 
-  const handleDeleteNote = (noteId: string) => {
-    setNotes(notes.filter(note => note.id !== noteId));
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      // Delete note from database
+      await eightbaseService.deleteNote(noteId);
+      
+      // Reload notes from database
+      await loadNotes();
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      // You could add a toast notification here
+    }
   };
 
   const handleEditNote = (noteId: string, updatedNote: { title: string; content: string }) => {
@@ -502,11 +546,85 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
                   <CardDescription className="text-gray-600 dark:text-gray-400">Communication history with this student</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12">
-                    <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">No Call History</h3>
-                    <p className="text-muted-foreground">No calls have been recorded yet.</p>
-                  </div>
+                  {callLogsLoading ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">Loading call history...</p>
+                    </div>
+                  ) : callLogs.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Phone className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">No Call History</h3>
+                      <p className="text-muted-foreground">No calls have been recorded yet.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {callLogs.map((callLog) => (
+                        <div key={callLog.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                                <Phone className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                                  {callLog.call_type.charAt(0).toUpperCase() + callLog.call_type.slice(1)} Call
+                                </h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  {new Date(callLog.call_date).toLocaleDateString()} • {callLog.call_duration} minutes
+                                </p>
+                              </div>
+                            </div>
+                            <Badge 
+                              variant="outline" 
+                              className={`${
+                                callLog.student_mood === 'positive' ? 'border-green-200 text-green-700 bg-green-50 dark:border-green-800 dark:text-green-400 dark:bg-green-900/20' :
+                                callLog.student_mood === 'motivated' ? 'border-blue-200 text-blue-700 bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:bg-blue-900/20' :
+                                callLog.student_mood === 'neutral' ? 'border-gray-200 text-gray-700 bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:bg-gray-900/20' :
+                                'border-orange-200 text-orange-700 bg-orange-50 dark:border-orange-800 dark:text-orange-400 dark:bg-orange-900/20'
+                              }`}
+                            >
+                              {callLog.student_mood.charAt(0).toUpperCase() + callLog.student_mood.slice(1)}
+                            </Badge>
+                          </div>
+                          
+                          {callLog.topics_discussed && callLog.topics_discussed.length > 0 && (
+                            <div className="mb-3">
+                              <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Topics Discussed:</h5>
+                              <div className="flex flex-wrap gap-2">
+                                {callLog.topics_discussed.map((topic, index) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {topic}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {callLog.outcome && (
+                            <div className="mb-3">
+                              <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Outcome:</h5>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{callLog.outcome}</p>
+                            </div>
+                          )}
+                          
+                          {callLog.next_steps && (
+                            <div className="mb-3">
+                              <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Next Steps:</h5>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{callLog.next_steps}</p>
+                            </div>
+                          )}
+                          
+                          <div className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-600 pt-2">
+                            <div className="flex justify-between">
+                              <span>Coach ID: {callLog.coach_id}</span>
+                              <span>Recorded: {new Date(callLog.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -518,76 +636,45 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
                   <CardDescription className="text-gray-600 dark:text-gray-400">Additional notes and observations about this student</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    {/* Add New Note Section */}
-                    <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Add New Note</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="note-title" className="text-sm font-medium text-gray-700 dark:text-gray-300">Note Title</Label>
-                          <Input
-                            id="note-title"
-                            value={newNote.title}
-                            onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
-                            placeholder="Enter note title..."
-                            className="mt-1 bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-gray-100"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="note-content" className="text-sm font-medium text-gray-700 dark:text-gray-300">Note Content</Label>
-                          <Textarea
-                            id="note-content"
-                            value={newNote.content}
-                            onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
-                            placeholder="Enter note content..."
-                            rows={3}
-                            className="mt-1 bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-900 dark:text-gray-100"
-                          />
-                        </div>
-                        <Button onClick={handleAddNote} disabled={!newNote.title.trim() || !newNote.content.trim()}>
-                          <FileText className="h-4 w-4 mr-2" />
-                          Add Note
-                        </Button>
-                      </div>
+                  {notesLoading ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">Loading notes...</p>
                     </div>
-
-                    {/* Existing Notes */}
+                  ) : notes.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                      <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                      <p>No notes available for this student.</p>
+                    </div>
+                  ) : (
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Existing Notes</h3>
-                      {notes.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                          <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                          <p>No notes yet. Add your first note above.</p>
-                        </div>
-                      ) : (
-                        notes.map((note) => (
-                          <div key={note.id} className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                <h4 className="font-semibold text-gray-900 dark:text-gray-100">{note.title}</h4>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteNote(note.id)}
-                                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800"
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
+                      {notes.map((note) => (
+                        <div key={note.id} className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                              <h4 className="font-semibold text-gray-900 dark:text-gray-100">{note.title}</h4>
                             </div>
-                            <p className="text-gray-700 dark:text-gray-300 mb-3">{note.content}</p>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              Created: {new Date(note.createdAt).toLocaleDateString()}
-                              {note.updatedAt !== note.createdAt && (
-                                <span> • Updated: {new Date(note.updatedAt).toLocaleDateString()}</span>
-                              )}
-                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteNote(note.id)}
+                              className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
                           </div>
-                        ))
-                      )}
+                          <p className="text-gray-700 dark:text-gray-300 mb-3">{note.content}</p>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            Created: {new Date(note.createdAt).toLocaleDateString()}
+                            {note.updatedAt !== note.createdAt && (
+                              <span> • Updated: {new Date(note.updatedAt).toLocaleDateString()}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

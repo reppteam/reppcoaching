@@ -60,10 +60,10 @@ export function AppHeader({
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur dark:supports-[backdrop-filter]:bg-black">
       <div className="max-w-[90%] mx-auto px-4">
         <div className="flex items-center justify-between py-4">
-          {/* Left: Brand */}
+          {/* Left: Clean Header */}
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold text-blue-600">
-              REAL ESTATE PHOTOGRAPHER PRO
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+              Dashboard
             </h1>
           </div>
 

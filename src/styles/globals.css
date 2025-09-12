@@ -359,3 +359,81 @@ input:focus, textarea:focus, select:focus {
 .bg-background.rounded-lg.shadow-lg .font-bold {
   color: var(--foreground) !important;
 }
+
+/* Enhanced modal text visibility for dark mode */
+[data-radix-dialog-content] *,
+[data-radix-alert-dialog-content] *,
+[role="dialog"] *,
+.modal-content *,
+.dialog-content * {
+  color: inherit !important;
+}
+
+/* Ensure all text elements in modals are visible */
+[data-radix-dialog-content] p,
+[data-radix-dialog-content] span,
+[data-radix-dialog-content] div,
+[data-radix-dialog-content] label,
+[data-radix-alert-dialog-content] p,
+[data-radix-alert-dialog-content] span,
+[data-radix-alert-dialog-content] div,
+[data-radix-alert-dialog-content] label,
+[role="dialog"] p,
+[role="dialog"] span,
+[role="dialog"] div,
+[role="dialog"] label {
+  color: var(--foreground) !important;
+}
+
+/* Ensure form elements in modals are visible */
+[data-radix-dialog-content] input,
+[data-radix-dialog-content] textarea,
+[data-radix-dialog-content] select,
+[data-radix-alert-dialog-content] input,
+[data-radix-alert-dialog-content] textarea,
+[data-radix-alert-dialog-content] select,
+[role="dialog"] input,
+[role="dialog"] textarea,
+[role="dialog"] select {
+  color: var(--foreground) !important;
+  background-color: var(--background) !important;
+  border-color: var(--border) !important;
+}
+
+/* Ensure placeholder text is visible in modals */
+[data-radix-dialog-content] input::placeholder,
+[data-radix-dialog-content] textarea::placeholder,
+[data-radix-alert-dialog-content] input::placeholder,
+[data-radix-alert-dialog-content] textarea::placeholder,
+[role="dialog"] input::placeholder,
+[role="dialog"] textarea::placeholder {
+  color: var(--muted-foreground) !important;
+}
+
+/* Ensure button text is visible in modals */
+[data-radix-dialog-content] button,
+[data-radix-alert-dialog-content] button,
+[role="dialog"] button {
+  color: var(--foreground) !important;
+}
+
+/* Ensure links are visible in modals */
+[data-radix-dialog-content] a,
+[data-radix-alert-dialog-content] a,
+[role="dialog"] a {
+  color: var(--primary) !important;
+}
+
+/* Ensure table content is visible in modals */
+[data-radix-dialog-content] table,
+[data-radix-dialog-content] th,
+[data-radix-dialog-content] td,
+[data-radix-alert-dialog-content] table,
+[data-radix-alert-dialog-content] th,
+[data-radix-alert-dialog-content] td,
+[role="dialog"] table,
+[role="dialog"] th,
+[role="dialog"] td {
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}

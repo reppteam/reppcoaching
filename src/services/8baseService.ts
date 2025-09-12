@@ -1403,8 +1403,8 @@ export const eightbaseService = {
       for (const tag of lead.engagementTag) {
         await executeMutation(queries.CREATE_ENGAGEMENT_TAG, {
           data: {
-            ...tag,
-            lead: { connect: { id: createdLead.id } }
+            type: tag.type,
+            completed_date: new Date(tag.completed_date).toISOString().split('T')[0],
           }
         });
       }
@@ -1432,18 +1432,23 @@ export const eightbaseService = {
 
   // Engagement Tags
   async addEngagementTag(leadId: string, tag: EngagementTag): Promise<Lead> {
-    const data = await executeMutation(queries.CREATE_ENGAGEMENT_TAG, {
+    // Create the engagement tag with lead_id
+    const engagementTagData = await executeMutation(queries.CREATE_ENGAGEMENT_TAG, {
       data: {
-        ...tag,
+        type: tag.type,
         completed_date: new Date(tag.completed_date).toISOString().split('T')[0],
-        lead: { connect: { id: leadId } }
       }
     });
     
-    // Return updated lead
+    // Now we need to associate the engagement tag with the lead
+    // This might need to be done through updating the lead to include the engagement tag
+    // or through a different mechanism in your 8base setup
+    
+    // For now, let's return the updated lead by fetching it
     const leadData = await executeQuery(queries.GET_LEADS_BY_FILTER, {
       filter: { id: { equals: leadId } }
     });
+    
     return transformLead(leadData.leadsList.items[0]);
   },
 
@@ -1489,7 +1494,19 @@ export const eightbaseService = {
   },
 
   async createCallLog(callLog: Omit<CallLog, 'id' | 'created_at' | 'updated_at'>): Promise<CallLog> {
-    const data = await executeMutation(queries.CREATE_CALL_LOG, { data: callLog });
+    // Transform the data to use connection pattern
+    const { student_id, coach_id, ...restData } = callLog;
+    const connectionData = {
+      ...restData,
+      student: {
+        connect: { id: student_id }
+      },
+      coach: {
+        connect: { id: coach_id }
+      }
+    };
+    
+    const data = await executeMutation(queries.CREATE_CALL_LOG, { data: connectionData });
     return transformCallLog(data.callLogCreate);
   },
 
@@ -1503,9 +1520,16 @@ export const eightbaseService = {
   },
 
   // Notes
-  async getNotes(targetType: string, targetId: string, userRole?: string): Promise<Note[]> {
+  async getNotes(targetType: string, targetId: string, userRole?: string, coachId?: string): Promise<Note[]> {
+    // Query notes where studentNote relationship points to the student
     const data = await executeQuery(queries.GET_NOTES_BY_FILTER, {
-      filter: { targetType: { equals: targetType }, targetId: { equals: targetId } }
+      filter: { 
+        studentNote: { 
+          user: { 
+            id: { equals: targetId } 
+          } 
+        } 
+      }
     });
     
     let notes = data.notesList.items;
@@ -1521,7 +1545,19 @@ export const eightbaseService = {
   },
 
   async createNote(note: Omit<Note, 'id' | 'created_at'>): Promise<Note> {
-    const data = await executeMutation(queries.CREATE_NOTE, { data: note });
+    // Transform the data to use connection pattern
+    const { target_id, user_id, created_by, created_by_name, ...restData } = note;
+    const connectionData = {
+      ...restData,
+      studentNote: {
+        connect: { id: target_id }
+      },
+      coach: {
+        connect: { id: user_id }
+      }
+    };
+    
+    const data = await executeMutation(queries.CREATE_NOTE, { data: connectionData });
     return data.noteCreate;
   },
 
@@ -3079,5 +3115,6 @@ export const eightbaseService = {
       console.error('Failed to get student by ID:', error);
       throw error;
     }
-  }
+  },
+
 }; 

@@ -76,14 +76,14 @@ export function Header({
           {/* Left: Logo + Brand */}
           <div className="flex items-center gap-3 flex-shrink-0">
             <img src="/hedderlogo.png" alt="Logo" className="h-10" />
-            <div className="hidden md:block">
+            {/* <div className="hidden md:block">
               <h1 className="text-lg font-bold text-brand-gray">
                 REAL <span className="text-brand-blue">ESTATE</span>
               </h1>
               <p className="text-sm text-brand-blue font-medium -mt-1">
                 PHOTOGRAPHER PRO
               </p>
-            </div>
+            </div> */}
           </div>
 
           {/* Center: Role + Edit (mobile/tablet inline) */}

@@ -2211,15 +2211,10 @@ export const DELETE_LEAD = gql`
 
 export const CREATE_ENGAGEMENT_TAG = gql`
   mutation CreateEngagementTag($data: EngagementTagCreateInput!) {
-    engagementTagsCreate(data: $data) {
+    engagementTagCreate(data: $data) {
       id
       type
       completed_date
-      lead {
-        id
-        lead_name
-        email
-      }
       createdAt
       updatedAt
     }
@@ -2341,7 +2336,7 @@ export const GET_CALL_LOGS_BY_FILTER = gql`
 
 export const CREATE_CALL_LOG = gql`
   mutation CreateCallLog($data: CallLogCreateInput!) {
-    callLogsCreate(data: $data) {
+    callLogCreate(data: $data) {
       id
       call_date
       call_duration
@@ -2416,14 +2411,36 @@ export const GET_NOTES_BY_FILTER = gql`
     notesList(filter: $filter) {
       items {
         id
-        targetType
-        targetId
-        userId
+        title
         content
+        target_type
         visibility
         createdAt
-        createdBy
-        createdByName
+        updatedAt
+        studentNote {
+          id
+          firstName
+          lastName
+          email
+          user {
+            id
+            email
+            firstName
+            lastName
+          }
+        }
+        coach {
+          id
+          firstName
+          lastName
+          email
+          users {
+            id
+            email
+            firstName
+            lastName
+          }
+        }
       }
     }
   }
@@ -2431,39 +2448,83 @@ export const GET_NOTES_BY_FILTER = gql`
 
 export const CREATE_NOTE = gql`
   mutation CreateNote($data: NoteCreateInput!) {
-    notesCreate(data: $data) {
+    noteCreate(data: $data) {
       id
-      targetType
-      targetId
-      userId
+      title
       content
+      target_type
       visibility
       createdAt
-      createdBy
-      createdByName
+      updatedAt
+      studentNote {
+        id
+        firstName
+        lastName
+        email
+        user {
+          id
+          email
+          firstName
+          lastName
+        }
+      }
+      coach {
+        id
+        firstName
+        lastName
+        email
+        users {
+          id
+          email
+          firstName
+          lastName
+        }
+      }
     }
   }
 `;
 
 export const UPDATE_NOTE = gql`
   mutation UpdateNote($id: ID!, $data: NoteUpdateInput!) {
-    notesUpdate(filter: { id: $id }, data: $data) {
+    noteUpdate(filter: { id: $id }, data: $data) {
       id
-      targetType
-      targetId
-      userId
+      title
       content
+      target_type
       visibility
       createdAt
-      createdBy
-      createdByName
+      updatedAt
+      studentNote {
+        id
+        firstName
+        lastName
+        email
+        user {
+          id
+          email
+          firstName
+          lastName
+        }
+      }
+      coach {
+        id
+        firstName
+        lastName
+        email
+        user {
+          id
+          email
+          firstName
+          lastName
+        }
+      }
     }
   }
 `;
 
 export const DELETE_NOTE = gql`
   mutation DeleteNote($id: ID!) {
-    notesDelete(filter: { id: $id }) {
+    noteDelete(filter: { id: $id }) {
       success
     }
   }

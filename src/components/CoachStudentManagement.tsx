@@ -28,15 +28,15 @@ import {
   Filter,
   Search,
   RefreshCw,
-  Mail,
+  FileText,
   Target,
+  Mail,
   BookOpen,
   Activity,
   Star,
   DollarSign,
   Clock3,
-  CalendarDays,
-  FileText
+  CalendarDays
 } from 'lucide-react';
 import { User as UserType, StudentKPIData, StudentActivitySummary } from '../types';
 
@@ -55,6 +55,10 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showInactive, setShowInactive] = useState(false);
+  const [showIncompleteTasks, setShowIncompleteTasks] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
   const currentCoachId = coachId || user?.id;
@@ -92,7 +96,7 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
     }
   };
 
-  const filteredStudents = students.filter(student => {
+  const filteredAndSortedStudents = students.filter(student => {
     const matchesSearch = student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -105,7 +109,48 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
                        (filterType === 'paid' && student.has_paid) ||
                        (filterType === 'free' && !student.has_paid);
 
-    return matchesSearch && matchesStatus && matchesType;
+    const matchesInactiveFilter = showInactive || student.has_paid;
+
+    const matchesIncompleteTasks = !showIncompleteTasks || (() => {
+      const activity = getStudentActivity(student.id);
+      return activity?.alerts && activity.alerts.length > 0;
+    })();
+
+    return matchesSearch && matchesStatus && matchesType && matchesInactiveFilter && matchesIncompleteTasks;
+  }).sort((a, b) => {
+    let comparison = 0;
+    
+    switch (sortBy) {
+      case 'name':
+        const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+        const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+        comparison = nameA.localeCompare(nameB);
+        break;
+      case 'email':
+        comparison = a.email.toLowerCase().localeCompare(b.email.toLowerCase());
+        break;
+      case 'lastActivity':
+        const activityA = getStudentActivity(a.id);
+        const activityB = getStudentActivity(b.id);
+        const dateA = activityA?.last_activity ? new Date(activityA.last_activity).getTime() : 0;
+        const dateB = activityB?.last_activity ? new Date(activityB.last_activity).getTime() : 0;
+        comparison = dateA - dateB;
+        break;
+      case 'performance':
+        const kpiA = getStudentKPI(a.id);
+        const kpiB = getStudentKPI(b.id);
+        const scoreA = kpiA?.conversion_rate || 0;
+        const scoreB = kpiB?.conversion_rate || 0;
+        comparison = scoreA - scoreB;
+        break;
+      case 'status':
+        comparison = (a.has_paid ? 1 : 0) - (b.has_paid ? 1 : 0);
+        break;
+      default:
+        comparison = 0;
+    }
+    
+    return sortOrder === 'asc' ? comparison : -comparison;
   });
 
   const getStudentKPI = (studentId: string) => {
@@ -230,13 +275,17 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Enhanced Filters and Search */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>Search & Filters</CardTitle>
+          <CardDescription>
+            Find and organize your students with advanced filtering options
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-4">
+            {/* Search Bar */}
             <div>
               <Label htmlFor="search">Search Students</Label>
               <div className="relative">
@@ -250,48 +299,126 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
                 />
               </div>
             </div>
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Students</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {/* Filter Row 1 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Students</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="type">Type</Label>
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="free">Free</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="sort">Sort By</Label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="lastActivity">Last Activity</SelectItem>
+                    <SelectItem value="performance">Performance</SelectItem>
+                    <SelectItem value="status">Status</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="type">Type</Label>
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="free">Free</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {/* Filter Row 2 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="sortOrder">Sort Order</Label>
+                <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sort order" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="asc">Ascending</SelectItem>
+                    <SelectItem value="desc">Descending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="showInactive"
+                  checked={showInactive}
+                  onChange={(e) => setShowInactive(e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="showInactive" className="text-sm">
+                  Show inactive clients
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="showIncompleteTasks"
+                  checked={showIncompleteTasks}
+                  onChange={(e) => setShowIncompleteTasks(e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="showIncompleteTasks" className="text-sm">
+                  Incomplete tasks this week
+                </Label>
+              </div>
             </div>
-            <div className="flex items-end">
-              <Button variant="outline" className="w-full">
-                <Filter className="h-4 w-4 mr-2" />
-                Apply Filters
-              </Button>
+
+            {/* Results Summary */}
+            <div className="flex items-center justify-between pt-2 border-t">
+              <p className="text-sm text-muted-foreground">
+                Showing {filteredAndSortedStudents.length} of {students.length} students
+              </p>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilterStatus('all');
+                    setFilterType('all');
+                    setSortBy('name');
+                    setSortOrder('asc');
+                    setShowInactive(false);
+                    setShowIncompleteTasks(false);
+                  }}
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Clear Filters
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Students Table */}
+      {/* Enhanced Students Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Students ({filteredStudents.length})</CardTitle>
+          <CardTitle>Students ({filteredAndSortedStudents.length})</CardTitle>
           <CardDescription>
-            Your assigned students and their current status
+            Your assigned students with detailed information and multiple data rows
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -307,12 +434,13 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredStudents.map((student) => {
+              {filteredAndSortedStudents.map((student) => {
                 const kpi = getStudentKPI(student.id);
                 const activity = getStudentActivity(student.id);
                 
                 return (
-                  <TableRow key={student.id}>
+                  <React.Fragment key={student.id}>
+                  <TableRow>
                     <TableCell>
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
@@ -372,6 +500,108 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
                       </div>
                     </TableCell>
                   </TableRow>
+
+                  {/* Detailed Information Row */}
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-0">
+                      <div className="bg-gray-50 dark:bg-gray-800 border-l-4 border-blue-500 p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Performance Metrics */}
+                          <div>
+                            <h4 className="font-semibold text-sm mb-2">Performance Metrics</h4>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Conversion Rate:</span>
+                                <span className="font-medium">{kpi?.conversion_rate || 0}%</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Revenue:</span>
+                                <span className="font-medium">${(kpi as any)?.total_revenue || 0}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Shoots:</span>
+                                <span className="font-medium">{(kpi as any)?.total_shoots || 0}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Recent Activity */}
+                          <div>
+                            <h4 className="font-semibold text-sm mb-2">Recent Activity</h4>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Last Report:</span>
+                                <span className="font-medium">
+                                  {(activity as any)?.last_report_date 
+                                    ? new Date((activity as any).last_report_date).toLocaleDateString()
+                                    : 'None'
+                                  }
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Reports This Month:</span>
+                                <span className="font-medium">{(activity as any)?.reports_this_month || 0}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Engagement Score:</span>
+                                <span className="font-medium">{(activity as any)?.engagement_score || 0}%</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Goals & Progress */}
+                          <div>
+                            <h4 className="font-semibold text-sm mb-2">Goals & Progress</h4>
+                            <div className="space-y-1 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Current Goal:</span>
+                                <span className="font-medium">
+                                  {(student as any).current_goal || 'Not set'}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Progress:</span>
+                                <span className="font-medium">
+                                  {(student as any).goal_progress || 0}%
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Next Milestone:</span>
+                                <span className="font-medium">
+                                  {(student as any).next_milestone || 'None'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Additional Actions */}
+                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                              <span>Coaching Start: {student.coaching_term_start ? new Date(student.coaching_term_start).toLocaleDateString() : 'N/A'}</span>
+                              <span>Access End: {student.access_end ? new Date(student.access_end).toLocaleDateString() : 'N/A'}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button variant="outline" size="sm">
+                                <Phone className="h-4 w-4 mr-2" />
+                                Log Call
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <FileText className="h-4 w-4 mr-2" />
+                                Add Note
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Target className="h-4 w-4 mr-2" />
+                                View Goals
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </React.Fragment>
                 );
               })}
             </TableBody>
@@ -384,7 +614,7 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {selectedStudent?.firstName} {selectedStudent?.lastName} - Student Details
+              {selectedStudent ? `${selectedStudent.firstName} ${selectedStudent.lastName}` : 'Student'} - Student Details
             </DialogTitle>
             <DialogDescription>
               Comprehensive view of student information, performance, and activity

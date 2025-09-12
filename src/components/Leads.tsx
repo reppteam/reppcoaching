@@ -48,7 +48,8 @@ import {
   Shuffle,
   Settings,
   Wand2,
-  Eye
+  Eye,
+  FileText
 } from 'lucide-react';
 
 // Engagement tag configuration - matches 8base schema and image design
@@ -1282,6 +1283,26 @@ export function Leads() {
                               </div>
                               <div className="bg-background rounded-lg p-3 border text-sm whitespace-pre-line">
                                 {generateScript(lead) || 'No script created yet. Click Random to generate one automatically.'}
+                              </div>
+                            </div>
+
+                            {/* Lead Notes */}
+                            <div>
+                              <h4 className="font-medium mb-3 flex items-center gap-2">
+                                <FileText className="h-4 w-4" />
+                                Lead Notes
+                              </h4>
+                              <div className="space-y-2">
+                                <Textarea
+                                  placeholder="Add notes about this lead after calls or interactions..."
+                                  value={lead.notes || ''}
+                                  onChange={(e) => handleInlineUpdate(lead.id, 'notes', e.target.value)}
+                                  rows={3}
+                                  className="text-sm"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                  Use this space to jot down quick notes after calls or interactions with this lead.
+                                </p>
                               </div>
                             </div>
 
