@@ -758,7 +758,79 @@ let mockSubitems: Subitem[] = [
 //     updated_at: '2024-07-02T00:00:00Z'
 //   }
 // ];
-let mockLeads: Lead[] = []
+let mockLeads: Lead[] = [
+  {
+    id: '1',
+    user_id: 'user1',
+    lead_name: 'John Smith',
+    email: 'john@example.com',
+    phone: '+1234567890',
+    instagram_handle: '@johnsmith',
+    lead_source: 'Instagram',
+    initial_call_outcome: 'Interested',
+    date_of_initial_call: '2024-01-15',
+    last_followup_outcome: 'Follow up scheduled',
+    date_of_last_followup: '2024-01-20',
+    next_followup_date: '2024-01-25',
+    notes: 'Very interested in luxury properties',
+    lead_notes: 'Called back immediately, seems motivated',
+    engagementTag: [
+      {
+        id: '1',
+        type: 'follow_day_engagement',
+        completed_date: '2024-01-10'
+      },
+      {
+        id: '2',
+        type: 'engagement_day_1',
+        completed_date: '2024-01-11'
+      }
+    ],
+    script_components: {
+      intro: 'Hi John! I saw your recent post about luxury real estate.',
+      hook: 'I have some exclusive properties that might interest you.',
+      body1: 'These are off-market opportunities with great potential.',
+      body2: 'Would you be interested in a quick call to discuss?',
+      ending: 'Looking forward to connecting!'
+    },
+    status: 'contacted',
+    created_at: '2024-01-10T00:00:00Z',
+    updated_at: '2024-01-20T00:00:00Z'
+  },
+  {
+    id: '2',
+    user_id: 'user1',
+    lead_name: 'Sarah Johnson',
+    email: 'sarah@example.com',
+    phone: '+1234567891',
+    instagram_handle: '@sarahj',
+    lead_source: 'Referral',
+    initial_call_outcome: 'Not interested',
+    date_of_initial_call: '2024-01-12',
+    last_followup_outcome: 'No response',
+    date_of_last_followup: '2024-01-18',
+    next_followup_date: '2024-01-30',
+    notes: 'Looking for investment properties',
+    lead_notes: 'Prefers email communication',
+    engagementTag: [
+      {
+        id: '3',
+        type: 'dm_sent',
+        completed_date: '2024-01-12'
+      }
+    ],
+    script_components: {
+      intro: 'Hi Sarah! I heard about your interest in investment properties.',
+      hook: 'I have some great opportunities that might fit your criteria.',
+      body1: 'These properties have excellent ROI potential.',
+      body2: 'Would you like to see some details?',
+      ending: 'Let me know if you\'re interested!'
+    },
+    status: 'contacted',
+    created_at: '2024-01-12T00:00:00Z',
+    updated_at: '2024-01-18T00:00:00Z'
+  }
+]
 
 
 // Enhanced Message Templates with 5 variations per type (existing data)
@@ -1240,6 +1312,7 @@ let mockPricing: Pricing[] = [
 let mockNotes: Note[] = [
   {
     id: '1',
+    title: 'Pricing Strategy Progress',
     target_type: 'student',
     target_id: '1',
     user_id: '1',
@@ -1251,6 +1324,7 @@ let mockNotes: Note[] = [
   },
   {
     id: '2',
+    title: 'Lead Generation Discussion',
     target_type: 'call',
     target_id: '1',
     user_id: '1',
@@ -1569,6 +1643,19 @@ export const mockApi = {
     return newLead;
   },
 
+  async createLeadsBulk(leads: Omit<Lead, 'id' | 'created_at' | 'updated_at'>[]): Promise<Lead[]> {
+    await delay(500); // Slightly longer delay for bulk operation
+    const newLeads: Lead[] = leads.map((lead, index) => ({
+      ...lead,
+      id: (Date.now() + index).toString(),
+      engagementTag: lead.engagementTag || [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+    mockLeads.push(...newLeads);
+    return newLeads;
+  },
+
   async updateLead(id: string, updates: Partial<Lead>): Promise<Lead> {
     await delay(300);
     const index = mockLeads.findIndex(l => l.id === id);
@@ -1592,10 +1679,15 @@ export const mockApi = {
     const existingTags = mockLeads[index].engagementTag.filter(t => t.type !== tag.type);
     existingTags.push(tag);
     
-    mockLeads[index] = {
-      ...mockLeads[index],
+    // Update only the engagement tags
+    const leadUpdateData: any = {
       engagementTag: existingTags,
       updated_at: new Date().toISOString()
+    };
+    
+    mockLeads[index] = {
+      ...mockLeads[index],
+      ...leadUpdateData
     };
     return mockLeads[index];
   },

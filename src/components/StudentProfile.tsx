@@ -81,6 +81,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
   });
 
   const [noteForm, setNoteForm] = useState({
+    title: '',
     content: '',
     visibility: 'public' as 'public' | 'private'
   });
@@ -168,6 +169,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
         target_type: 'student',
         target_id: student.id,
         user_id: currentUser?.id || '',
+        title: noteForm.title,
         content: noteForm.content,
         visibility: noteForm.visibility,
         created_by: currentUser?.id || '',
@@ -176,7 +178,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
 
       setNotes([newNote, ...notes]);
       setAddingNote(false);
-      setNoteForm({ content: '', visibility: 'public' });
+      setNoteForm({ title: '', content: '', visibility: 'public' });
     } catch (error) {
       console.error('Error adding note:', error);
     }
@@ -1023,6 +1025,15 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            <div>
+              <Label htmlFor="note_title">Note Title</Label>
+              <Input
+                id="note_title"
+                value={noteForm.title}
+                onChange={(e) => setNoteForm({...noteForm, title: e.target.value})}
+                placeholder="Enter note title..."
+              />
+            </div>
             <div>
               <Label htmlFor="note_content">Note Content</Label>
               <Textarea

@@ -3,6 +3,8 @@ import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../contexts/ThemeContext';
 import { eightbaseService } from '../services/8baseService';
 import { CallLog } from '../types';
+import { useQuery } from '@apollo/client';
+import { GET_NOTES_BY_FILTER } from '../graphql/operations';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -71,6 +73,19 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // GraphQL query for notes
+  const { data: notesData, loading: notesLoading, refetch: refetchNotes } = useQuery(GET_NOTES_BY_FILTER, {
+    variables: {
+      filter: {
+        studentNote: {
+          id: { equals: studentId }
+        }
+      }
+    },
+    skip: !studentId || !isOpen,
+    fetchPolicy: 'cache-and-network'
+  });
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -97,16 +112,28 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
 
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
   const [callLogsLoading, setCallLogsLoading] = useState(false);
-  const [notesLoading, setNotesLoading] = useState(false);
 
 
   useEffect(() => {
     if (studentId && isOpen) {
       loadStudentData();
       loadCallLogs();
-      loadNotes();
     }
   }, [studentId, isOpen]);
+
+  // Process notes data from GraphQL query
+  useEffect(() => {
+    if (notesData?.notesList?.items) {
+      const transformedNotes = notesData.notesList.items.map((note: any) => ({
+        id: note.id,
+        title: note.title || note.content?.split('\n')[0] || 'Untitled Note',
+        content: note.content,
+        createdAt: note.createdAt,
+        updatedAt: note.updatedAt
+      }));
+      setNotes(transformedNotes);
+    }
+  }, [notesData]);
 
   // Don't render anything if modal is not open or no student ID
   if (!isOpen || !studentId) {
@@ -139,14 +166,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
           notes: realStudent.notes || ''
         });
 
-        // Parse notes from JSON or create empty array
-        try {
-          const parsedNotes = realStudent.notes ? JSON.parse(realStudent.notes) : [];
-          setNotes(Array.isArray(parsedNotes) ? parsedNotes : []);
-        } catch (error) {
-          console.error('Error parsing notes JSON:', error);
-          setNotes([]);
-        }
+        // Notes will be loaded separately via GraphQL query
       } else {
         // Fallback to mock data for demonstration
         const mockStudent: Student = {
@@ -243,32 +263,6 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
     }
   };
 
-  const loadNotes = async () => {
-    if (!studentId || !isOpen) return;
-
-    try {
-      setNotesLoading(true);
-      
-      // Get notes for this student
-      const fetchedNotes = await eightbaseService.getNotes('student', studentId, user?.role);
-      
-      // Transform the notes to match our local structure
-      const transformedNotes = fetchedNotes.map(note => ({
-        id: note.id,
-        title: note.content.split('\n')[0] || 'Untitled Note', // Extract title from first line of content
-        content: note.content,
-        createdAt: note.created_at,
-        updatedAt: note.created_at // Use created_at since updated_at doesn't exist in Note type
-      }));
-      
-      setNotes(transformedNotes);
-    } catch (error) {
-      console.error('Error loading notes:', error);
-      setNotes([]);
-    } finally {
-      setNotesLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     if (!student) return;
@@ -327,8 +321,8 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
       // Delete note from database
       await eightbaseService.deleteNote(noteId);
       
-      // Reload notes from database
-      await loadNotes();
+      // Refetch notes from GraphQL query
+      await refetchNotes();
     } catch (error) {
       console.error('Error deleting note:', error);
       // You could add a toast notification here
@@ -408,7 +402,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
                 <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
-              <Button onClick={handleSave} size="sm" disabled={saving}>
+              <Button onClick={handleSave} size="sm" disabled={saving} className="!text-var-white">
                 {saving ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -416,7 +410,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4 mr-2 !dark:text-black !text-white" />
                     Save Changes
                   </>
                 )}
@@ -426,9 +420,15 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
 
           {/* Tabs - Exact match to image */}
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800">
+            <TabsList className="grid w-full grid-cols-5 bg-gray-100 dark:bg-gray-800">
               <TabsTrigger value="profile" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
                 Profile
+              </TabsTrigger>
+              <TabsTrigger value="goals" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
+                Goals
+              </TabsTrigger>
+              <TabsTrigger value="profit" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
+                Profit Calculator
               </TabsTrigger>
               <TabsTrigger value="calls" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
                 Call History
@@ -625,6 +625,47 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
                       ))}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="goals" className="mt-6">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">Student Goals</CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">View and track student goals and progress</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <User className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <p>Goals functionality will be integrated here.</p>
+                    <p className="text-sm mt-2">This will show the student's goals and progress tracking.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="profit" className="mt-6">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">Profit Calculator</CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">View student's profit calculator and financial data</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                    <User className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <p>Profit Calculator will be integrated here.</p>
+                    <p className="text-sm mt-2">This will show the student's profit calculator data and financial metrics.</p>
+                    <Button 
+                      className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={() => {
+                        // This would open the profit calculator in a new tab or modal
+                        window.open(`/profit-calculator?studentId=${studentId}`, '_blank');
+                      }}
+                    >
+                      View Profit Calculator
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

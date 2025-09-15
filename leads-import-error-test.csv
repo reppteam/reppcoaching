@@ -1,0 +1,5 @@
+Name,Email,Phone,Instagram,Source,Status
+,test1@example.com,(555) 123-4567,@test1,Instagram,new
+Test Lead 2,invalid-email,(555) 234-5678,@test2,Facebook,contacted
+Test Lead 3,test3@example.com,(555) 345-6789,@test3,InvalidSource,qualified
+Test Lead 4,test4@example.com,(555) 456-7890,@test4,Zillow,invalid_status

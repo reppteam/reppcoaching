@@ -120,6 +120,7 @@ export interface Lead {
   date_of_last_followup?: string;
   next_followup_date?: string;
   notes?: string; // Lead notes for quick jotting after calls
+  lead_notes?: string; // Additional lead notes for students to jot quick notes after calls
   // New engagement tracking system - array of tags
   engagementTag: EngagementTag[];
   script_components: {
@@ -129,9 +130,6 @@ export interface Lead {
     body2: string;
     ending: string;
   };
-  message_sent: boolean;
-  followed_back: boolean;
-  followed_up: boolean;
   status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
   created_at: string;
   updated_at: string;
@@ -164,6 +162,7 @@ export interface EngagementTagInfo {
 
 export interface Note {
   id: string;
+  title: string;
   target_type: string;
   target_id: string;
   user_id: string;

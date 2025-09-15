@@ -176,39 +176,12 @@ const transformLead = (lead: any): Lead => ({
     body2: '',
     ending: ''
   },
-  message_sent: lead.message_sent,
-  followed_back: lead.followed_back,
-  followed_up: lead.followed_up,
   status: lead.status,
   created_at: lead.createdAt,
   updated_at: lead.updatedAt
 });
 
 const transformStudentLead = (lead: any): Lead => {
-  // Create engagement tags based on boolean fields
-  const engagementTag: EngagementTag[] = [];
-  
-  if (lead.message_sent) {
-    engagementTag.push({
-      type: 'dm_sent',
-      completed_date: lead.updatedAt || lead.createdAt
-    });
-  }
-  
-  if (lead.followed_back) {
-    engagementTag.push({
-      type: 'follow_day_engagement',
-      completed_date: lead.updatedAt || lead.createdAt
-    });
-  }
-  
-  if (lead.followed_up) {
-    engagementTag.push({
-      type: 'follow_up_dm_sent',
-      completed_date: lead.updatedAt || lead.createdAt
-    });
-  }
-
   return {
     id: lead.id,
     user_id: lead.user?.id || '', // This will be set by the service
@@ -222,7 +195,11 @@ const transformStudentLead = (lead: any): Lead => {
     last_followup_outcome: lead.last_followup_outcome,
     date_of_last_followup: lead.date_of_last_followup,
     next_followup_date: lead.next_followup_date,
-    engagementTag: engagementTag,
+    engagementTag: lead.engagementTag?.items?.map((tag: any) => ({
+      id: tag.id,
+      type: tag.type,
+      completed_date: tag.completed_date
+    })) || [],
     script_components: {
       intro: '',
       hook: '',
@@ -230,9 +207,6 @@ const transformStudentLead = (lead: any): Lead => {
       body2: '',
       ending: ''
     },
-    message_sent: lead.message_sent,
-    followed_back: lead.followed_back,
-    followed_up: lead.followed_up,
     status: lead.status,
     created_at: lead.createdAt,
     updated_at: lead.updatedAt
@@ -329,6 +303,7 @@ const transformSubitem = (subitem: any): Subitem => ({
 
 const transformNote = (note: any): Note => ({
   id: note.id,
+  title: note.title || '',
   target_type: note.targetType || note.target_type,
   target_id: note.targetId || note.target_id,
   user_id: note.userId || note.user_id,
@@ -1378,9 +1353,6 @@ export const eightbaseService = {
       last_followup_outcome: lead.last_followup_outcome,
       date_of_last_followup: lead.date_of_last_followup,
       next_followup_date: lead.next_followup_date,
-      message_sent: lead.message_sent,
-      followed_back: lead.followed_back,
-      followed_up: lead.followed_up,
       status: lead.status,
       user: { connect: { id: lead.user_id } }
     };
@@ -1413,6 +1385,43 @@ export const eightbaseService = {
     return transformLead(createdLead);
   },
 
+  async createLeadsBulk(leads: Omit<Lead, 'id' | 'created_at' | 'updated_at'>[]): Promise<Lead[]> {
+    console.log('Input leads:', leads);
+    
+    const leadDataArray = leads.map(lead => ({
+      lead_name: lead.lead_name,
+      email: lead.email,
+      phone: lead.phone,
+      instagram_handle: lead.instagram_handle,
+      lead_source: lead.lead_source,
+      initial_call_outcome: lead.initial_call_outcome,
+      date_of_initial_call: lead.date_of_initial_call,
+      last_followup_outcome: lead.last_followup_outcome,
+      date_of_last_followup: lead.date_of_last_followup,
+      next_followup_date: lead.next_followup_date,
+      status: lead.status,
+      user: { connect: { id: lead.user_id } }
+    }));
+
+    console.log('Lead data array being sent:', leadDataArray);
+    console.log('Using bulk mutation:', queries.CREATE_LEADS_BULK);
+
+    try {
+      const data = await executeMutation(queries.CREATE_LEADS_BULK, { data: leadDataArray });
+      console.log('Response from bulk create:', data);
+      return data.leadCreateMany.items.map(transformLead);
+    } catch (error) {
+      console.error('Bulk creation failed, falling back to individual creation:', error);
+      // Fallback to individual creation if bulk fails
+      const createdLeads: Lead[] = [];
+      for (const lead of leads) {
+        const createdLead = await this.createLead(lead);
+        createdLeads.push(createdLead);
+      }
+      return createdLeads;
+    }
+  },
+
   async updateLead(id: string, updates: Partial<Lead>): Promise<Lead> {
     const data = await executeMutation(queries.UPDATE_LEAD_SIMPLE, { 
       id, 
@@ -1432,19 +1441,16 @@ export const eightbaseService = {
 
   // Engagement Tags
   async addEngagementTag(leadId: string, tag: EngagementTag): Promise<Lead> {
-    // Create the engagement tag with lead_id
+    // Create the engagement tag with lead connection
     const engagementTagData = await executeMutation(queries.CREATE_ENGAGEMENT_TAG, {
       data: {
         type: tag.type,
         completed_date: new Date(tag.completed_date).toISOString().split('T')[0],
+        lead: { connect: { id: leadId } }
       }
     });
     
-    // Now we need to associate the engagement tag with the lead
-    // This might need to be done through updating the lead to include the engagement tag
-    // or through a different mechanism in your 8base setup
-    
-    // For now, let's return the updated lead by fetching it
+    // Return the updated lead by fetching it
     const leadData = await executeQuery(queries.GET_LEADS_BY_FILTER, {
       filter: { id: { equals: leadId } }
     });
@@ -1544,7 +1550,7 @@ export const eightbaseService = {
     );
   },
 
-  async createNote(note: Omit<Note, 'id' | 'created_at'>): Promise<Note> {
+  async createNote(note: Omit<Note, 'id' | 'created_at'> & { title?: string }): Promise<Note> {
     // Transform the data to use connection pattern
     const { target_id, user_id, created_by, created_by_name, ...restData } = note;
     const connectionData = {

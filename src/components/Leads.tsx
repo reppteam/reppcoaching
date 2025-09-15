@@ -281,9 +281,6 @@ export function Leads() {
         ...formData,
         user_id: user.id,
         engagementTag: formData.engagementTag || [],
-        message_sent: false,
-        followed_back: false,
-        followed_up: false
       } as Omit<Lead, 'id' | 'created_at' | 'updated_at'>;
 
       await eightbaseService.createLead(leadData);
@@ -487,7 +484,7 @@ export function Leads() {
   };
 
   const parseCSV = (csv: string) => {
-    const lines = csv.split('\n').filter(line => line.trim());
+    const lines = csv.split('\n').filter(line => line.trim() && line.trim() !== '');
     if (lines.length < 2) {
       setImportErrors(['CSV file must contain at least a header and one data row']);
       return;
@@ -505,8 +502,29 @@ export function Leads() {
     const preview: Partial<Lead>[] = [];
     const errors: string[] = [];
 
+    // Parse CSV line properly handling quoted fields
+    const parseCSVLine = (line: string): string[] => {
+      const result: string[] = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let j = 0; j < line.length; j++) {
+        const char = line[j];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    };
+
     for (let i = 1; i < Math.min(lines.length, 6); i++) { // Preview first 5 rows
-      const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+      const values = parseCSVLine(lines[i]);
       const row: Partial<Lead> = {
         lead_name: values[headers.indexOf('name')] || '',
         email: values[headers.indexOf('email')] || '',
@@ -534,15 +552,41 @@ export function Leads() {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const csv = e.target?.result as string;
-      const lines = csv.split('\n').filter(line => line.trim());
+      const lines = csv.split('\n').filter(line => line.trim() && line.trim() !== '');
       const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
 
-      let importedCount = 0;
+      const leadsToCreate: Omit<Lead, 'id' | 'created_at' | 'updated_at'>[] = [];
       const errors: string[] = [];
 
+      // Parse all leads first
       for (let i = 1; i < lines.length; i++) {
         try {
-          const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+          // Parse CSV line properly handling quoted fields
+          const parseCSVLine = (line: string): string[] => {
+            const result: string[] = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let j = 0; j < line.length; j++) {
+              const char = line[j];
+              if (char === '"') {
+                inQuotes = !inQuotes;
+              } else if (char === ',' && !inQuotes) {
+                result.push(current.trim());
+                current = '';
+              } else {
+                current += char;
+              }
+            }
+            result.push(current.trim());
+            return result;
+          };
+
+          const values = parseCSVLine(lines[i]);
+          console.log('Parsed values:', values);
+          console.log('Headers:', headers);
+          console.log('Name index:', headers.indexOf('name'));
+          
           const leadData: Omit<Lead, 'id' | 'created_at' | 'updated_at'> = {
             user_id: user.id,
             lead_name: values[headers.indexOf('name')] || '',
@@ -559,17 +603,28 @@ export function Leads() {
               body2: '',
               ending: ''
             },
-            message_sent: false,
-            followed_back: false,
-            followed_up: false
           };
+          
+          console.log('Lead data:', leadData);
 
           if (leadData.lead_name) {
-            await eightbaseService.createLead(leadData);
-            importedCount++;
+            leadsToCreate.push(leadData);
+          } else {
+            errors.push(`Row ${i}: Name is required`);
           }
         } catch (error) {
-          errors.push(`Row ${i}: Failed to import - ${error}`);
+          errors.push(`Row ${i}: Failed to parse - ${error}`);
+        }
+      }
+
+      // Create all leads in bulk
+      let importedCount = 0;
+      if (leadsToCreate.length > 0) {
+        try {
+          const createdLeads = await eightbaseService.createLeadsBulk(leadsToCreate);
+          importedCount = createdLeads.length;
+        } catch (error) {
+          errors.push(`Bulk import failed: ${error}`);
         }
       }
 

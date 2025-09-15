@@ -46,6 +46,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
   const [formData, setFormData] = useState({
     target_type: 'student' as 'student' | 'call',
     target_id: '',
+    title: '',
     content: '',
     visibility: 'public' as 'public' | 'private'
   });
@@ -87,6 +88,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
         target_type: formData.target_type,
         target_id: formData.target_id,
         user_id: currentCoachId,
+        title: formData.title,
         content: formData.content,
         visibility: formData.visibility,
         created_by: currentCoachId,
@@ -127,6 +129,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
     setFormData({
       target_type: 'student',
       target_id: '',
+      title: '',
       content: '',
       visibility: 'public'
     });
@@ -228,6 +231,17 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="title">Note Title</Label>
+                  <Input
+                    id="title"
+                    placeholder="Enter note title..."
+                    value={formData.title}
+                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    required
+                  />
                 </div>
 
                 <div>
@@ -385,6 +399,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                           setFormData({
                             target_type: note.target_type as 'student' | 'call',
                             target_id: note.target_id,
+                            title: note.title || '',
                             content: note.content,
                             visibility: note.visibility as 'public' | 'private'
                           });
@@ -447,6 +462,15 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div>
+              <Label>Note Title</Label>
+              <Input
+                placeholder="Enter note title..."
+                value={formData.title}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+              />
             </div>
 
             <div>

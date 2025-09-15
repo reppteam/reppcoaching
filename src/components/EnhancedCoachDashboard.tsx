@@ -40,7 +40,8 @@ import {
   Heart,
   Shield,
   Crown,
-  Sparkles
+  Sparkles,
+  Search
 } from 'lucide-react';
 
 interface Coach {
@@ -105,6 +106,11 @@ export function EnhancedCoachDashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLogCallModalOpen, setIsLogCallModalOpen] = useState(false);
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
+  const [timeFrameFilter, setTimeFrameFilter] = useState<'week' | 'month' | 'custom' | 'all'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'name' | 'activity'>('recent');
+  const [showInactive, setShowInactive] = useState(false);
+  const [showIncompleteTasks, setShowIncompleteTasks] = useState(false);
 
   useEffect(() => {
     if (user?.email) {
@@ -361,7 +367,8 @@ export function EnhancedCoachDashboard() {
         target_type: noteData.target,
         target_id: noteData.studentId || '',
         user_id: coach?.id || '',
-        content: `${noteData.title}\n\n${noteData.content}`,
+        title: noteData.title,
+        content: noteData.content,
         visibility: noteData.visibility,
         created_by: user?.id || '',
         created_by_name: `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
@@ -453,7 +460,106 @@ export function EnhancedCoachDashboard() {
             </div>
           </div>
 
-        {/* Enhanced Summary Cards with Detailed Metrics */}
+          {/* Search and Filter Bar */}
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
+            <CardContent className="pt-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* Search Bar */}
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search students by name or email..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                {/* Sort Options */}
+                <div className="flex gap-2">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+                  >
+                    <option value="recent">Most Recent Activity</option>
+                    <option value="oldest">Oldest Activity</option>
+                    <option value="name">Name (A-Z)</option>
+                    <option value="activity">Activity Level</option>
+                  </select>
+                </div>
+
+                {/* Filter Options */}
+                <div className="flex gap-2">
+                  <Button
+                    variant={showInactive ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setShowInactive(!showInactive)}
+                    className="text-xs"
+                  >
+                    Include Inactive
+                  </Button>
+                  <Button
+                    variant={showIncompleteTasks ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setShowIncompleteTasks(!showIncompleteTasks)}
+                    className="text-xs"
+                  >
+                    Incomplete Tasks
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+        {/* Enhanced Summary Cards with Detailed Metrics and Filter Options */}
+        <div className="space-y-4">
+          {/* Filter Options for Summary Cards */}
+          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Summary Card Filters</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  variant={timeFrameFilter === 'week' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => setTimeFrameFilter('week')}
+                  className="text-xs"
+                >
+                  Week-to-Date
+                </Button>
+                <Button 
+                  variant={timeFrameFilter === 'month' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => setTimeFrameFilter('month')}
+                  className="text-xs"
+                >
+                  Month-to-Date
+                </Button>
+                <Button 
+                  variant={timeFrameFilter === 'custom' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => setTimeFrameFilter('custom')}
+                  className="text-xs"
+                >
+                  Custom Range
+                </Button>
+                <Button 
+                  variant={timeFrameFilter === 'all' ? 'default' : 'outline'} 
+                  size="sm"
+                  onClick={() => setTimeFrameFilter('all')}
+                  className="text-xs"
+                >
+                  All Time
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -635,6 +741,7 @@ export function EnhancedCoachDashboard() {
             </CardContent>
           </Card>
         )}
+        </div>
 
         {/* My Students Section - Exact match to image */}
         <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
@@ -648,7 +755,45 @@ export function EnhancedCoachDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {coach.students?.items?.map((student) => {
+              {coach.students?.items?.filter(student => {
+                // Search filter
+                const matchesSearch = searchTerm === '' || 
+                  student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  student.email.toLowerCase().includes(searchTerm.toLowerCase());
+                
+                // Active/Inactive filter
+                const hasRecentReports = student.student?.items?.some(report => 
+                  new Date(report.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                );
+                const matchesActiveFilter = showInactive || hasRecentReports;
+                
+                // Incomplete tasks filter
+                const hasIncompleteTasks = !hasRecentReports;
+                const matchesIncompleteFilter = !showIncompleteTasks || hasIncompleteTasks;
+                
+                return matchesSearch && matchesActiveFilter && matchesIncompleteFilter;
+              }).sort((a, b) => {
+                // Sorting logic
+                switch (sortBy) {
+                  case 'recent':
+                    const aRecent = a.student?.items?.[0]?.createdAt || a.createdAt;
+                    const bRecent = b.student?.items?.[0]?.createdAt || b.createdAt;
+                    return new Date(bRecent).getTime() - new Date(aRecent).getTime();
+                  case 'oldest':
+                    const aOldest = a.student?.items?.[0]?.createdAt || a.createdAt;
+                    const bOldest = b.student?.items?.[0]?.createdAt || b.createdAt;
+                    return new Date(aOldest).getTime() - new Date(bOldest).getTime();
+                  case 'name':
+                    return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+                  case 'activity':
+                    const aActivity = a.student?.items?.filter(r => new Date(r.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length || 0;
+                    const bActivity = b.student?.items?.filter(r => new Date(r.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length || 0;
+                    return bActivity - aActivity;
+                  default:
+                    return 0;
+                }
+              }).map((student) => {
                 const reports = student.student?.items || [];
                 const totalRevenue = getStudentTotalRevenue(student);
                 const totalProfit = getStudentTotalProfit(student);

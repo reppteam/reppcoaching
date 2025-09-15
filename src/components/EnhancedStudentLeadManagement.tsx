@@ -37,7 +37,8 @@ import {
   Settings,
   Wand2,
   Eye,
-  Phone
+  Phone,
+  FileText
 } from 'lucide-react';
 
 // Enhanced engagement tag configuration that matches the image design
@@ -108,6 +109,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
   const [templatesDialogOpen, setTemplatesDialogOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [expandedLeads, setExpandedLeads] = useState<Set<string>>(new Set());
+  const [editingNotes, setEditingNotes] = useState<string | null>(null);
 
   // Form state for new lead
   const [formData, setFormData] = useState<Partial<Lead>>({
@@ -185,9 +187,6 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
         ...formData,
         user_id: targetUserId,
         engagementTag: formData.engagementTag || [],
-        message_sent: false,
-        followed_back: false,
-        followed_up: false
       } as Omit<Lead, 'id' | 'created_at' | 'updated_at'>;
 
       await eightbaseService.createLead(leadData);
@@ -277,6 +276,156 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
     navigator.clipboard.writeText(text);
   };
 
+  const handleNotesChange = async (leadId: string, notes: string) => {
+    try {
+      // Update the lead notes in the local state
+      setLeads(prevLeads => 
+        prevLeads.map(lead => 
+          lead.id === leadId ? { ...lead, lead_notes: notes } : lead
+        )
+      );
+      
+      // Save to backend
+      await eightbaseService.updateLead(leadId, { lead_notes: notes });
+    } catch (error) {
+      console.error('Failed to update lead notes:', error);
+    }
+  };
+
+  const handleImportLeads = () => {
+    // Create a file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        let importedLeads: any[] = [];
+
+        if (file.name.endsWith('.csv')) {
+          // Parse CSV with improved parsing
+          const lines = text.split('\n').filter(line => line.trim() && line.trim() !== '');
+          const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
+          
+          // Parse CSV line properly handling quoted fields
+          const parseCSVLine = (line: string): string[] => {
+            const result: string[] = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let j = 0; j < line.length; j++) {
+              const char = line[j];
+              if (char === '"') {
+                inQuotes = !inQuotes;
+              } else if (char === ',' && !inQuotes) {
+                result.push(current.trim());
+                current = '';
+              } else {
+                current += char;
+              }
+            }
+            result.push(current.trim());
+            return result;
+          };
+
+          importedLeads = lines.slice(1).map(line => {
+            const values = parseCSVLine(line);
+            const lead: any = {};
+            headers.forEach((header, index) => {
+              const fieldName = header.replace(/\s+/g, '_');
+              lead[fieldName] = values[index] || '';
+            });
+            return lead;
+          });
+        } else if (file.name.endsWith('.json')) {
+          // Parse JSON
+          importedLeads = JSON.parse(text);
+        }
+
+        // Prepare leads for bulk import
+        const targetUserId = isCoachView && studentId ? studentId : user?.id;
+        if (!targetUserId) {
+          alert('User not found. Please try again.');
+          return;
+        }
+
+        const leadsToCreate: Omit<Lead, 'id' | 'created_at' | 'updated_at'>[] = importedLeads
+          .filter(leadData => leadData.name || leadData.lead_name) // Only include leads with names
+          .map(leadData => ({
+            user_id: targetUserId,
+            lead_name: leadData.name || leadData.lead_name || '',
+            email: leadData.email || '',
+            phone: leadData.phone || '',
+            instagram_handle: leadData.instagram || leadData.instagram_handle || '',
+            lead_source: leadData.source || leadData.lead_source || 'Other',
+            status: (leadData.status as Lead['status']) || 'new',
+            engagementTag: [],
+            script_components: {
+              intro: '',
+              hook: '',
+              body1: '',
+              body2: '',
+              ending: ''
+            }
+          }));
+
+        if (leadsToCreate.length === 0) {
+          alert('No valid leads found in the file. Please ensure the file contains lead names.');
+          return;
+        }
+
+        // Import leads using bulk creation
+        console.log('Importing leads in bulk:', leadsToCreate);
+        await eightbaseService.createLeadsBulk(leadsToCreate);
+
+        // Reload data
+        await loadData();
+        alert(`Successfully imported ${leadsToCreate.length} leads in bulk!`);
+      } catch (error) {
+        console.error('Failed to import leads:', error);
+        alert('Failed to import leads. Please check the file format.');
+      }
+    };
+    input.click();
+  };
+
+  const handleExportLeads = () => {
+    try {
+      // Convert leads to CSV format
+      const headers = ['Name', 'Email', 'Phone', 'Instagram', 'Source', 'Status', 'Notes', 'Created Date'];
+      const csvContent = [
+        headers.join(','),
+        ...leads.map(lead => [
+          lead.lead_name,
+          lead.email || '',
+          lead.phone || '',
+          lead.instagram_handle || '',
+          lead.lead_source,
+          lead.status,
+          lead.lead_notes || '',
+          new Date(lead.created_at).toLocaleDateString()
+        ].map(field => `"${field}"`).join(','))
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `leads_export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export leads:', error);
+      alert('Failed to export leads.');
+    }
+  };
+
   const toggleLeadExpanded = (leadId: string) => {
     const newExpanded = new Set(expandedLeads);
     if (newExpanded.has(leadId)) {
@@ -349,10 +498,28 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
           </p>
         </div>
         {(!isCoachView || user?.role === 'coach') && (
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleImportLeads}
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Import from Monday
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleExportLeads}
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Export Leads
+            </Button>
           <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
             <Plus className="mr-2 h-4 w-4" />
             Add Lead
           </Button>
+          </div>
         )}
       </div>
 
@@ -572,6 +739,38 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                               <div className="bg-white dark:bg-gray-700 rounded-lg p-3 border text-sm whitespace-pre-line min-h-[100px]">
                                 {generateScript(lead) || 'No script created yet. Click "Random" to generate one automatically using your DM templates.'}
                               </div>
+                            </div>
+
+                            {/* Lead Notes Section */}
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium flex items-center gap-2 text-gray-900 dark:text-white">
+                                  <FileText className="h-4 w-4" />
+                                  Lead Notes
+                                </h4>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setEditingNotes(lead.id)}
+                                >
+                                  <Edit className="mr-1 h-3 w-3" />
+                                  {editingNotes === lead.id ? 'Save' : 'Edit'}
+                                </Button>
+                              </div>
+                              {editingNotes === lead.id ? (
+                                <textarea
+                                  value={lead.lead_notes || ''}
+                                  onChange={(e) => handleNotesChange(lead.id, e.target.value)}
+                                  placeholder="Add quick notes about this lead after calls..."
+                                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm min-h-[80px] resize-none"
+                                  onBlur={() => setEditingNotes(null)}
+                                  autoFocus
+                                />
+                              ) : (
+                                <div className="bg-white dark:bg-gray-700 rounded-lg p-3 border text-sm min-h-[80px]">
+                                  {lead.lead_notes || 'No notes yet. Click "Edit" to add quick notes about this lead.'}
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}

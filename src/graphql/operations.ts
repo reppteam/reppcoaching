@@ -2034,9 +2034,6 @@ export const GET_LEADS_BY_FILTER = gql`
         last_followup_outcome
         date_of_last_followup
         next_followup_date
-        message_sent
-        followed_back
-        followed_up
         status
         user {
           id
@@ -2046,6 +2043,13 @@ export const GET_LEADS_BY_FILTER = gql`
         }
         engagement_statuses
         script_components
+        engagementTag {
+          items {
+            id
+            type
+            completed_date
+          }
+        }
         createdAt
         updatedAt
       }
@@ -2068,15 +2072,19 @@ export const GET_STUDENT_LEADS = gql`
         last_followup_outcome
         date_of_last_followup
         next_followup_date
-        message_sent
-        followed_back
-        followed_up
         status
         user {
           id
           email
           firstName
           lastName
+        }
+        engagementTag {
+          items {
+            id
+            type
+            completed_date
+          }
         }
         createdAt
         updatedAt
@@ -2099,12 +2107,32 @@ export const CREATE_LEAD = gql`
       last_followup_outcome
       date_of_last_followup
       next_followup_date
-      message_sent
-      followed_back
-      followed_up
       status
       createdAt
       updatedAt
+    }
+  }
+`;
+
+export const CREATE_LEADS_BULK = gql`
+  mutation CreateLeadsBulk($data: [LeadCreateManyInput!]!) {
+    leadCreateMany(data: $data) {
+      items {
+        id
+        lead_name
+        email
+        phone
+        instagram_handle
+        lead_source
+        initial_call_outcome
+        date_of_initial_call
+        last_followup_outcome
+        date_of_last_followup
+        next_followup_date
+        status
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
@@ -2124,9 +2152,6 @@ export const UPDATE_LEAD = gql`
         last_followup_outcome
         date_of_last_followup
         next_followup_date
-        message_sent
-        followed_back
-        followed_up
         status
         user {
           id
@@ -2155,9 +2180,6 @@ export const UPDATE_LEAD_SIMPLE = gql`
       last_followup_outcome
       date_of_last_followup
       next_followup_date
-      message_sent
-      followed_back
-      followed_up
       status
       createdAt
       updatedAt
@@ -2180,9 +2202,6 @@ export const UPDATE_LEAD_BY_FILTER = gql`
         last_followup_outcome
         date_of_last_followup
         next_followup_date
-        message_sent
-        followed_back
-        followed_up
         status
         user {
           id
@@ -2215,6 +2234,9 @@ export const CREATE_ENGAGEMENT_TAG = gql`
       id
       type
       completed_date
+      lead {
+        id
+      }
       createdAt
       updatedAt
     }
@@ -2223,7 +2245,7 @@ export const CREATE_ENGAGEMENT_TAG = gql`
 
 export const UPDATE_ENGAGEMENT_TAG = gql`
   mutation UpdateEngagementTag($id: ID!, $data: EngagementTagUpdateInput!) {
-    engagementTagsUpdate(filter: { id: $id }, data: $data) {
+    engagementTagUpdate(filter: { id: $id }, data: $data) {
       id
       type
       completed_date
@@ -2240,7 +2262,7 @@ export const UPDATE_ENGAGEMENT_TAG = gql`
 
 export const DELETE_ENGAGEMENT_TAG = gql`
   mutation DeleteEngagementTag($id: ID!) {
-    engagementTagsDelete(filter: { id: $id }) {
+    engagementTagDelete(filter: { id: $id }) {
       success
     }
   }
@@ -2252,7 +2274,7 @@ export const DELETE_ENGAGEMENT_TAG = gql`
 
 export const CREATE_SCRIPT_COMPONENTS = gql`
   mutation CreateScriptComponents($data: ScriptComponentCreateInput!) {
-    scriptComponentsCreate(data: $data) {
+    scriptComponentCreate(data: $data) {
       id
       intro
       hook
@@ -2272,7 +2294,7 @@ export const CREATE_SCRIPT_COMPONENTS = gql`
 
 export const UPDATE_SCRIPT_COMPONENTS = gql`
   mutation UpdateScriptComponents($id: ID!, $data: ScriptComponentUpdateInput!) {
-    scriptComponentsUpdate(filter: { id: $id }, data: $data) {
+    scriptComponentUpdate(filter: { id: $id }, data: $data) {
       id
       intro
       hook
@@ -2292,7 +2314,7 @@ export const UPDATE_SCRIPT_COMPONENTS = gql`
 
 export const DELETE_SCRIPT_COMPONENTS = gql`
   mutation DeleteScriptComponents($id: ID!) {
-    scriptComponentsDelete(filter: { id: $id }) {
+    scriptComponentDelete(filter: { id: $id }) {
       success
     }
   }

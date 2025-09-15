@@ -62,6 +62,7 @@ export function AdminDashboard() {
   const [noteForm, setNoteForm] = useState({
     target_type: 'student',
     target_id: '',
+    title: '',
     content: '',
     visibility: 'public'
   });
@@ -134,6 +135,7 @@ export function AdminDashboard() {
       setNoteForm({
         target_type: 'student',
         target_id: '',
+        title: '',
         content: '',
         visibility: 'public'
       });
@@ -632,6 +634,16 @@ export function AdminDashboard() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="title" className="text-foreground">Note Title</Label>
+              <Input
+                id="title"
+                value={noteForm.title}
+                onChange={(e) => setNoteForm({...noteForm, title: e.target.value})}
+                placeholder="Enter note title..."
+              />
             </div>
             
             <div>
