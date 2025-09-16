@@ -1277,6 +1277,12 @@ export const GET_STUDENT_BY_ID = gql`
       preferred_contact_method
       availability
       notes
+      user {
+        id
+        firstName
+        lastName
+        email
+      }
       createdAt
       updatedAt
       student {

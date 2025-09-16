@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../contexts/ThemeContext';
 import { eightbaseService } from '../services/8baseService';
+import { studentImpersonationService } from '../services/studentImpersonationService';
 import { Header } from './Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -41,7 +42,11 @@ import {
   Shield,
   Crown,
   Sparkles,
-  Search
+  Search,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  User
 } from 'lucide-react';
 
 interface Coach {
@@ -96,6 +101,146 @@ interface WeeklyReport {
   updatedAt: string;
 }
 
+// Calendar Component
+interface CalendarProps {
+  selectedDate: Date | null;
+  onDateSelect: (date: Date) => void;
+  minDate?: Date;
+  maxDate?: Date;
+  className?: string;
+}
+
+function CalendarComponent({ selectedDate, onDateSelect, minDate, maxDate, className = "" }: CalendarProps) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+  
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+  
+  const isDateInRange = (date: Date) => {
+    if (minDate && date < minDate) return false;
+    if (maxDate && date > maxDate) return false;
+    return true;
+  };
+  
+  const isDateSelected = (date: Date) => {
+    if (!selectedDate) return false;
+    return date.toDateString() === selectedDate.toDateString();
+  };
+  
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+  
+  const handleDateClick = (day: number) => {
+    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    if (isDateInRange(date)) {
+      onDateSelect(date);
+    }
+  };
+  
+  const goToPreviousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  };
+  
+  const goToNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  };
+  
+  const renderCalendarDays = () => {
+    const daysInMonth = getDaysInMonth(currentMonth);
+    const firstDay = getFirstDayOfMonth(currentMonth);
+    const days = [];
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`empty-${i}`} className="h-8 w-8"></div>);
+    }
+    
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+      const isInRange = isDateInRange(date);
+      const isSelected = isDateSelected(date);
+      const isTodayDate = isToday(date);
+      
+      days.push(
+        <button
+          key={day}
+          onClick={() => handleDateClick(day)}
+          disabled={!isInRange}
+          className={`
+            h-8 w-8 text-sm rounded-md transition-colors
+            ${isInRange 
+              ? 'hover:bg-blue-100 dark:hover:bg-blue-900/30 cursor-pointer' 
+              : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+            }
+            ${isSelected 
+              ? 'bg-blue-600 text-white hover:bg-blue-700' 
+              : isTodayDate 
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold'
+                : 'text-gray-700 dark:text-gray-300'
+            }
+          `}
+        >
+          {day}
+        </button>
+      );
+    }
+    
+    return days;
+  };
+  
+  return (
+    <div className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-4 ${className}`}>
+      {/* Calendar Header */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={goToPreviousMonth}
+          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+        >
+          <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+        </button>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+        </h3>
+        <button
+          onClick={goToNextMonth}
+          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+        >
+          <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+        </button>
+      </div>
+      
+      {/* Day Names */}
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {dayNames.map(day => (
+          <div key={day} className="h-8 w-8 flex items-center justify-center text-xs font-medium text-gray-500 dark:text-gray-400">
+            {day}
+          </div>
+        ))}
+      </div>
+      
+      {/* Calendar Days */}
+      <div className="grid grid-cols-7 gap-1">
+        {renderCalendarDays()}
+      </div>
+    </div>
+  );
+}
+
 export function EnhancedCoachDashboard() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -104,6 +249,7 @@ export function EnhancedCoachDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('profile');
   const [isLogCallModalOpen, setIsLogCallModalOpen] = useState(false);
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
   const [timeFrameFilter, setTimeFrameFilter] = useState<'week' | 'month' | 'custom' | 'all'>('all');
@@ -111,6 +257,11 @@ export function EnhancedCoachDashboard() {
   const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'name' | 'activity'>('recent');
   const [showInactive, setShowInactive] = useState(false);
   const [showIncompleteTasks, setShowIncompleteTasks] = useState(false);
+  const [customDateRange, setCustomDateRange] = useState<{start: Date | null; end: Date | null}>({
+    start: null,
+    end: null
+  });
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (user?.email) {
@@ -265,6 +416,51 @@ export function EnhancedCoachDashboard() {
     return { start: earliestDate, end: latestDate };
   };
 
+  // Get date range based on selected filter
+  const getFilteredDateRange = (): { start: Date | null; end: Date | null } => {
+    const now = new Date();
+    
+    switch (timeFrameFilter) {
+      case 'week':
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - 7);
+        return { start: weekStart, end: now };
+      
+      case 'month':
+        const monthStart = new Date(now);
+        monthStart.setMonth(now.getMonth() - 1);
+        return { start: monthStart, end: now };
+      
+      case 'custom':
+        if (customDateRange.start && customDateRange.end) {
+          return { 
+            start: customDateRange.start, 
+            end: customDateRange.end 
+          };
+        }
+        return { start: null, end: null };
+      
+      case 'all':
+      default:
+        return { start: null, end: null };
+    }
+  };
+
+  // Filter reports based on date range
+  const getFilteredReports = (student: Student) => {
+    const reports = student.student?.items || [];
+    const dateRange = getFilteredDateRange();
+    
+    if (!dateRange.start || !dateRange.end) {
+      return reports; // Return all reports if no date filter
+    }
+    
+    return reports.filter(report => {
+      const reportDate = new Date(report.createdAt);
+      return reportDate >= dateRange.start! && reportDate <= dateRange.end!;
+    });
+  };
+
   const getStudentTotalRevenue = (student: Student) => {
     return student.student?.items?.reduce((total, report) => total + (report.revenue || 0), 0) || 0;
   };
@@ -302,6 +498,101 @@ export function EnhancedCoachDashboard() {
     return student.student?.items?.reduce((total, report) => total + (report.paid_shoots || 0), 0) || 0;
   };
 
+  // Filtered versions of calculation functions
+  const getFilteredTotalRevenue = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const filteredReports = getFilteredReports(student);
+      const studentRevenue = filteredReports.reduce((studentTotal, report) => 
+        studentTotal + (report.revenue || 0), 0);
+      return total + studentRevenue;
+    }, 0);
+  };
+
+  const getFilteredTotalNetProfit = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const filteredReports = getFilteredReports(student);
+      const studentProfit = filteredReports.reduce((studentTotal, report) => 
+        studentTotal + (report.net_profit || 0), 0);
+      return total + studentProfit;
+    }, 0);
+  };
+
+  const getFilteredTotalShoots = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const filteredReports = getFilteredReports(student);
+      const studentShoots = filteredReports.reduce((studentTotal, report) => 
+        studentTotal + (report.paid_shoots || 0) + (report.free_shoots || 0), 0);
+      return total + studentShoots;
+    }, 0);
+  };
+
+  const getFilteredTotalClients = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const filteredReports = getFilteredReports(student);
+      const studentClients = filteredReports.reduce((studentTotal, report) => 
+        studentTotal + (report.new_clients || 0), 0);
+      return total + studentClients;
+    }, 0);
+  };
+
+  const getFilteredTotalPaidShoots = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const filteredReports = getFilteredReports(student);
+      const studentPaidShoots = filteredReports.reduce((studentTotal, report) => 
+        studentTotal + (report.paid_shoots || 0), 0);
+      return total + studentPaidShoots;
+    }, 0);
+  };
+
+  const getFilteredTotalFreeShoots = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const filteredReports = getFilteredReports(student);
+      const studentFreeShoots = filteredReports.reduce((studentTotal, report) => 
+        studentTotal + (report.free_shoots || 0), 0);
+      return total + studentFreeShoots;
+    }, 0);
+  };
+
+  const getFilteredTotalExpenses = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const filteredReports = getFilteredReports(student);
+      const studentExpenses = filteredReports.reduce((studentTotal, report) => 
+        studentTotal + (report.expenses || 0), 0);
+      return total + studentExpenses;
+    }, 0);
+  };
+
+  const getFilteredTotalEditingCost = () => {
+    if (!coach?.students?.items) return 0;
+    
+    return coach.students.items.reduce((total, student) => {
+      const filteredReports = getFilteredReports(student);
+      const studentEditingCost = filteredReports.reduce((studentTotal, report) => 
+        studentTotal + (report.editing_cost || 0), 0);
+      return total + studentEditingCost;
+    }, 0);
+  };
+
+  const getFilteredAverageOrderValue = () => {
+    const totalRevenue = getFilteredTotalRevenue();
+    const totalShoots = getFilteredTotalShoots();
+    return totalShoots > 0 ? totalRevenue / totalShoots : 0;
+  };
+
   const getStudentAverageOrderValue = (student: Student) => {
     const reports = student.student?.items || [];
     if (reports.length === 0) return 0;
@@ -311,8 +602,9 @@ export function EnhancedCoachDashboard() {
 
   const getStudentLatestReport = (student: Student) => {
     const reports = student.student?.items || [];
-    if (reports.length === 0) return null;
-    return reports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+    if (reports?.length === 0) return null;
+    // Create a copy of the array before sorting to avoid read-only property error
+    return [...reports].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
   };
 
   const getStudentsWithoutRecentReports = () => {
@@ -330,6 +622,7 @@ export function EnhancedCoachDashboard() {
 
   const handleViewStudentProfile = (studentId: string) => {
     setSelectedStudentId(studentId);
+    setActiveTab('profile');
     setIsEditModalOpen(true);
   };
 
@@ -379,6 +672,14 @@ export function EnhancedCoachDashboard() {
       console.error('Error creating note:', error);
       throw error; // Re-throw to let the modal handle the error display
     }
+  };
+
+  const handleLoginAsStudent = async (student: Student) => {
+    // Instead of opening a new tab, open the student profile modal
+    // The modal already has the profit calculator integrated
+    setSelectedStudentId(student.id);
+    setActiveTab('profit');
+    setIsEditModalOpen(true);
   };
 
   if (loading) {
@@ -460,60 +761,6 @@ export function EnhancedCoachDashboard() {
             </div>
           </div>
 
-          {/* Search and Filter Bar */}
-          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                {/* Search Bar */}
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search students by name or email..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                {/* Sort Options */}
-                <div className="flex gap-2">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-                  >
-                    <option value="recent">Most Recent Activity</option>
-                    <option value="oldest">Oldest Activity</option>
-                    <option value="name">Name (A-Z)</option>
-                    <option value="activity">Activity Level</option>
-                  </select>
-                </div>
-
-                {/* Filter Options */}
-                <div className="flex gap-2">
-                  <Button
-                    variant={showInactive ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setShowInactive(!showInactive)}
-                    className="text-xs"
-                  >
-                    Include Inactive
-                  </Button>
-                  <Button
-                    variant={showIncompleteTasks ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setShowIncompleteTasks(!showIncompleteTasks)}
-                    className="text-xs"
-                  >
-                    Incomplete Tasks
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
         {/* Enhanced Summary Cards with Detailed Metrics and Filter Options */}
         <div className="space-y-4">
@@ -543,9 +790,13 @@ export function EnhancedCoachDashboard() {
                 <Button 
                   variant={timeFrameFilter === 'custom' ? 'default' : 'outline'} 
                   size="sm"
-                  onClick={() => setTimeFrameFilter('custom')}
+                  onClick={() => {
+                    setTimeFrameFilter('custom');
+                    setShowDatePicker(!showDatePicker);
+                  }}
                   className="text-xs"
                 >
+                  <CalendarDays className="h-3 w-3 mr-1" />
                   Custom Range
                 </Button>
                 <Button 
@@ -557,6 +808,94 @@ export function EnhancedCoachDashboard() {
                   All Time
                 </Button>
               </div>
+              
+              {/* Custom Date Range Picker */}
+              {timeFrameFilter === 'custom' && showDatePicker && (
+                <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className="mb-4">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Select Date Range</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Choose start and end dates to filter your data</p>
+                  </div>
+                  
+                  <div className="flex flex-col lg:flex-row gap-6">
+                    {/* Start Date Calendar */}
+                    <div className="flex-1">
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Start Date
+                        </label>
+                        {customDateRange.start && (
+                          <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                            Selected: {customDateRange.start.toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                      <CalendarComponent
+                        selectedDate={customDateRange.start}
+                        onDateSelect={(date) => setCustomDateRange(prev => ({ ...prev, start: date }))}
+                        maxDate={customDateRange.end || new Date()}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    {/* End Date Calendar */}
+                    <div className="flex-1">
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          End Date
+                        </label>
+                        {customDateRange.end && (
+                          <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                            Selected: {customDateRange.end.toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                      <CalendarComponent
+                        selectedDate={customDateRange.end}
+                        onDateSelect={(date) => setCustomDateRange(prev => ({ ...prev, end: date }))}
+                        minDate={customDateRange.start || undefined}
+                        maxDate={new Date()}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center gap-2">
+                      {customDateRange.start && customDateRange.end && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <Calendar className="h-4 w-4 inline mr-1" />
+                          Showing data from {customDateRange.start.toLocaleDateString()} to {customDateRange.end.toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setCustomDateRange({ start: null, end: null });
+                          setTimeFrameFilter('all');
+                          setShowDatePicker(false);
+                        }}
+                        className="text-xs"
+                      >
+                        Clear & Close
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => setShowDatePicker(false)}
+                        className="text-xs"
+                        disabled={!customDateRange.start || !customDateRange.end}
+                      >
+                        Apply Filter
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -581,7 +920,7 @@ export function EnhancedCoachDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${getTotalRevenue().toLocaleString()}
+                ${getFilteredTotalRevenue().toLocaleString()}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Combined student revenue
@@ -596,7 +935,7 @@ export function EnhancedCoachDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${getTotalNetProfit().toLocaleString()}
+                ${getFilteredTotalNetProfit().toLocaleString()}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 After expenses & editing costs
@@ -611,7 +950,7 @@ export function EnhancedCoachDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${getAverageOrderValue().toLocaleString()}
+                ${getFilteredAverageOrderValue().toLocaleString()}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Average order value
@@ -628,7 +967,7 @@ export function EnhancedCoachDashboard() {
               <UserCheck className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{getTotalClients()}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{getFilteredTotalClients()}</div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Total new clients
               </p>
@@ -641,7 +980,7 @@ export function EnhancedCoachDashboard() {
               <Camera className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{getTotalPaidShoots()}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{getFilteredTotalPaidShoots()}</div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Revenue-generating shoots
               </p>
@@ -654,7 +993,7 @@ export function EnhancedCoachDashboard() {
               <Camera className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{getTotalFreeShoots()}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{getFilteredTotalFreeShoots()}</div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Marketing & portfolio shoots
               </p>
@@ -668,7 +1007,7 @@ export function EnhancedCoachDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                ${(getTotalExpenses() + getTotalEditingCost()).toLocaleString()}
+                ${(getFilteredTotalExpenses() + getFilteredTotalEditingCost()).toLocaleString()}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Expenses + editing costs
@@ -753,14 +1092,68 @@ export function EnhancedCoachDashboard() {
               </div>
             </div>
           </CardHeader>
+          
+          {/* Search and Filter Bar */}
+          <div className="px-6 pb-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Search Bar */}
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search students by name or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Sort Options */}
+              <div className="flex gap-2">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+                >
+                  <option value="recent">Most Recent Activity</option>
+                  <option value="oldest">Oldest Activity</option>
+                  <option value="name">Name (A-Z)</option>
+                  <option value="activity">Activity Level</option>
+                </select>
+              </div>
+
+              {/* Filter Options */}
+              <div className="flex gap-2">
+                <Button
+                  variant={showInactive ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setShowInactive(!showInactive)}
+                  className="text-xs"
+                >
+                  Include Inactive
+                </Button>
+                <Button
+                  variant={showIncompleteTasks ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setShowIncompleteTasks(!showIncompleteTasks)}
+                  className="text-xs"
+                >
+                  Incomplete Tasks
+                </Button>
+              </div>
+            </div>
+          </div>
+
           <CardContent>
             <div className="space-y-4">
               {coach.students?.items?.filter(student => {
                 // Search filter
                 const matchesSearch = searchTerm === '' || 
-                  student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  student.email.toLowerCase().includes(searchTerm.toLowerCase());
+                  (student.firstName && student.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                  (student.lastName && student.lastName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                  (student.email && student.email.toLowerCase().includes(searchTerm.toLowerCase()));
                 
                 // Active/Inactive filter
                 const hasRecentReports = student.student?.items?.some(report => 
@@ -847,6 +1240,15 @@ export function EnhancedCoachDashboard() {
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View Profile
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="border-green-200 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/20"
+                          onClick={() => handleLoginAsStudent(student)}
+                        >
+                          <User className="h-4 w-4 mr-1" />
+                          View Profit Calculator
                         </Button>
                       </div>
                     </div>
@@ -1145,6 +1547,7 @@ export function EnhancedCoachDashboard() {
         studentId={selectedStudentId || ''}
         isOpen={isEditModalOpen && !!selectedStudentId}
         onClose={handleCloseEditModal}
+        activeTab={activeTab}
       />
 
       {/* Log Call Modal */}

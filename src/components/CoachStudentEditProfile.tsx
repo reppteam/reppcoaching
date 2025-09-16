@@ -4,7 +4,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { eightbaseService } from '../services/8baseService';
 import { CallLog } from '../types';
 import { useQuery } from '@apollo/client';
-import { GET_NOTES_BY_FILTER } from '../graphql/operations';
+import { GET_NOTES_BY_FILTER, GET_GOALS_BY_FILTER, GET_STUDENT_BY_ID, GET_CALL_LOGS_BY_FILTER } from '../graphql/operations';
+import { Goal } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -21,8 +22,11 @@ import {
   Save,
   X,
   Sun,
-  Moon
+  Moon,
+  Calculator,
+  ExternalLink
 } from 'lucide-react';
+import ProfitCalculator from './ProfitCalculator';
 
 interface Student {
   id: string;
@@ -39,6 +43,12 @@ interface Student {
   preferred_contact_method: string;
   availability: string;
   notes: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   createdAt: string;
   updatedAt: string;
   student?: {
@@ -64,17 +74,22 @@ interface CoachStudentEditProfileProps {
   studentId: string;
   isOpen: boolean;
   onClose: () => void;
+  activeTab?: string;
 }
 
-export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStudentEditProfileProps) {
+export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab = 'profile' }: CoachStudentEditProfileProps) {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [student, setStudent] = useState<Student | null>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Debug logging
+  console.log('CoachStudentEditProfile - studentId:', studentId);
+  console.log('CoachStudentEditProfile - isOpen:', isOpen);
+  console.log('CoachStudentEditProfile - activeTab:', activeTab);
+
   // GraphQL query for notes
-  const { data: notesData, loading: notesLoading, refetch: refetchNotes } = useQuery(GET_NOTES_BY_FILTER, {
+  const { data: notesData, loading: notesLoading, refetch: refetchNotes, error: notesError } = useQuery(GET_NOTES_BY_FILTER, {
     variables: {
       filter: {
         studentNote: {
@@ -83,7 +98,70 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
       }
     },
     skip: !studentId || !isOpen,
-    fetchPolicy: 'cache-and-network'
+    fetchPolicy: 'cache-and-network',
+    onCompleted: (data) => {
+      console.log('Notes query completed:', data);
+    },
+    onError: (error) => {
+      console.error('Notes query error:', error);
+    }
+  });
+
+  console.log('Notes query - skip:', !studentId || !isOpen);
+  console.log('Notes query - loading:', notesLoading);
+  console.log('Notes query - error:', notesError);
+  console.log('Notes query - data:', notesData);
+
+  // GraphQL query for student profile data
+  const { data: studentData, loading: studentLoading, refetch: refetchStudent, error: studentError } = useQuery(GET_STUDENT_BY_ID, {
+    variables: { id: studentId },
+    skip: !studentId || !isOpen,
+    fetchPolicy: 'cache-and-network',
+    onCompleted: (data) => {
+      console.log('Student query completed:', data);
+    },
+    onError: (error) => {
+      console.error('Student query error:', error);
+    }
+  });
+
+  // GraphQL query for goals
+  const { data: goalsData, loading: goalsLoading, refetch: refetchGoals, error: goalsError } = useQuery(GET_GOALS_BY_FILTER, {
+    variables: {
+      filter: {
+        student: {
+          email: {
+            equals: studentData?.student?.email
+          }
+        }
+      }
+    },
+    skip: !studentId || !isOpen || !studentData?.student?.email,
+    fetchPolicy: 'cache-and-network',
+    onCompleted: (data) => {
+      console.log('Goals query completed:', data);
+    },
+    onError: (error) => {
+      console.error('Goals query error:', error);
+    }
+  });
+  // GraphQL query for call logs
+  const { data: callLogsData, loading: callLogsLoading, refetch: refetchCallLogs, error: callLogsError } = useQuery(GET_CALL_LOGS_BY_FILTER, {
+    variables: {
+      filter: {
+        student: {
+          id: { equals: studentId }
+        }
+      }
+    },
+    skip: !studentId || !isOpen,
+    fetchPolicy: 'cache-and-network',
+    onCompleted: (data) => {
+      console.log('Call logs query completed:', data);
+    },
+    onError: (error) => {
+      console.error('Call logs query error:', error);
+    }
   });
 
   const [formData, setFormData] = useState({
@@ -111,19 +189,16 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
   }>>([]);
 
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
-  const [callLogsLoading, setCallLogsLoading] = useState(false);
+  const [goals, setGoals] = useState<Goal[]>([]);
 
-
-  useEffect(() => {
-    if (studentId && isOpen) {
-      loadStudentData();
-      loadCallLogs();
-    }
-  }, [studentId, isOpen]);
+  // All data is now loaded via GraphQL queries automatically
+  // No need for manual loading functions
 
   // Process notes data from GraphQL query
   useEffect(() => {
+    console.log('Processing notes data:', notesData);
     if (notesData?.notesList?.items) {
+      console.log('Notes items from API:', notesData.notesList.items);
       const transformedNotes = notesData.notesList.items.map((note: any) => ({
         id: note.id,
         title: note.title || note.content?.split('\n')[0] || 'Untitled Note',
@@ -131,137 +206,127 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
         createdAt: note.createdAt,
         updatedAt: note.updatedAt
       }));
+      console.log('Transformed notes:', transformedNotes);
       setNotes(transformedNotes);
+    } else {
+      console.log('No notes data found in response:', notesData);
     }
   }, [notesData]);
+
+  // Process student data from GraphQL query
+  useEffect(() => {
+    console.log('Processing student data:', studentData);
+    if (studentData?.student) {
+      const student = studentData.student;
+      console.log('Student object from API:', student);
+      
+      const processedStudent = {
+        id: student.id,
+        firstName: student.firstName || '',
+        lastName: student.lastName || '',
+        email: student.email || '',
+        phone: student.phone || '',
+        business_name: student.business_name || '',
+        location: student.location || '',
+        target_market: student.target_market || '',
+        strengths: student.strengths || '',
+        challenges: student.challenges || '',
+        goals: student.goals || '',
+        preferred_contact_method: student.preferred_contact_method || '',
+        availability: student.availability || '',
+        notes: student.notes || '',
+        user: student.user,
+        createdAt: student.createdAt,
+        updatedAt: student.updatedAt,
+        student: student.student
+      };
+      
+      console.log('Processed student:', processedStudent);
+      setStudent(processedStudent);
+      
+      const processedFormData = {
+        firstName: student.firstName || '',
+        lastName: student.lastName || '',
+        email: student.email || '',
+        phone: student.phone || '',
+        business_name: student.business_name || '',
+        location: student.location || '',
+        target_market: student.target_market || '',
+        strengths: student.strengths || '',
+        challenges: student.challenges || '',
+        goals: student.goals || '',
+        preferred_contact_method: student.preferred_contact_method || '',
+        availability: student.availability || '',
+        notes: student.notes || ''
+      };
+      
+      console.log('Processed form data:', processedFormData);
+      setFormData(processedFormData);
+      } else {
+      console.log('No student data found in response:', studentData);
+    }
+  }, [studentData]);
+
+  // Process goals data from GraphQL query
+  useEffect(() => {
+    console.log('Processing goals data:', goalsData);
+    if (goalsData?.goalsList?.items) {
+      console.log('Goals items from API:', goalsData.goalsList.items);
+      const transformedGoals = goalsData.goalsList.items.map((goal: any) => ({
+        id: goal.id,
+        user_id: goal.student?.id || '',
+        title: goal.title || 'Untitled Goal',
+        description: goal.description || '',
+        target_value: goal.target_value || 0,
+        current_value: goal.current_value || 0,
+        goal_type: goal.goal_type || 'revenue',
+        deadline: goal.deadline || goal.month_start || new Date().toISOString(),
+        priority: goal.priority || 'medium',
+        status: goal.status || 'active',
+        progress_percentage: goal.target_value > 0 ? Math.round((goal.current_value / goal.target_value) * 100) : 0,
+        created_at: goal.createdAt,
+        updated_at: goal.updatedAt
+      }));
+      console.log('Transformed goals:', transformedGoals);
+      setGoals(transformedGoals);
+    } else {
+      console.log('No goals data found in response:', goalsData);
+    }
+  }, [goalsData]);
+
+  // Process call logs data from GraphQL query
+  useEffect(() => {
+    console.log('Processing call logs data:', callLogsData);
+    if (callLogsData?.callLogsList?.items) {
+      console.log('Call logs items from API:', callLogsData.callLogsList.items);
+      const transformedCallLogs = callLogsData.callLogsList.items.map((callLog: any) => ({
+        id: callLog.id,
+        student_id: callLog.student?.id || '',
+        coach_id: callLog.coach?.id || '',
+        call_date: callLog.call_date,
+        call_duration: callLog.call_duration,
+        call_type: callLog.call_type,
+        topics_discussed: callLog.topics_discussed || [],
+        outcome: callLog.outcome || '',
+        next_steps: callLog.next_steps || '',
+        student_mood: callLog.student_mood || 'neutral',
+        created_at: callLog.createdAt,
+        updated_at: callLog.updatedAt
+      }));
+      console.log('Transformed call logs:', transformedCallLogs);
+      setCallLogs(transformedCallLogs);
+    } else {
+      console.log('No call logs data found in response:', callLogsData);
+    }
+  }, [callLogsData]);
 
   // Don't render anything if modal is not open or no student ID
   if (!isOpen || !studentId) {
     return null;
   }
 
-  const loadStudentData = async () => {
-    if (!studentId || !isOpen) return;
-
-    try {
-      setLoading(true);
-      
-      // Get real student data from 8base
-      const realStudent = await eightbaseService.getStudentById(studentId);
-      if (realStudent) {
-        setStudent(realStudent);
-        setFormData({
-          firstName: realStudent.firstName || '',
-          lastName: realStudent.lastName || '',
-          email: realStudent.email || '',
-          phone: realStudent.phone || '',
-          business_name: realStudent.business_name || '',
-          location: realStudent.location || '',
-          target_market: realStudent.target_market || '',
-          strengths: realStudent.strengths || '',
-          challenges: realStudent.challenges || '',
-          goals: realStudent.goals || '',
-          preferred_contact_method: realStudent.preferred_contact_method || '',
-          availability: realStudent.availability || '',
-          notes: realStudent.notes || ''
-        });
-
-        // Notes will be loaded separately via GraphQL query
-      } else {
-        // Fallback to mock data for demonstration
-        const mockStudent: Student = {
-          id: studentId,
-          firstName: 'John',
-          lastName: 'Student',
-          email: 'student@example.com',
-          phone: '+1 (555) 123-4567',
-          business_name: "John's Real Estate Photography",
-          location: 'Austin, TX',
-          target_market: 'Luxury homes and commercial properties',
-          strengths: 'Great eye for detail, strong editing skills',
-          challenges: 'Pricing confidence, lead generation',
-          goals: 'Reach $10K monthly revenue by end of year',
-          preferred_contact_method: 'Phone calls',
-          availability: 'Weekday evenings, weekend mornings',
-          notes: 'Very motivated, quick learner',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          student: {
-            items: [
-              {
-                id: '1',
-                revenue: 2250,
-                net_profit: 1800,
-                paid_shoots: 8,
-                free_shoots: 2,
-                new_clients: 3,
-                start_date: '2024-06-24',
-                end_date: '2024-06-30',
-                status: 'completed',
-                createdAt: '2024-06-30T10:00:00Z'
-              }
-            ]
-          }
-        };
-        
-        setStudent(mockStudent);
-        setFormData({
-          firstName: mockStudent.firstName,
-          lastName: mockStudent.lastName,
-          email: mockStudent.email,
-          phone: mockStudent.phone,
-          business_name: mockStudent.business_name,
-          location: mockStudent.location,
-          target_market: mockStudent.target_market,
-          strengths: mockStudent.strengths,
-          challenges: mockStudent.challenges,
-          goals: mockStudent.goals,
-          preferred_contact_method: mockStudent.preferred_contact_method,
-          availability: mockStudent.availability,
-          notes: mockStudent.notes
-        });
-
-        // Set mock notes for demonstration
-        setNotes([
-          {
-            id: '1',
-            title: 'Initial Assessment',
-            content: 'Very motivated, quick learner',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            id: '2',
-            title: 'Progress Update',
-            content: 'Showing great improvement in pricing confidence',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ]);
-      }
-    } catch (error) {
-      console.error('Error loading student data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadCallLogs = async () => {
-    if (!studentId || !isOpen) return;
-
-    try {
-      setCallLogsLoading(true);
-      
-      // Get call logs for this student
-      const logs = await eightbaseService.getCallLogs(studentId);
-      setCallLogs(logs || []);
-    } catch (error) {
-      console.error('Error loading call logs:', error);
-      setCallLogs([]);
-    } finally {
-      setCallLogsLoading(false);
-    }
-  };
+  // All data loading is now handled by GraphQL queries
+  // No need for separate loading functions
 
 
   const handleSave = async () => {
@@ -279,8 +344,8 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
         notes: notesJson
       });
       
-      // Reload data to get updated information
-      await loadStudentData();
+      // Refetch student data to get updated information
+      await refetchStudent();
       
       // Show success message or handle success
       console.log('Student profile updated successfully');
@@ -337,7 +402,43 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
     ));
   };
 
-  if (loading) {
+  const handleCreateGoal = async () => {
+    const title = prompt('Enter goal title:');
+    if (!title) return;
+
+    const description = prompt('Enter goal description (optional):') || '';
+    const targetValue = prompt('Enter target value (number):');
+    if (!targetValue || isNaN(Number(targetValue))) {
+      alert('Please enter a valid number for target value');
+      return;
+    }
+
+    const goalType = prompt('Enter goal type (revenue, clients, shoots, text, other):') || 'revenue';
+    const priority = prompt('Enter priority (low, medium, high):') || 'medium';
+
+    try {
+      await eightbaseService.createGoal({
+        title,
+        description,
+        target_value: Number(targetValue),
+        current_value: 0,
+        goal_type: goalType as any,
+        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+        priority: priority as any,
+        status: 'active',
+        user_id: student?.user?.id || studentId
+      });
+
+      // Refetch goals to get updated data
+      await refetchGoals();
+      console.log('Goal created successfully');
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      alert('Failed to create goal. Please try again.');
+    }
+  };
+
+  if (studentLoading && !student) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose} className="w-full">
         <DialogContent className="w-[95vw] max-w-[95vw] overflow-y-auto">
@@ -419,7 +520,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
           </div>
 
           {/* Tabs - Exact match to image */}
-          <Tabs defaultValue="profile" className="w-full">
+            <Tabs defaultValue={activeTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5 bg-gray-100 dark:bg-gray-800">
               <TabsTrigger value="profile" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400">
                 Profile
@@ -632,15 +733,130 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
             <TabsContent value="goals" className="mt-6">
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
                   <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">Student Goals</CardTitle>
                   <CardDescription className="text-gray-600 dark:text-gray-400">View and track student goals and progress</CardDescription>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleCreateGoal}
+                      className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Add Goal
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
+                  {goalsLoading ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">Loading goals...</p>
+                    </div>
+                  ) : goals.length === 0 ? (
                   <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                     <User className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                    <p>Goals functionality will be integrated here.</p>
-                    <p className="text-sm mt-2">This will show the student's goals and progress tracking.</p>
+                      <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">No Goals Set</h3>
+                      <p className="text-muted-foreground mb-4">This student hasn't created any goals yet.</p>
+                      <Button onClick={handleCreateGoal} variant="outline">
+                        <User className="h-4 w-4 mr-2" />
+                        Create First Goal
+                      </Button>
                   </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Current Goals from Profile */}
+                      {formData.goals && formData.goals.trim() && (
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Profile Goals</span>
+                          </div>
+                          <p className="text-sm text-blue-700 dark:text-blue-300">{formData.goals}</p>
+                        </div>
+                      )}
+
+                      {/* Real Goals from Database */}
+                      <div className="space-y-4">
+                        {goals.map((goal) => (
+                          <div key={goal.id} className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">{goal.title}</h4>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={`${
+                                      goal.priority === 'high' ? 'border-red-200 text-red-700 bg-red-50 dark:border-red-800 dark:text-red-400 dark:bg-red-900/20' :
+                                      goal.priority === 'medium' ? 'border-yellow-200 text-yellow-700 bg-yellow-50 dark:border-yellow-800 dark:text-yellow-400 dark:bg-yellow-900/20' :
+                                      'border-gray-200 text-gray-700 bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:bg-gray-900/20'
+                                    }`}
+                                  >
+                                    {goal.priority}
+                                  </Badge>
+                                  <Badge 
+                                    variant="outline" 
+                                    className={`${
+                                      goal.status === 'completed' ? 'border-green-200 text-green-700 bg-green-50 dark:border-green-800 dark:text-green-400 dark:bg-green-900/20' :
+                                      'border-blue-200 text-blue-700 bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:bg-blue-900/20'
+                                    }`}
+                                  >
+                                    {goal.status}
+                                  </Badge>
+                                </div>
+                                {goal.description && (
+                                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{goal.description}</p>
+                                )}
+                                <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                                  <span>Type: <span className="font-medium text-gray-900 dark:text-gray-100">{goal.goal_type}</span></span>
+                                  <span>Deadline: <span className="font-medium text-gray-900 dark:text-gray-100">{new Date(goal.deadline).toLocaleDateString()}</span></span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Progress Bar */}
+                            <div className="mb-3">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                  {goal.current_value} / {goal.target_value} ({goal.progress_percentage || 0}%)
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                <div 
+                                  className={`h-2 rounded-full transition-all duration-300 ${
+                                    (goal.progress_percentage || 0) >= 100 ? 'bg-green-500' :
+                                    (goal.progress_percentage || 0) >= 75 ? 'bg-blue-500' :
+                                    (goal.progress_percentage || 0) >= 50 ? 'bg-yellow-500' :
+                                    'bg-red-500'
+                                  }`}
+                                  style={{ width: `${Math.min(goal.progress_percentage || 0, 100)}%` }}
+                                ></div>
+                              </div>
+                            </div>
+
+                            {/* Goal Details */}
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="text-gray-600 dark:text-gray-400">Target Value:</span>
+                                <span className="ml-2 font-medium text-gray-900 dark:text-gray-100">
+                                  {goal.goal_type === 'revenue' ? `$${goal.target_value.toLocaleString()}` : goal.target_value}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600 dark:text-gray-400">Current Value:</span>
+                                <span className="ml-2 font-medium text-gray-900 dark:text-gray-100">
+                                  {goal.goal_type === 'revenue' ? `$${goal.current_value.toLocaleString()}` : goal.current_value}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                  </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -648,23 +864,45 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose }: CoachStu
             <TabsContent value="profit" className="mt-6">
               <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">Profit Calculator</CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-400">View student's profit calculator and financial data</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <Calculator className="h-5 w-5" />
+                        Profit Calculator
+                      </CardTitle>
+                      <CardDescription className="text-gray-600 dark:text-gray-400">
+                        View {student?.firstName} {student?.lastName}'s profit calculator and financial data
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <User className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                    <p>Profit Calculator will be integrated here.</p>
-                    <p className="text-sm mt-2">This will show the student's profit calculator data and financial metrics.</p>
-                    <Button 
-                      className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={() => {
-                        // This would open the profit calculator in a new tab or modal
-                        window.open(`/profit-calculator?studentId=${studentId}`, '_blank');
-                      }}
-                    >
-                      View Profit Calculator
-                    </Button>
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calculator className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Student's Profit Calculator</span>
+                      </div>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        This shows the profit calculator data for {student?.firstName} {student?.lastName}. 
+                        You can view their pricing, costs, and profit margins.
+                      </p>
+                    </div>
+                    
+                    {/* Profit Calculator Component */}
+                    <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                      {student?.user?.id ? (
+                        <ProfitCalculator studentId={student.user.id} />
+                      ) : (
+                        <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                          <Calculator className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                          <p>Unable to load profit calculator</p>
+                          <p className="text-sm mt-2">Student user information not available</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

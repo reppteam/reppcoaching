@@ -28,7 +28,11 @@ import ProfitCalculatorService, {
   ProductWithCalculations 
 } from '../services/profitCalculatorService';
 
-const ProfitCalculator: React.FC = () => {
+interface ProfitCalculatorProps {
+  studentId?: string; // Optional prop to show specific student's calculator
+}
+
+const ProfitCalculator: React.FC<ProfitCalculatorProps> = ({ studentId }) => {
   const { user } = useAuth();
   const apolloClient = useApolloClient();
   const [service, setService] = useState<ProfitCalculatorService | null>(null);
@@ -65,13 +69,14 @@ const ProfitCalculator: React.FC = () => {
 
   // Initialize service and load data
   useEffect(() => {
-    if (user?.id && apolloClient) {
-      const profitService = new ProfitCalculatorService(user.id);
+    const userId = studentId || user?.id;
+    if (userId && apolloClient) {
+      const profitService = new ProfitCalculatorService(userId);
       profitService.setApolloClient(apolloClient);
       setService(profitService);
       loadData(profitService);
     }
-  }, [user?.id, apolloClient]);
+  }, [user?.id, studentId, apolloClient]);
 
   const loadData = async (profitService: ProfitCalculatorService) => {
     try {
@@ -252,7 +257,7 @@ const ProfitCalculator: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64 bg-white dark:bg-black text-gray-900 dark:text-white">
         <Loader2 className="w-8 h-8 animate-spin" />
         <span className="ml-2">Loading Profit Calculator...</span>
       </div>
@@ -261,19 +266,19 @@ const ProfitCalculator: React.FC = () => {
 
   if (!globalVariables) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">Unable to load calculator settings.</p>
+      <div className="text-center py-8 bg-white dark:bg-black text-gray-900 dark:text-white">
+        <p className="text-muted-foreground dark:text-gray-400">calculator settings are not set by student.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white dark:bg-black text-gray-900 dark:text-white">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Profit Calculator</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Profit Calculator</h1>
+          <p className="text-muted-foreground dark:text-gray-400">
             Calculate costs and optimize pricing for maximum profitability
           </p>
         </div>
@@ -446,24 +451,24 @@ const ProfitCalculator: React.FC = () => {
         <CardContent>
           <div className="space-y-4">
             {productsWithCalculations.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-muted-foreground dark:text-gray-400">
                 <p>No services yet. Create your first service to get started!</p>
               </div>
             ) : (
               productsWithCalculations.map((product) => (
-                <div key={product.id} className="border rounded-lg p-4">
+                <div key={product.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
                   {/* Service Header */}
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground dark:text-gray-400">
                         Price: ${product.price.toFixed(2)} | Cost: ${product.total_cost.toFixed(2)} | 
                         Margin: {product.profit_margin.toFixed(1)}%
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
                       {product.profit_margin >= globalVariables.target_profit_margin && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400">
                           Target Met
                         </Badge>
                       )}
@@ -483,28 +488,28 @@ const ProfitCalculator: React.FC = () => {
 
                   {/* Summary Cards */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Total Cost</p>
-                      <p className="text-lg font-bold text-blue-600">${product.total_cost.toFixed(2)}</p>
+                    <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <p className="text-sm text-muted-foreground dark:text-gray-300">Total Cost</p>
+                      <p className="text-lg font-bold text-blue-600 dark:text-blue-400">${product.total_cost.toFixed(2)}</p>
                     </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Profit</p>
-                      <p className="text-lg font-bold text-green-600">${product.profit.toFixed(2)}</p>
+                    <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <p className="text-sm text-muted-foreground dark:text-gray-300">Profit</p>
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">${product.profit.toFixed(2)}</p>
                     </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Profit Margin</p>
-                      <p className="text-lg font-bold text-green-600">{product.profit_margin.toFixed(1)}%</p>
+                    <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <p className="text-sm text-muted-foreground dark:text-gray-300">Profit Margin</p>
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">{product.profit_margin.toFixed(1)}%</p>
                     </div>
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Min. Price</p>
-                      <p className="text-lg font-bold text-blue-600">${product.minimum_price.toFixed(2)}</p>
+                    <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <p className="text-sm text-muted-foreground dark:text-gray-300">Min. Price</p>
+                      <p className="text-lg font-bold text-blue-600 dark:text-blue-400">${product.minimum_price.toFixed(2)}</p>
                     </div>
                   </div>
 
                   {/* Cost Breakdown */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-medium">Cost Breakdown</h4>
+                      <h4 className="font-medium text-gray-900 dark:text-white">Cost Breakdown</h4>
                       <Dialog open={isAddCostOpen && selectedProductId === product.id} onOpenChange={(open) => {
                         setIsAddCostOpen(open);
                         if (open) setSelectedProductId(product.id);
@@ -586,24 +591,24 @@ const ProfitCalculator: React.FC = () => {
                     </div>
 
                     {/* Cost Table */}
-                    <div className="border rounded-lg overflow-hidden">
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                       <table className="w-full">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-gray-50 dark:bg-gray-800">
                           <tr>
-                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Type</th>
-                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Description</th>
-                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Type</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Description</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">
                               {product.subitems.some(s => s.type === 'photo') ? 'Quantity' : 'Hours'}
                             </th>
-                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Rate</th>
-                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Cost</th>
-                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Actions</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Rate</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Cost</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Actions</th>
                           </tr>
                         </thead>
                         <tbody>
                           {product.subitems.length === 0 ? (
                             <tr>
-                              <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                              <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground dark:text-gray-400">
                                 No cost items yet. Add your first cost component above.
                               </td>
                             </tr>
@@ -628,25 +633,25 @@ const ProfitCalculator: React.FC = () => {
                               const cost = subitem.type === 'fixed' ? subitem.value : subitem.value * rate;
 
                               return (
-                                <tr key={subitem.id} className="border-t">
+                                <tr key={subitem.id} className="border-t border-gray-200 dark:border-gray-700">
                                   <td className="px-4 py-2">
                                     <div className="flex items-center space-x-2">
                                       {getCostTypeIcon(subitem.type)}
-                                      <span className="capitalize">{subitem.type}</span>
+                                      <span className="capitalize text-gray-900 dark:text-white">{subitem.type}</span>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-2">{subitem.label}</td>
-                                  <td className="px-4 py-2">
+                                  <td className="px-4 py-2 text-gray-900 dark:text-white">{subitem.label}</td>
+                                  <td className="px-4 py-2 text-gray-900 dark:text-white">
                                     {subitem.type === 'fixed' ? '1' : 
                                      subitem.type === 'photo' ? `${subitem.value} photos` : 
                                      `${subitem.value} hrs`}
                                   </td>
-                                  <td className="px-4 py-2">
+                                  <td className="px-4 py-2 text-gray-900 dark:text-white">
                                     {subitem.type === 'fixed' ? '' : 
                                      subitem.type === 'photo' ? `$${rate.toFixed(2)}/photo` : 
                                      `$${rate.toFixed(2)}/hr`}
                                   </td>
-                                  <td className="px-4 py-2 font-medium">${cost.toFixed(2)}</td>
+                                  <td className="px-4 py-2 font-medium text-gray-900 dark:text-white">${cost.toFixed(2)}</td>
                                   <td className="px-4 py-2">
                                     <div className="flex space-x-1">
                                       <Button variant="ghost" size="sm">
