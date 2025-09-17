@@ -111,6 +111,11 @@ interface LeadFilters {
   sources: string[];
   statuses: string[];
   engagementTags: EngagementTagType[];
+  dateRange: {
+    start: string;
+    end: string;
+  } | null;
+  dateFilter: 'all' | 'week' | 'month' | 'custom';
 }
 
 export function Leads() {
@@ -136,13 +141,16 @@ export function Leads() {
   const [filters, setFilters] = useState<LeadFilters>({
     sources: [],
     statuses: [],
-    engagementTags: []
+    engagementTags: [],
+    dateRange: null,
+    dateFilter: 'all'
   });
 
   // Import state
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<Partial<Lead>[]>([]);
   const [importErrors, setImportErrors] = useState<string[]>([]);
+  const [selectedImportLeads, setSelectedImportLeads] = useState<Set<number>>(new Set());
 
   // Form states
   const [formData, setFormData] = useState<Partial<Lead>>({
@@ -247,6 +255,34 @@ export function Leads() {
       );
     }
 
+    // Apply date filtering
+    if (filters.dateFilter !== 'all') {
+      const now = new Date();
+      const leadDate = new Date();
+      
+      filtered = filtered.filter(lead => {
+        const createdAt = new Date(lead.created_at);
+        
+        switch (filters.dateFilter) {
+          case 'week':
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return createdAt >= weekAgo;
+          case 'month':
+            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return createdAt >= monthAgo;
+          case 'custom':
+            if (filters.dateRange) {
+              const startDate = new Date(filters.dateRange.start);
+              const endDate = new Date(filters.dateRange.end);
+              return createdAt >= startDate && createdAt <= endDate;
+            }
+            return true;
+          default:
+            return true;
+        }
+      });
+    }
+
     // Apply sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -270,7 +306,8 @@ export function Leads() {
     return filtered;
   }, [leads, filters, sortBy]);
 
-  const activeFiltersCount = filters.sources.length + filters.statuses.length + filters.engagementTags.length;
+  const activeFiltersCount = filters.sources.length + filters.statuses.length + filters.engagementTags.length + 
+    (filters.dateFilter !== 'all' ? 1 : 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -368,15 +405,52 @@ export function Leads() {
     setFilters({
       sources: [],
       statuses: [],
-      engagementTags: []
+      engagementTags: [],
+      dateRange: null,
+      dateFilter: 'all'
     });
   };
 
-  const updateFilter = (type: keyof LeadFilters, values: string[]) => {
+  const updateFilter = (type: keyof LeadFilters, values: any) => {
     setFilters(prev => ({
       ...prev,
       [type]: values
     }));
+  };
+
+  const updateDateFilter = (dateFilter: 'all' | 'week' | 'month' | 'custom') => {
+    setFilters(prev => ({
+      ...prev,
+      dateFilter,
+      dateRange: dateFilter === 'custom' ? prev.dateRange : null
+    }));
+  };
+
+  const updateDateRange = (start: string, end: string) => {
+    setFilters(prev => ({
+      ...prev,
+      dateRange: { start, end }
+    }));
+  };
+
+  const toggleImportLeadSelection = (index: number) => {
+    setSelectedImportLeads(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllImportLeads = () => {
+    setSelectedImportLeads(new Set(importPreview.map((_, index) => index)));
+  };
+
+  const deselectAllImportLeads = () => {
+    setSelectedImportLeads(new Set());
   };
 
   // Enhanced script generation with random templates
@@ -475,6 +549,7 @@ export function Leads() {
     if (!file) return;
 
     setImportFile(file);
+    setSelectedImportLeads(new Set()); // Reset selected leads
     const reader = new FileReader();
     reader.onload = (e) => {
       const csv = e.target?.result as string;
@@ -547,7 +622,7 @@ export function Leads() {
   };
 
   const executeImport = async () => {
-    if (!importFile || !user) return;
+    if (!importFile || !user || selectedImportLeads.size === 0) return;
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -558,8 +633,9 @@ export function Leads() {
       const leadsToCreate: Omit<Lead, 'id' | 'created_at' | 'updated_at'>[] = [];
       const errors: string[] = [];
 
-      // Parse all leads first
-      for (let i = 1; i < lines.length; i++) {
+      // Parse only selected leads
+      Array.from(selectedImportLeads).forEach(index => {
+        const i = index + 1; // +1 because index 0 is headers
         try {
           // Parse CSV line properly handling quoted fields
           const parseCSVLine = (line: string): string[] => {
@@ -615,7 +691,7 @@ export function Leads() {
         } catch (error) {
           errors.push(`Row ${i}: Failed to parse - ${error}`);
         }
-      }
+      });
 
       // Create all leads in bulk
       let importedCount = 0;
@@ -925,6 +1001,90 @@ export function Leads() {
                     </div>
                   </div>
 
+                  {/* Date Filter */}
+                  <div>
+                    <Label className="text-sm font-medium">Date Range</Label>
+                    <div className="mt-2 space-y-3">
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="date-all"
+                            name="dateFilter"
+                            checked={filters.dateFilter === 'all'}
+                            onChange={() => updateDateFilter('all')}
+                            className="h-4 w-4"
+                          />
+                          <label htmlFor="date-all" className="text-sm">All Time</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="date-week"
+                            name="dateFilter"
+                            checked={filters.dateFilter === 'week'}
+                            onChange={() => updateDateFilter('week')}
+                            className="h-4 w-4"
+                          />
+                          <label htmlFor="date-week" className="text-sm">Last 7 Days</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="date-month"
+                            name="dateFilter"
+                            checked={filters.dateFilter === 'month'}
+                            onChange={() => updateDateFilter('month')}
+                            className="h-4 w-4"
+                          />
+                          <label htmlFor="date-month" className="text-sm">Last 30 Days</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="date-custom"
+                            name="dateFilter"
+                            checked={filters.dateFilter === 'custom'}
+                            onChange={() => updateDateFilter('custom')}
+                            className="h-4 w-4"
+                          />
+                          <label htmlFor="date-custom" className="text-sm">Custom Range</label>
+                        </div>
+                      </div>
+                      
+                      {filters.dateFilter === 'custom' && (
+                        <div className="space-y-2 pl-6">
+                          <div>
+                            <Label htmlFor="start-date" className="text-xs">Start Date</Label>
+                            <Input
+                              id="start-date"
+                              type="date"
+                              value={filters.dateRange?.start || ''}
+                              onChange={(e) => updateDateRange(
+                                e.target.value,
+                                filters.dateRange?.end || ''
+                              )}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="end-date" className="text-xs">End Date</Label>
+                            <Input
+                              id="end-date"
+                              type="date"
+                              value={filters.dateRange?.end || ''}
+                              onChange={(e) => updateDateRange(
+                                filters.dateRange?.start || '',
+                                e.target.value
+                              )}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Clear Filters */}
                   {activeFiltersCount > 0 && (
                     <Button variant="outline" onClick={clearFilters} className="w-full">
@@ -975,11 +1135,33 @@ export function Leads() {
 
                     {importPreview.length > 0 && (
                       <div>
-                        <Label>Preview (first 5 rows)</Label>
+                        <div className="flex items-center justify-between mb-2">
+                          <Label>Preview ({importPreview.length} rows)</Label>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={selectAllImportLeads}>
+                              Select All
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={deselectAllImportLeads}>
+                              Deselect All
+                            </Button>
+                          </div>
+                        </div>
                         <div className="mt-2 border rounded overflow-hidden">
                           <Table>
                             <TableHeader>
                               <TableRow>
+                                <TableHead className="w-12">
+                                  <Checkbox
+                                    checked={selectedImportLeads.size === importPreview.length && importPreview.length > 0}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        selectAllImportLeads();
+                                      } else {
+                                        deselectAllImportLeads();
+                                      }
+                                    }}
+                                  />
+                                </TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead>Phone</TableHead>
@@ -990,6 +1172,12 @@ export function Leads() {
                             <TableBody>
                               {importPreview.map((lead, index) => (
                                 <TableRow key={index}>
+                                  <TableCell>
+                                    <Checkbox
+                                      checked={selectedImportLeads.has(index)}
+                                      onCheckedChange={() => toggleImportLeadSelection(index)}
+                                    />
+                                  </TableCell>
                                   <TableCell>{lead.lead_name}</TableCell>
                                   <TableCell>{lead.email}</TableCell>
                                   <TableCell>{lead.phone}</TableCell>
@@ -999,6 +1187,9 @@ export function Leads() {
                               ))}
                             </TableBody>
                           </Table>
+                        </div>
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          {selectedImportLeads.size} of {importPreview.length} leads selected for import
                         </div>
                       </div>
                     )}
@@ -1020,10 +1211,10 @@ export function Leads() {
                       </Button>
                       <Button 
                         onClick={executeImport}
-                        disabled={!importFile || importErrors.length > 0}
+                        disabled={!importFile || importErrors.length > 0 || selectedImportLeads.size === 0}
                       >
                         <FileUp className="mr-2 h-4 w-4" />
-                        Import Leads
+                        Import {selectedImportLeads.size > 0 ? `${selectedImportLeads.size} Selected` : 'Leads'}
                       </Button>
                     </div>
                   </div>
@@ -1310,6 +1501,18 @@ export function Leads() {
                                   DM Script
                                 </h4>
                                 <div className="flex gap-2">
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    onClick={async () => {
+                                      const script = await generateRandomScript();
+                                      const scriptText = Object.values(script).join('\n\n');
+                                      copyToClipboard(scriptText);
+                                    }}
+                                  >
+                                    <Zap className="mr-1 h-3 w-3" />
+                                    Quick DM
+                                  </Button>
                                   <Button
                                     variant="outline"
                                     size="sm"

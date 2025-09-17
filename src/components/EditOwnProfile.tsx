@@ -10,7 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { User, MapPin, Target, Award, AlertTriangle, Target as TargetIcon, MessageSquare, Clock, FileText } from 'lucide-react';
 import { StudentProfile } from '../types';
 
-export const EditOwnProfile: React.FC = () => {
+interface EditOwnProfileProps {
+  onClose?: () => void;
+}
+
+export const EditOwnProfile: React.FC<EditOwnProfileProps> = ({ onClose }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -224,6 +228,7 @@ export const EditOwnProfile: React.FC = () => {
               <Button 
                 type="button" 
                 variant="outline" 
+                onClick={onClose}
                 className="bg-white dark:bg-[#3A3A3A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-[#404040]"
               >
                 Cancel

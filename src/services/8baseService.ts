@@ -163,6 +163,16 @@ const transformLead = (lead: any): Lead => ({
     type: tag.type,
     completed_date: tag.completed_date
   })) || [],
+  ScriptComponents: lead.scriptComponents?.items?.map((script: any) => ({
+    id: script.id,
+    intro: script.intro,
+    hook: script.hook,
+    body1: script.body1,
+    body2: script.body2,
+    ending: script.ending,
+    created_at: script.createdAt,
+    updated_at: script.updatedAt
+  })) || [],
   script_components: lead.script_Component ? {
     intro: lead.script_Component.intro,
     hook: lead.script_Component.hook,

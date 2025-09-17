@@ -289,7 +289,7 @@ const ProfitCalculator: React.FC<ProfitCalculatorProps> = ({ studentId }) => {
               Settings
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Calculator Settings</DialogTitle>
               <p className="text-sm text-muted-foreground">
@@ -405,7 +405,7 @@ const ProfitCalculator: React.FC<ProfitCalculatorProps> = ({ studentId }) => {
                   Add Service
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Add New Service</DialogTitle>
                   <p className="text-sm text-muted-foreground">
@@ -520,7 +520,7 @@ const ProfitCalculator: React.FC<ProfitCalculatorProps> = ({ studentId }) => {
                             Add Cost
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="max-h-[90vh] overflow-y-auto">
                           <DialogHeader>
                             <DialogTitle>Add Cost Item</DialogTitle>
                             <p className="text-sm text-muted-foreground">

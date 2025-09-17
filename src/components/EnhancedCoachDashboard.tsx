@@ -254,7 +254,7 @@ export function EnhancedCoachDashboard() {
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
   const [timeFrameFilter, setTimeFrameFilter] = useState<'week' | 'month' | 'custom' | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'name' | 'activity'>('recent');
+  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'name'>('recent');
   const [showInactive, setShowInactive] = useState(false);
   const [showIncompleteTasks, setShowIncompleteTasks] = useState(false);
   const [customDateRange, setCustomDateRange] = useState<{start: Date | null; end: Date | null}>({
@@ -1017,9 +1017,9 @@ export function EnhancedCoachDashboard() {
         </div>
 
         {/* Company Week Display & Performance Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <CompanyWeekDisplay variant="detailed" />
-          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
+          {/* <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">Performance Overview</CardTitle>
               <Activity className="h-4 w-4 text-gray-400 dark:text-gray-500" />
@@ -1045,7 +1045,7 @@ export function EnhancedCoachDashboard() {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
 
@@ -1120,7 +1120,6 @@ export function EnhancedCoachDashboard() {
                   <option value="recent">Most Recent Activity</option>
                   <option value="oldest">Oldest Activity</option>
                   <option value="name">Name (A-Z)</option>
-                  <option value="activity">Activity Level</option>
                 </select>
               </div>
 
@@ -1179,10 +1178,6 @@ export function EnhancedCoachDashboard() {
                     return new Date(aOldest).getTime() - new Date(bOldest).getTime();
                   case 'name':
                     return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
-                  case 'activity':
-                    const aActivity = a.student?.items?.filter(r => new Date(r.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length || 0;
-                    const bActivity = b.student?.items?.filter(r => new Date(r.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length || 0;
-                    return bActivity - aActivity;
                   default:
                     return 0;
                 }
@@ -1198,7 +1193,6 @@ export function EnhancedCoachDashboard() {
                 const avgAOV = getStudentAverageOrderValue(student);
                 const latestReport = getStudentLatestReport(student);
                 const recentReports = reports.filter(r => new Date(r.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length;
-                const activityLevel = Math.min(Math.max(recentReports * 50, 70), 100); // Set to 70% as shown in images
                 
                 return (
                   <div key={student.id} className="border border-gray-200 dark:border-gray-600 rounded-xl p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black shadow-sm hover:shadow-md transition-all duration-300">
@@ -1394,37 +1388,6 @@ export function EnhancedCoachDashboard() {
                       </div>
                     )}
                     
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-100 dark:border-gray-700">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Activity className="h-4 w-4 text-blue-500" />
-                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Activity Level</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg font-bold text-gray-900 dark:text-white">{activityLevel}%</span>
-                          {activityLevel >= 80 && <Heart className="h-4 w-4 text-red-500" />}
-                          {activityLevel >= 60 && activityLevel < 80 && <Zap className="h-4 w-4 text-yellow-500" />}
-                          {activityLevel < 60 && <AlertCircle className="h-4 w-4 text-orange-500" />}
-                        </div>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3 overflow-hidden">
-                        <div 
-                          className={`h-3 rounded-full transition-all duration-1000 ${
-                            activityLevel >= 80 
-                              ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
-                              : activityLevel >= 60 
-                              ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
-                              : 'bg-gradient-to-r from-red-500 to-pink-500'
-                          }`}
-                          style={{ width: `${activityLevel}%` }}
-                        ></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        <span>Low</span>
-                        <span>Medium</span>
-                        <span>High</span>
-                      </div>
-                    </div>
                   </div>
                 );
               })}

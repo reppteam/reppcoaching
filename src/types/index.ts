@@ -121,6 +121,7 @@ export interface Lead {
   next_followup_date?: string;
   notes?: string; // Lead notes for quick jotting after calls
   lead_notes?: string; // Additional lead notes for students to jot quick notes after calls
+  leadnote?: string; // Lead notes field from schema (Text field, 1000 chars max)
   // New engagement tracking system - array of tags
   engagementTag: EngagementTag[];
   script_components: {
@@ -130,6 +131,16 @@ export interface Lead {
     body2: string;
     ending: string;
   };
+  ScriptComponents?: {
+    id: string;
+    intro: string;
+    hook: string;
+    body1: string;
+    body2: string;
+    ending: string;
+    created_at: string;
+    updated_at: string;
+  }[];
   status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
   created_at: string;
   updated_at: string;

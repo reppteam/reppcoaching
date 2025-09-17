@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { eightbaseService } from '../services/8baseService';
 import { Lead, MessageTemplate, EngagementTag, EngagementTagType, EngagementTagInfo, MessageTemplateType } from '../types';
+// Updated Lead type includes leadnote field
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -10,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Badge } from './ui/badge';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Checkbox } from './ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Separator } from './ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
@@ -94,6 +96,17 @@ const ENGAGEMENT_TAG_CONFIG: Record<EngagementTagType, EngagementTagInfo> = {
   }
 };
 
+interface LeadFilters {
+  sources: string[];
+  statuses: string[];
+  engagementTags: EngagementTagType[];
+  dateRange: {
+    start: string;
+    end: string;
+  } | null;
+  dateFilter: 'all' | 'week' | 'month' | 'custom';
+}
+
 interface EnhancedStudentLeadManagementProps {
   // Optional props for coach view
   studentId?: string;
@@ -110,6 +123,24 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [expandedLeads, setExpandedLeads] = useState<Set<string>>(new Set());
   const [editingNotes, setEditingNotes] = useState<string | null>(null);
+  const [tempNotes, setTempNotes] = useState<string>('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [editScriptOpen, setEditScriptOpen] = useState(false);
+  const [editingScript, setEditingScript] = useState<Lead | null>(null);
+  const [scriptFormData, setScriptFormData] = useState({
+    intro: '',
+    hook: '',
+    body1: '',
+    body2: '',
+    ending: ''
+  });
+  const [filters, setFilters] = useState<LeadFilters>({
+    sources: [],
+    statuses: [],
+    engagementTags: [],
+    dateRange: null,
+    dateFilter: 'all'
+  });
 
   // Form state for new lead
   const [formData, setFormData] = useState<Partial<Lead>>({
@@ -140,6 +171,11 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
         eightbaseService.getMessageTemplates()
       ]);
       
+      console.log('=== DEBUG loadData ===');
+      console.log('Raw leadsData:', leadsData);
+      console.log('First lead ScriptComponents:', leadsData[0]?.ScriptComponents);
+      console.log('=== END DEBUG loadData ===');
+      
       setLeads(leadsData);
       setTemplates(templatesData);
     } catch (error) {
@@ -166,6 +202,77 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
     templates.forEach(template => {
       if (variations[template.type]) {
         variations[template.type].push(template);
+      }
+    });
+
+    // Add default templates if none exist
+    const defaultTemplates = {
+      intro: [
+        { 
+          id: 'default-intro', 
+          type: 'intro' as MessageTemplateType, 
+          content: 'Hi {name}! I saw your recent listing on {property_address}.', 
+          variation_number: 1,
+          category: 'dm',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ],
+      hook: [
+        { 
+          id: 'default-hook', 
+          type: 'hook' as MessageTemplateType, 
+          content: 'Your photos look great, but I specialize in helping realtors like you get 3x more engagement with premium photography.', 
+          variation_number: 1,
+          category: 'dm',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ],
+      body1: [
+        { 
+          id: 'default-body1', 
+          type: 'body1' as MessageTemplateType, 
+          content: 'I work with top agents in the area and my photos typically help listings sell 20% faster.', 
+          variation_number: 1,
+          category: 'dm',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ],
+      body2: [
+        { 
+          id: 'default-body2', 
+          type: 'body2' as MessageTemplateType, 
+          content: 'Would love to show you some before/after examples.', 
+          variation_number: 1,
+          category: 'dm',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ],
+      ending: [
+        { 
+          id: 'default-ending', 
+          type: 'ending' as MessageTemplateType, 
+          content: 'When would be a good time for a quick 10-minute call this week?', 
+          variation_number: 1,
+          category: 'dm',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ]
+    };
+
+    // Use default templates if no templates exist for a type
+    Object.keys(variations).forEach(type => {
+      if (variations[type as MessageTemplateType].length === 0) {
+        variations[type as MessageTemplateType] = defaultTemplates[type as keyof typeof defaultTemplates];
       }
     });
 
@@ -256,8 +363,62 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
   };
 
   const generateScript = (lead: Lead) => {
-    const script = Object.values(lead.script_components).join('\n\n');
-    return script;
+    let script = '';
+    
+    // Debug: Log the lead data to see what's available
+    console.log('=== DEBUG generateScript ===');
+    console.log('Lead ID:', lead.id);
+    console.log('Lead ScriptComponents:', lead.ScriptComponents);
+    console.log('ScriptComponents length:', lead.ScriptComponents?.length);
+    console.log('Lead script_components:', lead.script_components);
+    
+    // Check if lead has custom ScriptComponents from the table
+    if (lead.ScriptComponents && lead.ScriptComponents.length > 0) {
+      console.log('Using custom ScriptComponents from table');
+      // Use custom script components from the table
+      const customScript = lead.ScriptComponents[0];
+      script = [
+        customScript.intro,
+        customScript.hook,
+        customScript.body1,
+        customScript.body2,
+        customScript.ending
+      ].filter(text => text && text.trim()).join('\n\n');
+    } else {
+      console.log('No ScriptComponents found, checking script_components JSON field');
+      // Check if lead has custom script components in JSON field
+      const hasCustomScript = Object.values(lead.script_components).some(component => component && component.trim());
+      
+      if (hasCustomScript) {
+        console.log('Using custom script from JSON field');
+        // Show custom script from JSON field
+        script = Object.values(lead.script_components).join('\n\n');
+      } else {
+        console.log('Using default template script');
+        // Show default template script
+        const defaultScript = Object.values(templateVariations).map(templates => {
+          if (templates.length > 0) {
+            return templates[0].content;
+          }
+          return '';
+        }).filter(text => text.trim()).join('\n\n');
+        
+        script = defaultScript;
+      }
+    }
+    
+    // Replace placeholders with actual lead data
+    const finalScript = script
+      .replace(/{name}/g, lead.lead_name)
+      .replace(/{property_address}/g, 'your property')
+      .replace(/{email}/g, lead.email || 'your email')
+      .replace(/{phone}/g, lead.phone || 'your phone')
+      .replace(/{instagram}/g, lead.instagram_handle || 'your Instagram');
+    
+    console.log('Final generated script:', finalScript);
+    console.log('=== END DEBUG ===');
+    
+    return finalScript;
   };
 
   const applyRandomScriptToLead = async (leadId: string) => {
@@ -281,15 +442,29 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
       // Update the lead notes in the local state
       setLeads(prevLeads => 
         prevLeads.map(lead => 
-          lead.id === leadId ? { ...lead, lead_notes: notes } : lead
+          lead.id === leadId ? { ...lead, leadnote: notes } : lead
         )
       );
       
-      // Save to backend
-      await eightbaseService.updateLead(leadId, { lead_notes: notes });
+      // Save to backend using leadnote field
+      await eightbaseService.updateLead(leadId, { leadnote: notes });
+      
+      // Exit editing mode after successful save
+      setEditingNotes(null);
+      setTempNotes('');
     } catch (error) {
       console.error('Failed to update lead notes:', error);
     }
+  };
+
+  const handleStartEditingNotes = (leadId: string, currentNotes: string) => {
+    setEditingNotes(leadId);
+    setTempNotes(currentNotes || '');
+  };
+
+  const handleCancelEditingNotes = () => {
+    setEditingNotes(null);
+    setTempNotes('');
   };
 
   const handleImportLeads = () => {
@@ -405,7 +580,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
           lead.instagram_handle || '',
           lead.lead_source,
           lead.status,
-          lead.lead_notes || '',
+          lead.leadnote || '',
           new Date(lead.created_at).toLocaleDateString()
         ].map(field => `"${field}"`).join(','))
       ].join('\n');
@@ -469,6 +644,198 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
       return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
     }
     return phone;
+  };
+
+  // Filter helper functions
+  const availableSources = useMemo(() => {
+    const sources = new Set<string>();
+    leads.forEach(lead => sources.add(lead.lead_source));
+    return Array.from(sources).sort();
+  }, [leads]);
+
+  const availableStatuses = useMemo(() => {
+    const statuses = new Set<string>();
+    leads.forEach(lead => statuses.add(lead.status));
+    return Array.from(statuses).sort();
+  }, [leads]);
+
+  const availableEngagementTags = useMemo(() => {
+    const tags = new Set<EngagementTagType>();
+    leads.forEach(lead => {
+      lead.engagementTag.forEach(tag => tags.add(tag.type));
+    });
+    return Array.from(tags).sort();
+  }, [leads]);
+
+  // Filtered leads
+  const filteredLeads = useMemo(() => {
+    let filtered = [...leads];
+
+    // Apply filters
+    if (filters.sources.length > 0) {
+      filtered = filtered.filter(lead => filters.sources.includes(lead.lead_source));
+    }
+    if (filters.statuses.length > 0) {
+      filtered = filtered.filter(lead => filters.statuses.includes(lead.status));
+    }
+    if (filters.engagementTags.length > 0) {
+      filtered = filtered.filter(lead => 
+        filters.engagementTags.some(tag => 
+          lead.engagementTag.some(leadTag => leadTag.type === tag)
+        )
+      );
+    }
+
+    // Apply date filtering
+    if (filters.dateFilter !== 'all') {
+      const now = new Date();
+      
+      filtered = filtered.filter(lead => {
+        const createdAt = new Date(lead.created_at);
+        
+        switch (filters.dateFilter) {
+          case 'week':
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return createdAt >= weekAgo;
+          case 'month':
+            const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return createdAt >= monthAgo;
+          case 'custom':
+            if (filters.dateRange) {
+              const startDate = new Date(filters.dateRange.start);
+              const endDate = new Date(filters.dateRange.end);
+              return createdAt >= startDate && createdAt <= endDate;
+            }
+            return true;
+          default:
+            return true;
+        }
+      });
+    }
+
+    return filtered;
+  }, [leads, filters]);
+
+  const activeFiltersCount = filters.sources.length + filters.statuses.length + filters.engagementTags.length + 
+    (filters.dateFilter !== 'all' ? 1 : 0);
+
+  const updateFilter = (type: keyof LeadFilters, values: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [type]: values
+    }));
+  };
+
+  const updateDateFilter = (dateFilter: 'all' | 'week' | 'month' | 'custom') => {
+    setFilters(prev => ({
+      ...prev,
+      dateFilter,
+      dateRange: dateFilter === 'custom' ? prev.dateRange : null
+    }));
+  };
+
+  const updateDateRange = (start: string, end: string) => {
+    setFilters(prev => ({
+      ...prev,
+      dateRange: { start, end }
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      sources: [],
+      statuses: [],
+      engagementTags: [],
+      dateRange: null,
+      dateFilter: 'all'
+    });
+  };
+
+  // Script editing functions
+  const handleEditScript = (lead: Lead) => {
+    setEditingScript(lead);
+    
+    // Check if lead has existing ScriptComponents (from the table)
+    if (lead.ScriptComponents && lead.ScriptComponents.length > 0) {
+      // Use existing custom script components
+      const existingScript = lead.ScriptComponents[0];
+      setScriptFormData({
+        intro: existingScript.intro || '',
+        hook: existingScript.hook || '',
+        body1: existingScript.body1 || '',
+        body2: existingScript.body2 || '',
+        ending: existingScript.ending || ''
+      });
+    } else {
+      // Use script_components JSON field or default templates
+      setScriptFormData({
+        intro: lead.script_components.intro || '',
+        hook: lead.script_components.hook || '',
+        body1: lead.script_components.body1 || '',
+        body2: lead.script_components.body2 || '',
+        ending: lead.script_components.ending || ''
+      });
+    }
+    
+    setEditScriptOpen(true);
+  };
+
+  const handleSaveScript = async () => {
+    if (!editingScript) return;
+
+    try {
+      // Check if lead has existing ScriptComponents
+      if (editingScript.ScriptComponents && editingScript.ScriptComponents.length > 0) {
+        // Update existing script component
+        const existingScriptId = editingScript.ScriptComponents[0].id;
+        await eightbaseService.updateScriptComponents(existingScriptId, {
+          body1: scriptFormData.body1,
+          body2: scriptFormData.body2,
+          ending: scriptFormData.ending,
+          hook: scriptFormData.hook,
+          intro: scriptFormData.intro
+        });
+      } else {
+        // Create new script component
+        await eightbaseService.createScriptComponents({
+          body1: scriptFormData.body1,
+          body2: scriptFormData.body2,
+          ending: scriptFormData.ending,
+          hook: scriptFormData.hook,
+          intro: scriptFormData.intro,
+          lead: {
+            connect: { id: editingScript.id }
+          }
+        });
+      }
+      
+      await loadData();
+      setEditScriptOpen(false);
+      setEditingScript(null);
+    } catch (error) {
+      console.error('Failed to save script:', error);
+    }
+  };
+
+  const handleCopyScript = () => {
+    const fullScript = generateScriptPreview();
+    copyToClipboard(fullScript);
+  };
+
+  const generateScriptPreview = () => {
+    const script = Object.values(scriptFormData).filter(text => text.trim()).join('\n\n');
+    
+    // Replace placeholders with actual lead data if editingScript is available
+    if (editingScript) {
+      return script
+        .replace(/{name}/g, editingScript.lead_name)
+        .replace(/{property_address}/g, 'your property')
+        .replace(/{email}/g, editingScript.email || 'your email')
+        .replace(/{phone}/g, editingScript.phone || 'your phone')
+        .replace(/{instagram}/g, editingScript.instagram_handle || 'your Instagram');
+    }
+    
+    return script;
   };
 
   if (loading) {
@@ -539,23 +906,42 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-sm font-medium">
-                    {leads.length} Total
+                    {filteredLeads.length} of {leads.length} Leads
                   </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="relative"
+                    onClick={() => setFiltersOpen(true)}
+                  >
+                    <Filter className="mr-2 h-4 w-4" />
+                    Filters
+                    {activeFiltersCount > 0 && (
+                      <Badge className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
+                  </Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              {leads.length === 0 ? (
+              {filteredLeads.length === 0 ? (
                 <div className="text-center py-12">
                   <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-500 dark:text-gray-400">No leads yet.</p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {leads.length === 0 ? 'No leads yet.' : 'No leads match your filters.'}
+                  </p>
                   <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-                    Add your first lead to start tracking outreach progress.
+                    {leads.length === 0 
+                      ? 'Add your first lead to start tracking outreach progress.'
+                      : 'Try adjusting your filters or clear them to see all leads.'
+                    }
                   </p>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {leads.map((lead) => {
+                  {filteredLeads.map((lead) => {
                     const isExpanded = expandedLeads.has(lead.id);
                     return (
                       <div key={lead.id} className="group">
@@ -721,6 +1107,14 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                                   <Button
                                     variant="outline"
                                     size="sm"
+                                    onClick={() => handleEditScript(lead)}
+                                  >
+                                    <Edit className="mr-1 h-3 w-3" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
                                     onClick={() => applyRandomScriptToLead(lead.id)}
                                   >
                                     <Shuffle className="mr-1 h-3 w-3" />
@@ -737,7 +1131,16 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                                 </div>
                               </div>
                               <div className="bg-white dark:bg-gray-700 rounded-lg p-3 border text-sm whitespace-pre-line min-h-[100px]">
-                                {generateScript(lead) || 'No script created yet. Click "Random" to generate one automatically using your DM templates.'}
+                                {(() => {
+                                  const hasCustomScript = Object.values(lead.script_components).some(component => component && component.trim());
+                                  const scriptContent = generateScript(lead);
+                                  
+                                  if (hasCustomScript) {
+                                    return scriptContent;
+                                  } else {
+                                    return scriptContent || 'No script created yet. Click "Edit" to customize or "Random" to generate one automatically using your DM templates.';
+                                  }
+                                })()}
                               </div>
                             </div>
 
@@ -748,27 +1151,46 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                                   <FileText className="h-4 w-4" />
                                   Lead Notes
                                 </h4>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setEditingNotes(lead.id)}
-                                >
-                                  <Edit className="mr-1 h-3 w-3" />
-                                  {editingNotes === lead.id ? 'Save' : 'Edit'}
-                                </Button>
+                                {editingNotes === lead.id ? (
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={handleCancelEditingNotes}
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleNotesChange(lead.id, tempNotes)}
+                                    >
+                                      <Save className="mr-1 h-3 w-3" />
+                                      Save
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleStartEditingNotes(lead.id, lead.leadnote || '')}
+                                  >
+                                    <Edit className="mr-1 h-3 w-3" />
+                                    Edit
+                                  </Button>
+                                )}
                               </div>
                               {editingNotes === lead.id ? (
                                 <textarea
-                                  value={lead.lead_notes || ''}
-                                  onChange={(e) => handleNotesChange(lead.id, e.target.value)}
+                                  value={tempNotes}
+                                  onChange={(e) => setTempNotes(e.target.value)}
                                   placeholder="Add quick notes about this lead after calls..."
                                   className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm min-h-[80px] resize-none"
-                                  onBlur={() => setEditingNotes(null)}
                                   autoFocus
                                 />
                               ) : (
                                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 border text-sm min-h-[80px]">
-                                  {lead.lead_notes || 'No notes yet. Click "Edit" to add quick notes about this lead.'}
+                                  {lead.leadnote || 'No notes yet. Click "Edit" to add quick notes about this lead.'}
                                 </div>
                               )}
                             </div>
@@ -796,33 +1218,48 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                     Quick DM Templates
                   </CardTitle>
                   <CardDescription className="text-gray-600 dark:text-gray-400 text-sm">
-                    5 variations per section - randomly mixed
+                    Copy and customize these message templates.
                   </CardDescription>
                 </div>
-                <Dialog open={templatesDialogOpen} onOpenChange={setTemplatesDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Manage DM Templates</DialogTitle>
-                      <DialogDescription>
-                        Edit your 5 variations for each message section to avoid spam detection.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Template management content will be implemented here.
-                      </p>
-                    </div>
-                  </DialogContent>
-                </Dialog>
               </div>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
-              <div className="flex gap-2">
+              {/* Individual Template Cards */}
+              <div className="space-y-3">
+                {Object.entries(templateVariations).map(([type, templates]) => {
+                  if (templates.length === 0) return null;
+                  
+                  const template = templates[0]; // Show first template as example
+                  const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
+                  
+                  return (
+                    <div key={type} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-2">
+                            {capitalizedType}
+                          </h4>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                            {template.content}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(template.content)}
+                          className="ml-3 h-8 w-8 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 shrink-0"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <Separator />
+              
+              {/* <div className="flex gap-2">
                 <Button
                   onClick={async () => {
                     const script = await generateRandomScript();
@@ -833,31 +1270,11 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                   <Shuffle className="mr-2 h-4 w-4" />
                   Generate Random Script
                 </Button>
-              </div>
+              </div> */}
               
-              <Separator />
-              
-              <div className="space-y-3">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  <strong>How it works:</strong> Each script randomly selects 1 of 5 variations from each section to create unique messages.
-                </p>
-                
-                {Object.entries(templateVariations).map(([type, templates]) => (
-                  templates.length > 0 && (
-                    <div key={type} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-sm capitalize text-gray-900 dark:text-white">{type} ({templates.length})</h4>
-                        <Badge variant="outline" className="text-xs">
-                          {templates.length}/5
-                        </Badge>
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 border rounded p-2 bg-gray-50 dark:bg-gray-700">
-                        {templates[0]?.content.substring(0, 60)}...
-                      </div>
-                    </div>
-                  )
-                ))}
-              </div>
+              {/* <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                <strong>How it works:</strong> Each script randomly selects 1 of 5 variations from each section to create unique messages.
+              </div> */}
             </CardContent>
           </Card>
 
@@ -893,6 +1310,333 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
 
         </div>
       </div>
+
+      {/* Filter Leads Modal */}
+      {filtersOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-end p-4"
+          onClick={() => setFiltersOpen(false)}
+        >
+          <div 
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-80 h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Filter Leads</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setFiltersOpen(false)}
+                  className="h-8 w-8 p-0 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Filter your leads by source, status, and engagement tags.
+              </p>
+              
+              <div className="space-y-6">
+                {/* Sources Filter */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Sources</h3>
+                  <div className="space-y-2">
+                    {availableSources.map(source => (
+                      <div key={source} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`source-${source}`}
+                          checked={filters.sources.includes(source)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              updateFilter('sources', [...filters.sources, source]);
+                            } else {
+                              updateFilter('sources', filters.sources.filter(s => s !== source));
+                            }
+                          }}
+                        />
+                        <label htmlFor={`source-${source}`} className="text-sm text-gray-700 dark:text-gray-300">
+                          {source}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status Filter */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Status</h3>
+                  <div className="space-y-2">
+                    {availableStatuses.map(status => (
+                      <div key={status} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`status-${status}`}
+                          checked={filters.statuses.includes(status)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              updateFilter('statuses', [...filters.statuses, status]);
+                            } else {
+                              updateFilter('statuses', filters.statuses.filter(s => s !== status));
+                            }
+                          }}
+                        />
+                        <label htmlFor={`status-${status}`} className="text-sm text-gray-700 dark:text-gray-300 capitalize">
+                          {status}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Engagement Tags Filter */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Engagement Tags</h3>
+                  <div className="space-y-2">
+                    {availableEngagementTags.map(tag => {
+                      const config = ENGAGEMENT_TAG_CONFIG[tag];
+                      return (
+                        <div key={tag} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`tag-${tag}`}
+                            checked={filters.engagementTags.includes(tag)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                updateFilter('engagementTags', [...filters.engagementTags, tag]);
+                              } else {
+                                updateFilter('engagementTags', filters.engagementTags.filter(t => t !== tag));
+                              }
+                            }}
+                          />
+                          <label htmlFor={`tag-${tag}`} className="text-sm text-gray-700 dark:text-gray-300">
+                            {config.label}
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Date Filter */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Date Range</h3>
+                  <div className="space-y-3">
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="date-all"
+                          name="dateFilter"
+                          checked={filters.dateFilter === 'all'}
+                          onChange={() => updateDateFilter('all')}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <label htmlFor="date-all" className="text-sm text-gray-700 dark:text-gray-300">All Time</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="date-week"
+                          name="dateFilter"
+                          checked={filters.dateFilter === 'week'}
+                          onChange={() => updateDateFilter('week')}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <label htmlFor="date-week" className="text-sm text-gray-700 dark:text-gray-300">Last 7 Days</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="date-month"
+                          name="dateFilter"
+                          checked={filters.dateFilter === 'month'}
+                          onChange={() => updateDateFilter('month')}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <label htmlFor="date-month" className="text-sm text-gray-700 dark:text-gray-300">Last 30 Days</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="date-custom"
+                          name="dateFilter"
+                          checked={filters.dateFilter === 'custom'}
+                          onChange={() => updateDateFilter('custom')}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <label htmlFor="date-custom" className="text-sm text-gray-700 dark:text-gray-300">Custom Range</label>
+                      </div>
+                    </div>
+                    
+                    {filters.dateFilter === 'custom' && (
+                      <div className="space-y-2 pl-6">
+                        <div>
+                          <Label htmlFor="start-date" className="text-xs text-gray-600 dark:text-gray-400">Start Date</Label>
+                          <Input
+                            id="start-date"
+                            type="date"
+                            value={filters.dateRange?.start || ''}
+                            onChange={(e) => updateDateRange(
+                              e.target.value,
+                              filters.dateRange?.end || ''
+                            )}
+                            className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="end-date" className="text-xs text-gray-600 dark:text-gray-400">End Date</Label>
+                          <Input
+                            id="end-date"
+                            type="date"
+                            value={filters.dateRange?.end || ''}
+                            onChange={(e) => updateDateRange(
+                              filters.dateRange?.start || '',
+                              e.target.value
+                            )}
+                            className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Clear Filters */}
+                {activeFiltersCount > 0 && (
+                  <Button variant="outline" onClick={clearFilters} className="w-full">
+                    Clear All Filters
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit DM Script Modal */}
+      {editScriptOpen && editingScript && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    Edit DM Script - {editingScript.lead_name}
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Customize the direct message script for this lead
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditScriptOpen(false)}
+                  className="h-8 w-8 p-0 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Script Sections */}
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="intro" className="text-sm font-medium text-gray-900 dark:text-white">Intro</Label>
+                    <Textarea
+                      id="intro"
+                      value={scriptFormData.intro}
+                      onChange={(e) => setScriptFormData({...scriptFormData, intro: e.target.value})}
+                      placeholder="Hi {name}! I noticed your luxury property listings."
+                      className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="hook" className="text-sm font-medium text-gray-900 dark:text-white">Hook</Label>
+                    <Textarea
+                      id="hook"
+                      value={scriptFormData.hook}
+                      onChange={(e) => setScriptFormData({...scriptFormData, hook: e.target.value})}
+                      placeholder="Your listings look amazing, and I specialize in photography that can help them stand out even more."
+                      className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="body1" className="text-sm font-medium text-gray-900 dark:text-white">Body 1</Label>
+                    <Textarea
+                      id="body1"
+                      value={scriptFormData.body1}
+                      onChange={(e) => setScriptFormData({...scriptFormData, body1: e.target.value})}
+                      placeholder="I work with several top agents in the area."
+                      className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="body2" className="text-sm font-medium text-gray-900 dark:text-white">Body 2</Label>
+                    <Textarea
+                      id="body2"
+                      value={scriptFormData.body2}
+                      onChange={(e) => setScriptFormData({...scriptFormData, body2: e.target.value})}
+                      placeholder="My photos typically help properties get 25% more views."
+                      className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ending" className="text-sm font-medium text-gray-900 dark:text-white">Ending</Label>
+                    <Textarea
+                      id="ending"
+                      value={scriptFormData.ending}
+                      onChange={(e) => setScriptFormData({...scriptFormData, ending: e.target.value})}
+                      placeholder="Would you be interested in seeing some examples of my work?"
+                      className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+
+                {/* Complete Script Preview */}
+                <div>
+                  <Label className="text-sm font-medium text-gray-900 dark:text-white">Complete Script Preview</Label>
+                  <div className="mt-1 bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border text-sm whitespace-pre-line min-h-[120px]">
+                    {generateScriptPreview() || 'Start typing above to see your script preview...'}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={handleCopyScript}
+                    className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy Script
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditScriptOpen(false)}
+                    className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveScript}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Save Script
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Lead Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

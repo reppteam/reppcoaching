@@ -2056,6 +2056,18 @@ export const GET_LEADS_BY_FILTER = gql`
             completed_date
           }
         }
+        scriptComponents {
+          items {
+            id
+            intro
+            hook
+            body1
+            body2
+            ending
+            createdAt
+            updatedAt
+          }
+        }
         createdAt
         updatedAt
       }
@@ -2090,6 +2102,18 @@ export const GET_STUDENT_LEADS = gql`
             id
             type
             completed_date
+          }
+        }
+        scriptComponents {
+          items {
+            id
+            intro
+            hook
+            body1
+            body2
+            ending
+            createdAt
+            updatedAt
           }
         }
         createdAt
@@ -2164,6 +2188,18 @@ export const UPDATE_LEAD = gql`
           email
           firstName
           lastName
+        }
+        scriptComponents {
+          items {
+            id
+            intro
+            hook
+            body1
+            body2
+            ending
+            createdAt
+            updatedAt
+          }
         }
         createdAt
         updatedAt

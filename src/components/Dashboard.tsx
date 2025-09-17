@@ -99,6 +99,7 @@ export function Dashboard() {
     }
   }, [currentView, currentStudentId, loadStudent]);
 
+
   const getSidebarItems = (): SidebarItem[] => {
     const baseItems: SidebarItem[] = [
       { id: "home", label: "Home", icon: Home },
@@ -268,12 +269,15 @@ export function Dashboard() {
                           <div className="text-sm text-muted-foreground">
                             {user?.why || "Why did you start this business? What drives you to succeed? Keep your purpose front and center."}
                           </div>
-                          {!user?.why && (
-                            <Button variant="outline" size="sm" className="mt-2">
-                              <Quote className="mr-2 h-4 w-4" />
-                              Set Your Why
-                            </Button>
-                          )}
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => setEditProfileOpen(true)}
+                          >
+                            <Quote className="mr-2 h-4 w-4" />
+                            {user?.why ? 'Edit Your Why' : 'Set Your Why'}
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -445,8 +449,14 @@ export function Dashboard() {
 
       {/* Edit Profile Modal/Overlay */}
       {editProfileOpen && userRole === "user" && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#1A1A1A] rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => setEditProfileOpen(false)}
+        >
+          <div 
+            className="bg-white dark:bg-[#1A1A1A] rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Your Profile</h2>
@@ -459,7 +469,7 @@ export function Dashboard() {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <EditOwnProfile />
+              <EditOwnProfile onClose={() => setEditProfileOpen(false)} />
             </div>
           </div>
         </div>
@@ -486,6 +496,7 @@ export function Dashboard() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
