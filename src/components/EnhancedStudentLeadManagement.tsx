@@ -1514,7 +1514,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
 
       {/* Edit DM Script Modal */}
       {editScriptOpen && editingScript && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 !mt-0">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">

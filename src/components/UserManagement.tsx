@@ -18,6 +18,7 @@ import { StudentSignUpModal } from './StudentSignUpModal';
 import { ConfirmationEmailModal } from './ConfirmationEmailModal';
 import { AddUserModal } from './AddUserModal';
 import { userInvitationService } from '../services/userInvitationService';
+import { saasUserCreationService } from '../services/saasUserCreationService';
 import { STATIC_ROLES } from '../config/staticRoles';
 import { 
   Users, 
@@ -72,6 +73,19 @@ export function UserManagement() {
   const [emailConfirmationModalOpen, setEmailConfirmationModalOpen] = useState(false);
   const [deleteConfirmDialogOpen, setDeleteConfirmDialogOpen] = useState(false);
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  
+  // Create user dialog states (same as SuperAdminUserPanel)
+  const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
+  const [createUserLoading, setCreateUserLoading] = useState(false);
+  const [createUserForm, setCreateUserForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'user' as 'user' | 'coach' | 'coach_manager' | 'super_admin',
+    is_active: true,
+    has_paid: false,
+    assignedCoachId: 'none'
+  });
   
   // Form states
   const [coachFormData, setCoachFormData] = useState<CreateCoachFormData>({
@@ -420,6 +434,63 @@ export function UserManagement() {
     loadUsers();
   };
 
+  const handleCreateUser = async () => {
+    setCreateUserLoading(true);
+    try {
+      // Validate required fields
+      if (!createUserForm.firstName?.trim()) {
+        alert('First name is required.');
+        return;
+      }
+      if (!createUserForm.lastName?.trim()) {
+        alert('Last name is required.');
+        return;
+      }
+      if (!createUserForm.email?.trim()) {
+        alert('Email is required.');
+        return;
+      }
+
+      // Check if user already exists
+      const userExists = await saasUserCreationService.checkUserExists(createUserForm.email);
+      if (userExists.exists) {
+        alert('A user with this email already exists. Please use a different email.');
+        return;
+      }
+
+      // Create user with SaaS invitation flow
+      const result = await saasUserCreationService.createUserWithInvitation(createUserForm);
+      
+      if (result.success) {
+        // Close the dialog
+        setCreateUserDialogOpen(false);
+        // Reset the form
+        setCreateUserForm({
+          firstName: '',
+          lastName: '',
+          email: '',
+          role: 'user' as 'user' | 'coach' | 'coach_manager' | 'super_admin',
+          is_active: true,
+          has_paid: false,
+          assignedCoachId: 'none'
+        });
+        
+        // Show success message with details
+        alert(result.message);
+        
+        // Refresh the users list to show any new users that might have been created
+        loadUsers();
+      } else {
+        alert(result.error || 'Failed to create user invitation. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      alert('Error creating user. Please try again.');
+    } finally {
+      setCreateUserLoading(false);
+    }
+  };
+
   const openEditUser = (userToEdit: any) => {
     setEditingUser(userToEdit);
     
@@ -538,14 +609,132 @@ export function UserManagement() {
         </div>
         
         <div className="flex gap-3">
-          {/* Add User with 8base Integration */}
+          {/* Create User with SaaS Flow (same as SuperAdminUserPanel) */}
           {(user?.role === 'super_admin' || user?.role === 'coach_manager') && (
-            <Button onClick={() => setAddUserModalOpen(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Create Student
-            </Button>
+            <Dialog open={createUserDialogOpen} onOpenChange={setCreateUserDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Create User
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New User</DialogTitle>
+                  <DialogDescription>
+                    Add a new user to the platform
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="create-firstName" className="text-foreground">First Name</Label>
+                      <Input
+                        id="create-firstName"
+                        value={createUserForm.firstName}
+                        onChange={(e) => setCreateUserForm({...createUserForm, firstName: e.target.value})}
+                        className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="create-lastName" className="text-foreground">Last Name</Label>
+                      <Input
+                        id="create-lastName"
+                        value={createUserForm.lastName}
+                        onChange={(e) => setCreateUserForm({...createUserForm, lastName: e.target.value})}
+                        className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="create-email" className="text-foreground">Email</Label>
+                    <Input
+                      id="create-email"
+                      type="email"
+                      value={createUserForm.email}
+                      onChange={(e) => setCreateUserForm({...createUserForm, email: e.target.value})}
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="create-role" className="text-foreground">Role</Label>
+                    <Select value={createUserForm.role} onValueChange={(value) => setCreateUserForm({...createUserForm, role: value as 'user' | 'coach' | 'coach_manager' | 'super_admin', assignedCoachId: 'none'})}>
+                      <SelectTrigger className="bg-background border-border text-foreground">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">Student</SelectItem>
+                        <SelectItem value="coach">Coach</SelectItem>
+                        <SelectItem value="coach_manager">Coach Manager</SelectItem>
+                        <SelectItem value="super_admin">Super Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {createUserForm.role === 'user' && (
+                    <div>
+                      <Label htmlFor="create-coach" className="text-foreground">Assign Coach (Optional)</Label>
+                      <Select value={createUserForm.assignedCoachId} onValueChange={(value) => setCreateUserForm({...createUserForm, assignedCoachId: value})}>
+                        <SelectTrigger className="bg-background border-border text-foreground">
+                          <SelectValue placeholder="Select a coach (optional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No coach assigned</SelectItem>
+                          {coaches.map((coach) => (
+                            <SelectItem key={coach.id} value={coach.id}>
+                              {coach.firstName} {coach.lastName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="create-is_active"
+                        checked={createUserForm.is_active}
+                        onCheckedChange={(checked) => setCreateUserForm({...createUserForm, is_active: checked as boolean})}
+                      />
+                      <Label htmlFor="create-is_active" className="text-foreground">Active</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="create-has_paid"
+                        checked={createUserForm.has_paid}
+                        onCheckedChange={(checked) => setCreateUserForm({...createUserForm, has_paid: checked as boolean})}
+                      />
+                      <Label htmlFor="create-has_paid" className="text-foreground">Paid Account</Label>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setCreateUserDialogOpen(false)} className="text-foreground">
+                      Cancel
+                    </Button>
+                    <Button onClick={handleCreateUser} disabled={createUserLoading}>
+                      {createUserLoading ? 'Creating...' : 'Create User'}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
           
+          {/* Legacy Add User Modal (keeping for compatibility) */}
+          {/* {(user?.role === 'super_admin' || user?.role === 'coach_manager') && (
+            <Button variant="outline" onClick={() => setAddUserModalOpen(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Legacy Create Student
+            </Button>
+          )}
+           */}
           {/* Super Admin can create Coach Managers */}
           {/* {user?.role === 'super_admin' && (
             <Button 
@@ -561,7 +750,7 @@ export function UserManagement() {
             </Button>
           )} */}
           
-          {canCreateCoach && (
+          {/* {canCreateCoach && (
             <Dialog open={createCoachDialogOpen} onOpenChange={setCreateCoachDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -570,7 +759,7 @@ export function UserManagement() {
                 </Button>
               </DialogTrigger>
             </Dialog>
-          )}
+          )} */}
           
           {/* {canCreateStudent && (
             <>

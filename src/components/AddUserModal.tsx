@@ -57,6 +57,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     role: 'user', // Set a default role instead of empty string
     selectedRoleId: '', // Store the actual 8base role ID
     assigned_admin_id: 'none',
@@ -133,13 +134,18 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
     try {
       let newUser;
       
+      // Validate role selection
+      if (!formData.selectedRoleId) {
+        throw new Error('Please select a valid role');
+      }
+      
       // Step 1: Always create user in User table first
         const invitationData: InvitationData = {
           email: formData.email,
           firstName: formData.firstName,
           lastName: formData.lastName,
           role: formData.role as 'user' | 'coach' | 'coach_manager' | 'super_admin',
-        selectedRoleId: formData.selectedRoleId,
+          selectedRoleId: formData.selectedRoleId,
           assigned_admin_id: formData.assigned_admin_id === 'none' ? undefined : formData.assigned_admin_id,
           access_start: formData.access_start || undefined,
           access_end: formData.access_end || undefined,
@@ -158,55 +164,33 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
       newUser = userResult.user;
       console.log('User created successfully:', newUser);
       
-      // Step 2: Create additional record based on selected role ID
-      const selectedRole = STATIC_ROLES.find(role => role.id === formData.selectedRoleId);
-      console.log('Selected role:', selectedRole);
-      
-      if (selectedRole?.name === 'Coach' || selectedRole?.name === 'coach_manager') {
-        // Create coach in Coach table
-        const coachData = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          bio: ''
-        };
-        
-        console.log('Step 2: Creating coach in Coach table:', coachData);
-        const newCoach = await eightbaseService.createCoachDirect(coachData);
-        console.log('Coach created successfully:', newCoach);
-        
-      } else if (selectedRole?.name === 'Student') {
-        // Create student in Student table
-        const studentData = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: '',
-          business_name: '',
-          location: '',
-          target_market: '',
-          strengths: '',
-          challenges: '',
-          goals: '',
-          preferred_contact_method: '',
-          availability: '',
-          notes: ''
-        };
-        
-        console.log('Step 2: Creating student in Student table:', studentData);
-        const newStudent = await eightbaseService.createStudentDirect(studentData);
-        console.log('Student created successfully:', newStudent);
-      }
-      
-      // For super_admin, only User table creation is needed
+      // The userInvitationService handles all the record creation logic
+      // No need to create additional records here as it's handled by the service
 
       if (newUser) {
-        let successMessage = 'User created successfully in User table!';
-        if (selectedRole?.name === 'Coach' || selectedRole?.name === 'coach_manager') {
-          successMessage += ' Coach record also created in Coach table!';
-        } else if (selectedRole?.name === 'Student') {
-          successMessage += ' Student record also created in Student table!';
+        let successMessage = 'User created successfully!';
+        
+        // Add role connection information
+        const selectedRole = STATIC_ROLES.find(role => role.id === formData.selectedRoleId);
+        if (selectedRole) {
+          successMessage += ` Role "${selectedRole.name}" connected successfully.`;
         }
+        
+        if (formData.role === 'coach') {
+          successMessage += ' Coach profile record also created.';
+        } else if (formData.role === 'user') {
+          successMessage += ' Student profile record also created.';
+        } else {
+          successMessage += ' User record only (no additional profile records needed).';
+        }
+        
+        // Add email status information
+        if (userResult.emailSent) {
+          successMessage += ' Welcome email with password reset link sent successfully.';
+        } else {
+          successMessage += ' Note: Welcome email could not be sent. You may need to manually send the password reset link.';
+        }
+        
         setSuccess(successMessage);
         onUserCreated?.(newUser);
       } else {
@@ -230,12 +214,27 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
   const handleRoleChange = (roleId: string) => {
     // Map application role to 8base role using static mapping
     const targetRole = mapApplicationRoleTo8baseRole(roleId);
+    
+    console.log('Role change:', {
+      selectedRole: roleId,
+      targetRole: targetRole,
+      roleId: targetRole?.id
+    });
+
+    if (!targetRole) {
+      console.error('No matching 8base role found for:', roleId);
+      setError('Invalid role selection. Please try again.');
+      return;
+    }
 
     setFormData(prev => ({
       ...prev,
       role: roleId,
-      selectedRoleId: targetRole?.id || ''
+      selectedRoleId: targetRole.id
     }));
+    
+    // Clear any previous errors
+    setError('');
   };
 
   const getRoleIcon = (roleName: string) => {
@@ -278,7 +277,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
@@ -290,6 +289,23 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Progress Indicator */}
+          <div className="flex items-center justify-center space-x-2 mb-6">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <span className="text-sm text-muted-foreground">Basic Info</span>
+            </div>
+            <div className="w-8 h-px bg-gray-300"></div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+              <span className="text-sm text-muted-foreground">Role & Permissions</span>
+            </div>
+            <div className="w-8 h-px bg-gray-300"></div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+              <span className="text-sm text-muted-foreground">Additional Info</span>
+            </div>
+          </div>
           {/* Basic Information */}
           <Card>
             <CardHeader>
@@ -323,9 +339,10 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                     />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">Email Address *</Label>
-                                                                   <Input
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-foreground">Email Address *</Label>
+                  <Input
                     id="email"
                     type="email"
                     value={formData.email}
@@ -334,6 +351,18 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                     className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone || ''}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="Enter phone number"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -354,19 +383,32 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                   <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        <div className="flex items-center gap-2">
-                          {getRoleIcon(role.name)}
-                          <span>{role.name}</span>
-                          {role.description && (
-                            <Badge variant={getRoleBadgeVariant(role.name)} className="ml-auto">
-                              {role.description}
-                            </Badge>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))}
+                    {roles.map((role) => {
+                      const connectedRole = mapApplicationRoleTo8baseRole(role.id);
+                      const recordsCreated = role.id === 'coach' ? 'User + Coach' :
+                                           role.id === 'user' ? 'User + Student' :
+                                           'User only';
+                      return (
+                        <SelectItem key={role.id} value={role.id}>
+                          <div className="flex items-center gap-2 w-full">
+                            {getRoleIcon(role.name)}
+                            <div className="flex flex-col flex-1">
+                              <span>{role.name}</span>
+                              {connectedRole && (
+                                <span className="text-xs text-muted-foreground">
+                                  Connects to: {connectedRole.name} • Creates: {recordsCreated}
+                                </span>
+                              )}
+                            </div>
+                            {role.description && (
+                              <Badge variant={getRoleBadgeVariant(role.name)} className="ml-auto">
+                                {role.description}
+                              </Badge>
+                            )}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -517,6 +559,67 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                   onCheckedChange={(checked) => handleInputChange('isActive', checked as boolean)}
                 />
                 <Label htmlFor="isActive" className="text-foreground">Account is active</Label>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Summary</CardTitle>
+              <CardDescription>
+                Review the information before creating the user
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Name:</span> {formData.firstName} {formData.lastName}
+                  </div>
+                  <div>
+                    <span className="font-medium">Email:</span> {formData.email}
+                  </div>
+                  <div>
+                    <span className="font-medium">Phone:</span> {formData.phone || 'Not provided'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Role:</span> {roles.find(r => r.id === formData.role)?.name || 'Student'}
+                  </div>
+                  <div>
+                    <span className="font-medium">8base Role:</span> {
+                      (() => {
+                        const connectedRole = mapApplicationRoleTo8baseRole(formData.role);
+                        return connectedRole ? connectedRole.name : 'Not mapped';
+                      })()
+                    }
+                  </div>
+                  <div>
+                    <span className="font-medium">Records Created:</span> {
+                      formData.role === 'coach' ? 'User + Coach' :
+                      formData.role === 'user' ? 'User + Student' :
+                      'User only'
+                    }
+                  </div>
+                  {formData.role === 'user' && (
+                    <>
+                      <div>
+                        <span className="font-medium">Coach:</span> {formData.assigned_admin_id === 'none' ? 'Not assigned' : 'Assigned'}
+                      </div>
+                      <div>
+                        <span className="font-medium">Paid:</span> {formData.has_paid ? 'Yes' : 'No'}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="text-sm">
+                  <span className="font-medium">Status:</span> {formData.isActive ? 'Active' : 'Inactive'}
+                </div>
+                {formData.custom_message && (
+                  <div className="text-sm">
+                    <span className="font-medium">Custom Message:</span> {formData.custom_message}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

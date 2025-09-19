@@ -118,11 +118,11 @@ const transformUser = (user: any): User => {
     assignedCoach: assignedCoach,
     access_start: new Date().toISOString().split('T')[0], // Default to today
     access_end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0], // Default to 1 year from now
-    has_paid: true, // Default to true
+    has_paid: user.has_paid !== undefined ? user.has_paid : (userRole === 'user' ? false : true), // Students default to false, others to true
     created_at: user.createdAt,
     coaching_term_start: null, // Not available in new schema
     coaching_term_end: null, // Not available in new schema
-    is_active: true // Default to true
+    is_active: user.is_active !== undefined ? user.is_active : true // Default to true
   };
 };
 
@@ -556,6 +556,7 @@ export const eightbaseService = {
     if (updates.origin) transformedUpdates.origin = updates.origin;
     if (updates.timezone) transformedUpdates.timezone = updates.timezone;
     if (updates.has_paid !== undefined) transformedUpdates.has_paid = updates.has_paid;
+    if (updates.is_active !== undefined) transformedUpdates.is_active = updates.is_active;
     if (updates.access_start) transformedUpdates.access_start = updates.access_start;
     if (updates.access_end) transformedUpdates.access_end = updates.access_end;
     
@@ -575,7 +576,7 @@ export const eightbaseService = {
     // Remove fields that don't exist in UserUpdateInput
     const validFields = [
       'firstName', 'lastName', 'email', 'status', 'origin', 'timezone',
-      'roles', 'coach', 'has_paid', 'access_start', 'access_end'
+      'roles', 'coach', 'has_paid', 'is_active', 'access_start', 'access_end'
     ];
     
     // Only include valid fields
@@ -611,6 +612,7 @@ export const eightbaseService = {
     if (updates.origin) transformedUpdates.origin = updates.origin;
     if (updates.timezone) transformedUpdates.timezone = updates.timezone;
     if (updates.has_paid !== undefined) transformedUpdates.has_paid = updates.has_paid;
+    if (updates.is_active !== undefined) transformedUpdates.is_active = updates.is_active;
     if (updates.access_start) transformedUpdates.access_start = updates.access_start;
     if (updates.access_end) transformedUpdates.access_end = updates.access_end;
     
@@ -2303,7 +2305,8 @@ export const eightbaseService = {
     // Remove fields that don't exist in UserCreateInput
     const validFields = [
       'firstName', 'lastName', 'email', 'status', 'origin', 'timezone',
-      'roles', 'assignedCoach'
+      'roles', 'assignedCoach', 'is_active', 'has_paid', 'assigned_admin_id',
+      'access_start', 'access_end'
     ];
     
     // Remove fields that don't exist in UserCreateInput
@@ -3048,9 +3051,11 @@ export const eightbaseService = {
   // Direct Coach table creation
   async createCoachDirect(coachData: any): Promise<any> {
     try {
+      console.log('8baseService.createCoachDirect - Input data:', JSON.stringify(coachData, null, 2));
       const data = await executeMutation(queries.CREATE_COACH, {
         data: coachData
       });
+      console.log('8baseService.createCoachDirect - Response:', data);
       return data.coachCreate;
     } catch (error) {
       console.error('Failed to create coach directly:', error);

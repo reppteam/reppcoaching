@@ -67,8 +67,37 @@ class UserInvitationService {
 
       let createdUser;
 
-             // Create user based on role type
-       if (invitationData.role === 'user') {
+      // Create user based on role type
+      if (invitationData.role === 'coach') {
+         // Create coach with assigned students (if any)
+         const coachInput = {
+           email: invitationData.email,
+           firstName: invitationData.firstName,
+           lastName: invitationData.lastName,
+           roles: {
+             connect: { id: invitationData.selectedRoleId }
+           }
+           // Note: Student assignments would be handled separately if needed
+         };
+
+         createdUser = await eightbaseService.createUser(coachInput);
+         
+         // Create Coach record for coach role
+         try {
+           const coachData = {
+             firstName: invitationData.firstName,
+             lastName: invitationData.lastName,
+             email: invitationData.email,
+             bio: ''
+           };
+           await eightbaseService.createCoachDirect(coachData);
+           console.log('Coach record created successfully');
+         } catch (coachError) {
+           console.error('Failed to create coach record:', coachError);
+           // Don't fail the entire process if coach record creation fails
+         }
+         
+       } else if (invitationData.role === 'user') {
          // Create student with assigned coach (only if we have a valid coach ID)
          const studentInput: any = {
            email: invitationData.email,
@@ -87,19 +116,31 @@ class UserInvitationService {
          }
 
          createdUser = await eightbaseService.createUser(studentInput);
-       } else if (invitationData.role === 'coach') {
-         // Create coach with assigned students (if any)
-         const coachInput = {
-           email: invitationData.email,
-           firstName: invitationData.firstName,
-           lastName: invitationData.lastName,
-           roles: {
-             connect: { id: invitationData.selectedRoleId }
-           }
-           // Note: Student assignments would be handled separately if needed
-         };
-
-         createdUser = await eightbaseService.createUser(coachInput);
+         
+         // Create Student record for user role
+         try {
+           const studentData = {
+             firstName: invitationData.firstName,
+             lastName: invitationData.lastName,
+             email: invitationData.email,
+             phone: '',
+             business_name: '',
+             location: '',
+             target_market: '',
+             strengths: '',
+             challenges: '',
+             goals: '',
+             preferred_contact_method: '',
+             availability: '',
+             notes: ''
+           };
+           await eightbaseService.createStudentDirect(studentData);
+           console.log('Student record created successfully');
+         } catch (studentError) {
+           console.error('Failed to create student record:', studentError);
+           // Don't fail the entire process if student record creation fails
+         }
+         
        } else {
          // Create other roles (coach_manager, super_admin) with standard method
          const userInput = {
@@ -140,13 +181,12 @@ class UserInvitationService {
   // Create Auth0 user account
   private async createAuth0User(invitationData: InvitationData, userId?: string): Promise<any> {
     try {
-      // Generate a temporary password
-      const tempPassword = this.generateTemporaryPassword();
-
       // Get a fresh management token
       const managementToken = await auth0TokenService.getManagementToken();
 
-      // Create user in Auth0
+      // Create user in Auth0 with a random password (they'll reset it)
+      const randomPassword = this.generateTemporaryPassword();
+
       const auth0Response = await fetch(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/api/v2/users`, {
         method: 'POST',
         headers: {
@@ -155,7 +195,7 @@ class UserInvitationService {
         },
         body: JSON.stringify({
           email: invitationData.email,
-          password: tempPassword,
+          password: randomPassword,
           name: `${invitationData.firstName} ${invitationData.lastName}`,
           given_name: invitationData.firstName,
           family_name: invitationData.lastName,
@@ -187,13 +227,47 @@ class UserInvitationService {
 
       const auth0User = await auth0Response.json();
       
-      // Store temporary password for email
-      auth0User.tempPassword = tempPassword;
+      // Send password reset email instead of using temporary password
+      const resetResult = await this.sendPasswordResetEmail(invitationData.email);
       
-      return auth0User;
+      return {
+        ...auth0User,
+        passwordResetSent: resetResult.success,
+        resetError: resetResult.error
+      };
     } catch (error) {
       console.error('Error creating Auth0 user:', error);
       throw error;
+    }
+  }
+
+  // Send password reset email via Auth0
+  private async sendPasswordResetEmail(email: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await fetch(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/dbconnections/change_password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          client_id: process.env.REACT_APP_AUTH0_CLIENT_ID,
+          email: email,
+          connection: 'Username-Password-Authentication'
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Auth0 password reset failed: ${error.error_description || error.error}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to send password reset email'
+      };
     }
   }
 
@@ -208,13 +282,14 @@ class UserInvitationService {
             lastName: invitationData.lastName,
             email: invitationData.email,
             role: this.getRoleDisplayName(invitationData.role),
-            tempPassword: auth0User.tempPassword,
             loginUrl: `${window.location.origin}/login`,
             invitedBy: invitationData.invited_by || 'System Administrator',
             customMessage: invitationData.custom_message,
             accessStart: invitationData.access_start,
             accessEnd: invitationData.access_end,
-            hasPaid: invitationData.has_paid
+            hasPaid: invitationData.has_paid,
+            passwordResetSent: auth0User.passwordResetSent,
+            resetError: auth0User.resetError
           }
         }],
         from: { email: process.env.REACT_APP_SENDGRID_FROM_EMAIL || 'noreply@yourdomain.com', name: 'Real Estate Photographer Pro' },
@@ -313,12 +388,14 @@ class UserInvitationService {
         throw new Error('User not found');
       }
 
-      // Generate new temporary password
-      const tempPassword = this.generateTemporaryPassword();
+      // Send password reset email instead of updating password
+      const resetResult = await this.sendPasswordResetEmail(user.email);
 
-      // Update Auth0 user with new password
-      const auth0User = await this.updateAuth0UserPassword(user.email, tempPassword);
-      auth0User.tempPassword = tempPassword;
+      // Create mock auth0User object for email template
+      const auth0User = {
+        passwordResetSent: resetResult.success,
+        resetError: resetResult.error
+      };
 
       // Send new invitation email
       const emailResult = await this.sendInvitationEmail(invitationData, user, auth0User);

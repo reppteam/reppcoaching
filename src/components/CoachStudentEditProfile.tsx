@@ -42,6 +42,7 @@ interface Student {
   goals: string;
   preferred_contact_method: string;
   availability: string;
+  why?: string;
   notes: string;
   user?: {
     id: string;
@@ -177,6 +178,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
     goals: '',
     preferred_contact_method: '',
     availability: '',
+    why: '',
     notes: ''
   });
 
@@ -234,6 +236,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
         goals: student.goals || '',
         preferred_contact_method: student.preferred_contact_method || '',
         availability: student.availability || '',
+        why: student.why || '',
         notes: student.notes || '',
         user: student.user,
         createdAt: student.createdAt,
@@ -257,6 +260,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
         goals: student.goals || '',
         preferred_contact_method: student.preferred_contact_method || '',
         availability: student.availability || '',
+        why: student.why || '',
         notes: student.notes || ''
       };
       
@@ -374,6 +378,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
         goals: student.goals || '',
         preferred_contact_method: student.preferred_contact_method || '',
         availability: student.availability || '',
+        why: student.why || '',
         notes: student.notes || ''
       });
     }
@@ -595,11 +600,32 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
                       </div>
                       
                       <div>
-                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Preferred Contact</Label>
+                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Preferred Contact Method</Label>
                         <Input
                           value={formData.preferred_contact_method}
                           onChange={(e) => setFormData({ ...formData, preferred_contact_method: e.target.value })}
                           className="mt-1 text-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                          placeholder="e.g., Email, Phone, Text"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</Label>
+                        <Input
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          className="mt-1 text-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                          placeholder="(555) 123-4567"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email Address</Label>
+                        <Input
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          className="mt-1 text-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                          placeholder="student@example.com"
                         />
                       </div>
                       
@@ -632,6 +658,17 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
                           value={formData.availability}
                           onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
                           className="mt-1 text-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">Why (Motivation)</Label>
+                        <Textarea
+                          value={formData.why || ''}
+                          onChange={(e) => setFormData({ ...formData, why: e.target.value })}
+                          rows={4}
+                          className="mt-1 text-lg text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                          placeholder="What motivates this student? Why are they pursuing real estate photography?"
                         />
                       </div>
                     </div>

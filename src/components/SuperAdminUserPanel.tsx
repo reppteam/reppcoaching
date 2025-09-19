@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { eightbaseService } from '../services/8baseService';
+import { saasUserCreationService } from '../services/saasUserCreationService';
 import { User } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -53,6 +54,11 @@ export function SuperAdminUserPanel() {
     studentId: '',
     coachId: ''
   });
+  const [bulkAssignDialogOpen, setBulkAssignDialogOpen] = useState(false);
+  const [bulkAssignForm, setBulkAssignForm] = useState({
+    studentIds: [] as string[],
+    coachId: ''
+  });
   
   // Edit dialog states
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -73,13 +79,15 @@ export function SuperAdminUserPanel() {
 
   // Create user dialog states
   const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
+  const [createUserLoading, setCreateUserLoading] = useState(false);
   const [createUserForm, setCreateUserForm] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    role: 'user',
+    role: 'user' as 'user' | 'coach' | 'coach_manager' | 'super_admin',
     is_active: true,
-    has_paid: false
+    has_paid: false,
+    assignedCoachId: 'none'
   });
 
   useEffect(() => {
@@ -143,6 +151,49 @@ export function SuperAdminUserPanel() {
     }
   };
 
+  const handleBulkAssignCoach = async () => {
+    if (bulkAssignForm.studentIds.length === 0 || !bulkAssignForm.coachId) {
+      alert('Please select students and a coach');
+      return;
+    }
+
+    if (bulkAssignForm.studentIds.length > 50) {
+      alert('Cannot assign more than 50 students at once');
+      return;
+    }
+
+    try {
+      const coachId = bulkAssignForm.coachId;
+      const selectedCoach = coaches.find(c => c.id === coachId);
+      
+      if (!selectedCoach) {
+        alert('Selected coach not found');
+        return;
+      }
+
+      // Assign all selected students to the coach
+      const promises = bulkAssignForm.studentIds.map(studentId => {
+        const studentData = {
+          coach: {
+            connect: { id: coachId }
+          }
+        };
+        return eightbaseService.updateStudentDirect(studentId, studentData);
+      });
+
+      await Promise.all(promises);
+      
+      setBulkAssignDialogOpen(false);
+      setBulkAssignForm({ studentIds: [], coachId: '' });
+      await loadUsers();
+      
+      alert(`Successfully assigned ${bulkAssignForm.studentIds.length} students to ${selectedCoach.firstName} ${selectedCoach.lastName}`);
+    } catch (error) {
+      console.error('Failed to bulk assign coach:', error);
+      alert('Failed to assign students to coach. Please try again.');
+    }
+  };
+
   const handleEditUser = (user: User) => {
     setEditingUser(user);
     setEditForm({
@@ -175,11 +226,21 @@ export function SuperAdminUserPanel() {
         
         await eightbaseService.updateCoachDirect(editingUser.id, coachData);
       } else {
-        // Update student using direct Student table operations
+        // For students, we need to update both User table and Student table
+        // First, update the User table with has_paid and is_active
+        const userData = {
+          has_paid: editForm.has_paid,
+          is_active: editForm.is_active
+        };
+        
+        console.log('Updating user data:', userData);
+        await eightbaseService.updateUser(editingUser.id, userData);
+        
+        // Then, update the Student table with profile data
         const studentData: any = {
-        firstName: editForm.firstName,
-        lastName: editForm.lastName,
-        email: editForm.email,
+          firstName: editForm.firstName,
+          lastName: editForm.lastName,
+          email: editForm.email,
           phone: '',
           business_name: '',
           location: '',
@@ -227,6 +288,7 @@ export function SuperAdminUserPanel() {
       await loadUsers();
     } catch (error) {
       console.error('Failed to update user:', error);
+      alert('Failed to update user. Please try again.');
     }
   };
 
@@ -255,24 +317,59 @@ export function SuperAdminUserPanel() {
   };
 
   const handleCreateUser = async () => {
+    setCreateUserLoading(true);
     try {
-      const newUser = await eightbaseService.createUser(createUserForm);
-      // Add the new user to the local state
-      setUsers([newUser, ...users]);
-      // Close the dialog
-      setCreateUserDialogOpen(false);
-      // Reset the form
-      setCreateUserForm({
-        firstName: '',
-        lastName: '',
-        email: '',
-        role: 'user',
-        is_active: true,
-        has_paid: false
-      });
+      // Validate required fields
+      if (!createUserForm.firstName?.trim()) {
+        alert('First name is required.');
+        return;
+      }
+      if (!createUserForm.lastName?.trim()) {
+        alert('Last name is required.');
+        return;
+      }
+      if (!createUserForm.email?.trim()) {
+        alert('Email is required.');
+        return;
+      }
+
+      // Check if user already exists
+      const userExists = await saasUserCreationService.checkUserExists(createUserForm.email);
+      if (userExists.exists) {
+        alert('A user with this email already exists. Please use a different email.');
+        return;
+      }
+
+      // Create user with SaaS invitation flow
+      const result = await saasUserCreationService.createUserWithInvitation(createUserForm);
+      
+      if (result.success) {
+        // Close the dialog
+        setCreateUserDialogOpen(false);
+        // Reset the form
+        setCreateUserForm({
+          firstName: '',
+          lastName: '',
+          email: '',
+          role: 'user' as 'user' | 'coach' | 'coach_manager' | 'super_admin',
+          is_active: true,
+          has_paid: false,
+          assignedCoachId: 'none'
+        });
+        
+        // Show success message with details
+        alert(result.message);
+        
+        // Refresh the users list to show any new users that might have been created
+        loadUsers();
+      } else {
+        alert(result.error || 'Failed to create user invitation. Please try again.');
+      }
     } catch (error) {
       console.error('Failed to create user:', error);
       alert('Error creating user. Please try again.');
+    } finally {
+      setCreateUserLoading(false);
     }
   };
 
@@ -306,7 +403,6 @@ export function SuperAdminUserPanel() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
         <div>
           <h1 className="flex items-center gap-2">
             <Users className="h-6 w-6 text-brand-blue" />
@@ -316,14 +412,15 @@ export function SuperAdminUserPanel() {
             Manage all users, assign coaches, and monitor account status
           </p>
         </div>
-        <Dialog open={createUserDialogOpen} onOpenChange={setCreateUserDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Create User
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
+        <div className="flex space-x-2">
+          <Dialog open={createUserDialogOpen} onOpenChange={setCreateUserDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Create User
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
             <DialogHeader>
               <DialogTitle>Create New User</DialogTitle>
               <DialogDescription>
@@ -368,7 +465,7 @@ export function SuperAdminUserPanel() {
               
               <div>
                 <Label htmlFor="create-role" className="text-foreground">Role</Label>
-                <Select value={createUserForm.role} onValueChange={(value) => setCreateUserForm({...createUserForm, role: value})}>
+                <Select value={createUserForm.role} onValueChange={(value) => setCreateUserForm({...createUserForm, role: value as 'user' | 'coach' | 'coach_manager' | 'super_admin', assignedCoachId: 'none'})}>
                   <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
@@ -380,6 +477,25 @@ export function SuperAdminUserPanel() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              {createUserForm.role === 'user' && (
+                <div>
+                  <Label htmlFor="create-coach" className="text-foreground">Assign Coach (Optional)</Label>
+                  <Select value={createUserForm.assignedCoachId} onValueChange={(value) => setCreateUserForm({...createUserForm, assignedCoachId: value})}>
+                    <SelectTrigger className="bg-background border-border text-foreground">
+                      <SelectValue placeholder="Select a coach (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No coach assigned</SelectItem>
+                      {coaches.map((coach) => (
+                        <SelectItem key={coach.id} value={coach.id}>
+                          {coach.firstName} {coach.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center space-x-2">
@@ -404,14 +520,21 @@ export function SuperAdminUserPanel() {
                 <Button variant="outline" onClick={() => setCreateUserDialogOpen(false)} className="text-foreground">
                   Cancel
                 </Button>
-                <Button onClick={handleCreateUser}>
-                  Create User
+                <Button onClick={handleCreateUser} disabled={createUserLoading}>
+                  {createUserLoading ? 'Creating...' : 'Create User'}
                 </Button>
               </div>
             </div>
           </DialogContent>
         </Dialog>
-      </div>
+          <Button 
+            variant="outline"
+            onClick={() => setBulkAssignDialogOpen(true)}
+          >
+            <Shield className="h-4 w-4 mr-2" />
+            Bulk Assign Students
+          </Button>
+        </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -682,6 +805,93 @@ export function SuperAdminUserPanel() {
               </Button>
               <Button onClick={handleAssignCoach}>
                 Assign Coach
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Assign Students Dialog */}
+      <Dialog open={bulkAssignDialogOpen} onOpenChange={setBulkAssignDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Bulk Assign Students to Coach</DialogTitle>
+            <DialogDescription>
+              Select multiple students and assign them to a coach (up to 50 students at once)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="coach" className="text-foreground">Select Coach *</Label>
+              <Select value={bulkAssignForm.coachId} onValueChange={(value) => setBulkAssignForm({...bulkAssignForm, coachId: value})}>
+                <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectValue placeholder="Select coach" />
+                </SelectTrigger>
+                <SelectContent>
+                  {coaches.map(coach => (
+                    <SelectItem key={coach.id} value={coach.id}>
+                      {coach.firstName} {coach.lastName} ({coach.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="students" className="text-foreground">Select Students *</Label>
+              <div className="border border-border rounded-md p-4 max-h-60 overflow-y-auto">
+                <div className="space-y-2">
+                  {students.map(student => (
+                    <div key={student.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`student-${student.id}`}
+                        checked={bulkAssignForm.studentIds.includes(student.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            if (bulkAssignForm.studentIds.length >= 50) {
+                              alert('Cannot select more than 50 students at once');
+                              return;
+                            }
+                            setBulkAssignForm({
+                              ...bulkAssignForm,
+                              studentIds: [...bulkAssignForm.studentIds, student.id]
+                            });
+                          } else {
+                            setBulkAssignForm({
+                              ...bulkAssignForm,
+                              studentIds: bulkAssignForm.studentIds.filter(id => id !== student.id)
+                            });
+                          }
+                        }}
+                        className="rounded border-border"
+                      />
+                      <label htmlFor={`student-${student.id}`} className="text-sm text-foreground cursor-pointer">
+                        {student.firstName} {student.lastName} ({student.email})
+                        {student.coach && (
+                          <span className="text-xs text-muted-foreground ml-2">
+                            - Currently assigned to {student.coach.firstName} {student.coach.lastName}
+                          </span>
+                        )}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Selected: {bulkAssignForm.studentIds.length} students (max 50)
+              </p>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setBulkAssignDialogOpen(false)} className="text-foreground">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleBulkAssignCoach}
+                disabled={bulkAssignForm.studentIds.length === 0 || !bulkAssignForm.coachId}
+              >
+                Assign {bulkAssignForm.studentIds.length} Students
               </Button>
             </div>
           </div>

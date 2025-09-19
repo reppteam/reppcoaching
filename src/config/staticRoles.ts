@@ -43,10 +43,10 @@ export const getRoleById = (id: string): StaticRole | undefined => {
 // Helper function to map application roles to 8base roles
 export const mapApplicationRoleTo8baseRole = (appRole: string): StaticRole | undefined => {
   const roleMapping: Record<string, string> = {
-    'user': 'Student',
-    'coach': 'Coach',
-    'coach_manager': 'coach_manager',
-    'super_admin': 'Administrator'
+    'user': 'Student',           // Student → Student role
+    'coach': 'Coach',            // Coach → Coach role
+    'coach_manager': 'coach_manager',  // Coach Manager → coach_manager role
+    'super_admin': 'SuperAdmin'  // Super Admin → SuperAdmin role
   };
 
   const targetRoleName = roleMapping[appRole];

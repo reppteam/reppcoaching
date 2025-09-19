@@ -27,6 +27,8 @@ export const EditOwnProfile: React.FC<EditOwnProfileProps> = ({ onClose }) => {
     challenges: '',
     goals: '',
     preferred_contact_method: '',
+    phone: '',
+    email: '',
     availability: '',
     notes: ''
   });
@@ -52,6 +54,8 @@ export const EditOwnProfile: React.FC<EditOwnProfileProps> = ({ onClose }) => {
           challenges: profileData.challenges || '',
           goals: profileData.goals || '',
           preferred_contact_method: profileData.preferred_contact_method || '',
+          phone: profileData.phone || '',
+          email: profileData.email || '',
           availability: profileData.availability || '',
           notes: profileData.notes || ''
         });
@@ -205,6 +209,31 @@ export const EditOwnProfile: React.FC<EditOwnProfileProps> = ({ onClose }) => {
                   value={formData.availability}
                   onChange={(e) => setFormData({...formData, availability: e.target.value})}
                   placeholder="e.g., Weekday evenings, Weekend mornings"
+                  className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                />
+              </div>
+            </div>
+
+            {/* Phone and Email */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone" className="text-gray-900 dark:text-gray-300">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  placeholder="(555) 123-4567"
+                  className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                />
+              </div>
+              <div>
+                <Label htmlFor="email" className="text-gray-900 dark:text-gray-300">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  placeholder="your.email@example.com"
                   className="bg-gray-50 dark:bg-[#2A2A2A] border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>

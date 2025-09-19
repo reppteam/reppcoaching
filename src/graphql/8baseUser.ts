@@ -199,6 +199,11 @@ export const CREATE_USER_MUTATION = gql`
       email
       origin
       status
+      has_paid
+      is_active
+      assigned_admin_id
+      access_start
+      access_end
       createdAt
       updatedAt
       avatar {

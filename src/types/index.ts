@@ -214,6 +214,8 @@ export interface StudentProfile {
   challenges?: string;
   goals?: string;
   preferred_contact_method?: string;
+  phone?: string;
+  email?: string;
   availability?: string;
   notes?: string;
   created_at: string;
