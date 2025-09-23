@@ -326,6 +326,17 @@ class Auth0Service {
       throw error;
     }
   }
+
+
+  // Generate temporary password
+  private generateTemporaryPassword(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  }
 }
 
 export const auth0Service = new Auth0Service(); 

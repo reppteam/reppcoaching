@@ -47,6 +47,7 @@ export const PATH_DASHBOARD = {
   adminDashboard: "/admin-dashboard",
   superAdminDashboard: "/super-admin-dashboard",
   superAdminUserPanel: "/super-admin-user-panel",
+  superAdminList: "/super-admin-list",
   
   // Role management
   rolePermissionsManager: "/role-permissions-manager",

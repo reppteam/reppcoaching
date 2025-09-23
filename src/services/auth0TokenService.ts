@@ -48,8 +48,8 @@ class Auth0TokenService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          client_id: process.env.REACT_APP_AUTH0_CLIENT_ID,
-          client_secret: process.env.REACT_APP_AUTH0_CLIENT_SECRET,
+          client_id: process.env.REACT_APP_AUTH0_M2M_CLIENT_ID || process.env.REACT_APP_AUTH0_CLIENT_ID,
+          client_secret: process.env.REACT_APP_AUTH0_M2M_CLIENT_SECRET || process.env.REACT_APP_AUTH0_CLIENT_SECRET,
           audience: `https://${process.env.REACT_APP_AUTH0_DOMAIN}/api/v2/`,
           grant_type: 'client_credentials',
         }),

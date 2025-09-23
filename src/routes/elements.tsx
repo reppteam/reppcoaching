@@ -63,6 +63,7 @@ export const StudentProfileView = Loadable(lazy(() => import("../components/Stud
 export const AdminDashboard = Loadable(lazy(() => import("../components/AdminDashboard").then(module => ({ default: module.AdminDashboard }))));
 export const SuperAdminDashboard = Loadable(lazy(() => import("../components/SuperAdminDashboard").then(module => ({ default: module.SuperAdminDashboard }))));
 export const SuperAdminUserPanel = Loadable(lazy(() => import("../components/SuperAdminUserPanel").then(module => ({ default: module.SuperAdminUserPanel }))));
+export const SuperAdminList = Loadable(lazy(() => import("../components/SuperAdminList").then(module => ({ default: module.SuperAdminList }))));
 
 // Role management
 export const RolePermissionsManager = Loadable(lazy(() => import("../components/RolePermissionsManager").then(module => ({ default: module.RolePermissionsManager }))));
@@ -94,6 +95,9 @@ export const ImplementationSummary = Loadable(lazy(() => import("../components/I
 
 // Careers
 export const CareersPage = Loadable(lazy(() => import("../components/Dashboard").then(module => ({ default: module.Dashboard }))));
+
+// Email testing
+export const EmailTestPanel = Loadable(lazy(() => import("../components/EmailTestPanel").then(module => ({ default: module.EmailTestPanel }))));
 
 // 404 page
 export const Page404 = Loadable(lazy(() => import("../components/Dashboard").then(module => ({ default: module.Dashboard })))); 

@@ -351,6 +351,18 @@ export const eightbaseService = {
     }
   },
 
+  async getUserByEmail(email: string): Promise<User | null> {
+    try {
+      console.log('Getting user by email:', email);
+      const data = await executeQuery(queries.GET_USER_BY_EMAIL, { email });
+      const user = data.usersList?.items?.[0];
+      return user ? transformUser(user) : null;
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
+      return null;
+    }
+  },
+
   async getUsersByFilter(filter: any): Promise<User[]> {
     const data = await executeQuery(queries.GET_USER_BY_FILTER, { filter });
     return data.usersList.items.map(transformUser);
@@ -545,6 +557,28 @@ export const eightbaseService = {
   },
 
   async updateUser(id: string, updates: any, coachId?: string): Promise<User> {
+    // For simple updates (like name, email, is_active, has_paid), use the simple query
+    const isSimpleUpdate = !updates.role && !updates.coachId && !coachId && 
+                          !updates.access_start && !updates.access_end;
+    
+    if (isSimpleUpdate) {
+      // Use simple update for basic fields including is_active and has_paid
+      const simpleUpdates: any = {};
+      if (updates.email) simpleUpdates.email = updates.email;
+      if (updates.firstName) simpleUpdates.firstName = updates.firstName;
+      if (updates.lastName) simpleUpdates.lastName = updates.lastName;
+      if (updates.is_active !== undefined) simpleUpdates.is_active = updates.is_active;
+      if (updates.has_paid !== undefined) simpleUpdates.has_paid = updates.has_paid;
+      
+      const data = await executeMutation(queries.UPDATE_USER_SIMPLE, { 
+        filter: { id }, 
+        data: simpleUpdates 
+      });
+      
+      return transformUser(data.userUpdate);
+    }
+    
+    // For complex updates, use the full query
     // Transform the updates to match the correct field names
     const transformedUpdates = await this.transformUserDataForCreation(updates);
     
@@ -587,7 +621,7 @@ export const eightbaseService = {
       }
     });
     
-    const data = await executeMutation(queries.UPDATE_USER_WITH_COACH_CONNECTION, { 
+    const data = await executeMutation(queries.UPDATE_USER, { 
       filter: { id }, 
       data: finalUpdates 
     });

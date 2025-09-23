@@ -33,6 +33,7 @@ import {
   ShieldCheck,
   Users2,
 } from 'lucide-react';
+import { UserActions } from './UserActions';
 
 interface AssignCoachForm {
   studentId: string;
@@ -357,8 +358,14 @@ export function SuperAdminUserPanel() {
           assignedCoachId: 'none'
         });
         
-        // Show success message with details
-        alert(result.message);
+        // Show simplified success message
+        let successMessage = 'User created';
+        if (result.verificationSent) {
+          successMessage += ' and email sent';
+        } else {
+          successMessage += ' but email not sent - logout account and login again and send invitation';
+        }
+        alert(successMessage);
         
         // Refresh the users list to show any new users that might have been created
         loadUsers();
@@ -671,18 +678,39 @@ export function SuperAdminUserPanel() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className="bg-blue-100 text-blue-800">
+                    <Badge variant="info" className="flex items-center gap-1.5">
+                      <GraduationCap className="h-3 w-3" />
                       Student
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={user.is_active !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                      {user.is_active !== false ? 'Active' : 'Inactive'}
+                    <Badge variant={user.is_active !== false ? 'success' : 'destructive'} className="flex items-center gap-1.5">
+                      {user.is_active !== false ? (
+                        <>
+                          <CheckCircle className="h-3 w-3" />
+                          Active
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle className="h-3 w-3" />
+                          Inactive
+                        </>
+                      )}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={user.has_paid ? 'bg-emerald-100 text-emerald-800' : 'bg-muted text-muted-foreground'}>
-                      {user.has_paid ? 'Paid' : 'Free'}
+                    <Badge variant={user.has_paid ? 'success' : 'outline'} className="flex items-center gap-1.5">
+                      {user.has_paid ? (
+                        <>
+                          <CheckCircle className="h-3 w-3" />
+                          Paid
+                        </>
+                      ) : (
+                        <>
+                          <Calendar className="h-3 w-3" />
+                          Free
+                        </>
+                      )}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -698,6 +726,17 @@ export function SuperAdminUserPanel() {
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
+                      <UserActions 
+                        user={user} 
+                        onSuccess={(message) => {
+                          // You can add a toast notification here if needed
+                          console.log('Success:', message);
+                        }}
+                        onError={(error) => {
+                          // You can add a toast notification here if needed
+                          console.error('Error:', error);
+                        }}
+                      />
                       {!user.coach && (
                         <Button
                           size="sm"

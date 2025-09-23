@@ -819,6 +819,7 @@ export const GET_USER_BY_FILTER = gql`
   }
 `;
 
+
 export const UPDATE_USER = gql`
   mutation UpdateUser($data: UserUpdateInput!, $filter: UserKeyFilter) {
     userUpdate(data: $data, filter: $filter) {
@@ -847,7 +848,7 @@ export const UPDATE_USER = gql`
         count
         __typename
       }
-            phoneNumber
+      phoneNumber
       student {
         id
         firstName
@@ -896,6 +897,28 @@ export const UPDATE_USER = gql`
       is_active
       _description
       __typename
+    }
+  }
+`;
+
+// Simple update query for basic user fields only
+export const UPDATE_USER_SIMPLE = gql`
+  mutation UpdateUserSimple($data: UserUpdateInput!, $filter: UserKeyFilter) {
+    userUpdate(data: $data, filter: $filter) {
+      id
+      email
+      firstName
+      lastName
+      is_active
+      has_paid
+      createdAt
+      updatedAt
+      roles {
+        items {
+          id
+          name
+        }
+      }
     }
   }
 `;

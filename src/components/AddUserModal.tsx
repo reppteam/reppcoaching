@@ -168,27 +168,13 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
       // No need to create additional records here as it's handled by the service
 
       if (newUser) {
-        let successMessage = 'User created successfully!';
-        
-        // Add role connection information
-        const selectedRole = STATIC_ROLES.find(role => role.id === formData.selectedRoleId);
-        if (selectedRole) {
-          successMessage += ` Role "${selectedRole.name}" connected successfully.`;
-        }
-        
-        if (formData.role === 'coach') {
-          successMessage += ' Coach profile record also created.';
-        } else if (formData.role === 'user') {
-          successMessage += ' Student profile record also created.';
-        } else {
-          successMessage += ' User record only (no additional profile records needed).';
-        }
+        let successMessage = 'User created';
         
         // Add email status information
         if (userResult.emailSent) {
-          successMessage += ' Welcome email with password reset link sent successfully.';
+          successMessage += ' and email sent';
         } else {
-          successMessage += ' Note: Welcome email could not be sent. You may need to manually send the password reset link.';
+          successMessage += ' but email not sent - logout account and login again and send invitation';
         }
         
         setSuccess(successMessage);
@@ -260,16 +246,16 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
     switch (roleName) {
       case 'Super Admin':
       case 'super_admin':
-        return 'default';
+        return 'gradient';
       case 'Coach Manager':
       case 'coach_manager':
-        return 'secondary';
+        return 'info';
       case 'Coach':
       case 'coach':
-        return 'outline';
+        return 'success';
       case 'Student':
       case 'user':
-        return 'outline';
+        return 'info';
       default:
         return 'outline';
     }
@@ -401,7 +387,8 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                               )}
                             </div>
                             {role.description && (
-                              <Badge variant={getRoleBadgeVariant(role.name)} className="ml-auto">
+                              <Badge variant={getRoleBadgeVariant(role.name)} className="ml-auto flex items-center gap-1.5">
+                                {getRoleIcon(role.name)}
                                 {role.description}
                               </Badge>
                             )}

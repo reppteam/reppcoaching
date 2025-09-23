@@ -22,6 +22,7 @@ export interface User {
   access_end: string;
   has_paid: boolean;
   created_at: string;
+  updatedAt?: string;
   coaching_term_start?: string | null;
   coaching_term_end?: string | null;
   is_active?: boolean;

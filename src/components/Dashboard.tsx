@@ -18,6 +18,7 @@ import { AdminDashboard } from "./AdminDashboard";
 import { SuperAdminDashboard } from "./SuperAdminDashboard";
 import { CoachManagerDashboard } from "./CoachManagerDashboard";
 import { SuperAdminUserPanel } from "./SuperAdminUserPanel";
+import { SuperAdminList } from "./SuperAdminList";
 import { UserManagement } from "./UserManagement";
 import { StudentProfile } from "./StudentProfile";
 import { RolePermissionsManager } from "./RolePermissionsManager";
@@ -55,6 +56,7 @@ import {
   Heart,
   Quote,
   User as UserIcon,
+  UserCircle2,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -168,6 +170,11 @@ export function Dashboard() {
           label: "User Management",
           icon: Users,
         },
+        {
+          id: "super-admin-list",
+          label: "Super Admin List",
+          icon: Crown,
+        },
       ];
     }
 
@@ -179,6 +186,11 @@ export function Dashboard() {
           id: "super-admin-panel",
           label: "Super Admin Panel",
           icon: Crown,
+        },
+        {
+          id: "super-admin-list",
+          label: "Super Admin List",
+          icon: UserCircle2,
         },
         {
           id: "coach-manager",
@@ -202,21 +214,21 @@ export function Dashboard() {
           label: "User Management",
           icon: Users,
         },
-        {
-          id: "role-permissions",
-          label: "Role Permissions",
-          icon: Crown,
-        },
+        // {
+        //   id: "role-permissions",
+        //   label: "Role Permissions",
+        //   icon: Crown,
+        // },
         {
           id: "user-types",
           label: "User Types Overview",
           icon: Users,
         },
-        {
-          id: "role-test",
-          label: "Role Test",
-          icon: Users,
-        },
+        // {
+        //   id: "role-test",
+        //   label: "Role Test",
+        //   icon: Users,
+        // },
       ];
     }
 
@@ -315,6 +327,8 @@ export function Dashboard() {
         return <CoachManagerDashboard />;
       case "super-admin-panel":
         return <SuperAdminUserPanel />;
+      case "super-admin-list":
+        return <SuperAdminList />;
       case "admin-dashboard":
         return <AdminDashboard />;
       case "role-permissions":

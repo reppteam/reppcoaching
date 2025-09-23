@@ -155,15 +155,55 @@ export const GET_8BASE_USER_BY_EMAIL = gql`
 // Query to get user by email (direct query)
 export const GET_USER_BY_EMAIL = gql`
   query GetUserByEmail($email: String!) {
-    user(email: $email) {
-      email
-      firstName
-      id
-      lastName
-      roles {
-        items {
+    usersList(filter: { email: { equals: $email } }) {
+      items {
+        id
+        email
+        firstName
+        lastName
+        status
+        origin
+        timezone
+        createdAt
+        updatedAt
+        is_active
+        has_paid
+        access_start
+        access_end
+        avatar {
+          downloadUrl
+        }
+        roles {
+          items {
+            id
+            name
+          }
+        }
+        student {
           id
-          name
+          firstName
+          lastName
+          email
+          phone
+          business_name
+          location
+          target_market
+          strengths
+          challenges
+          goals
+          preferred_contact_method
+          availability
+          notes
+        }
+        coach {
+          id
+          firstName
+          lastName
+          email
+          bio
+          profileImage {
+            downloadUrl
+          }
         }
       }
     }

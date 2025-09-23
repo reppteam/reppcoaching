@@ -38,6 +38,7 @@ import {
   AdminDashboard,
   SuperAdminDashboard,
   SuperAdminUserPanel,
+  SuperAdminList,
   RolePermissionsManager,
   RolePermissionsMatrix,
   RoleImplementationStatus,
@@ -55,6 +56,7 @@ import {
   EmailTemplatePreview,
   ImplementationSummary,
   CareersPage,
+  EmailTestPanel,
 } from "./elements";
 
 // ----------------------------------------------------------------------
@@ -241,6 +243,14 @@ export default function Router() {
             </ProtectedRoute>
           ),
         },
+        {
+          path: "super-admin-list",
+          element: (
+            <ProtectedRoute requiredRole="Administrator">
+              <SuperAdminList />
+            </ProtectedRoute>
+          ),
+        },
 
         // Role management
         {
@@ -346,6 +356,16 @@ export default function Router() {
           element: (
             <ProtectedRoute requiredRole="Super Admin">
               <ImplementationSummary />
+            </ProtectedRoute>
+          ),
+        },
+
+        // Email testing (for development)
+        {
+          path: "email-test",
+          element: (
+            <ProtectedRoute requiredRole="Super Admin">
+              <EmailTestPanel />
             </ProtectedRoute>
           ),
         },

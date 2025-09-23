@@ -39,6 +39,7 @@ import {
   ShieldCheck,
   Users2,
 } from 'lucide-react';
+import { UserActions } from './UserActions';
 
 interface CreateCoachFormData {
   firstName: string;
@@ -111,6 +112,7 @@ export function UserManagement() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [newTag, setNewTag] = useState('');
   const [selectedStudentsForCoach, setSelectedStudentsForCoach] = useState<string[]>([]);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -475,8 +477,14 @@ export function UserManagement() {
           assignedCoachId: 'none'
         });
         
-        // Show success message with details
-        alert(result.message);
+        // Show simplified success message
+        let successMessage = 'User created';
+        if (result.verificationSent) {
+          successMessage += ' and email sent';
+        } else {
+          successMessage += ' but email not sent - logout account and login again and send invitation';
+        }
+        alert(successMessage);
         
         // Refresh the users list to show any new users that might have been created
         loadUsers();
@@ -557,6 +565,40 @@ export function UserManagement() {
     }));
   };
 
+  const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
+    try {
+      setUpdatingStatus(userId);
+      
+      // Update user with new is_active status
+      const updateData = {
+        is_active: !currentStatus
+      };
+
+      await eightbaseService.updateUser(userId, updateData);
+      
+      // Update local state for users (students)
+      setUsers(prev => prev.map(u => 
+        u.id === userId 
+          ? { ...u, is_active: !currentStatus }
+          : u
+      ));
+      
+      // Update local state for coaches - check both coach.id and coach.users.id
+      setCoaches(prev => prev.map(c => 
+        ((c as any).users?.id === userId || c.id === userId)
+          ? { ...c, users: (c as any).users ? { ...(c as any).users, is_active: !currentStatus } : (c as any).users, is_active: !currentStatus }
+          : c
+      ));
+
+      console.log(`User ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      alert('Failed to update user status. Please try again.');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
   // Filter users based on role permissions
   const coachManagers = users.filter(u => u.role === 'coach_manager'); // Keep for compatibility
   const students = users; // All users are now students from Student table
@@ -595,11 +637,17 @@ export function UserManagement() {
             Manage coaches and students in your organization
           </p>
           {/* Role-based access indicator */}
-          <div className="flex items-center space-x-2 mt-2">
-            <Badge className={getRoleDisplayInfo(user?.role || 'user')?.color}>
+          <div className="flex items-center space-x-3 mt-3">
+            <Badge 
+              variant={user?.role === 'super_admin' ? 'gradient' : 
+                      user?.role === 'coach_manager' ? 'info' : 
+                      user?.role === 'coach' ? 'success' : 'outline'}
+              className="flex items-center gap-1.5"
+            >
+              {getRoleDisplayInfo(user?.role || 'user')?.icon}
               {getRoleDisplayInfo(user?.role || 'user')?.displayName}
             </Badge>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
               {canCreateCoach ? 'Can create coaches' : ''} 
               {canCreateCoach && canCreateStudent ? ' • ' : ''}
               {canCreateStudent ? 'Can create students' : ''}
@@ -782,7 +830,8 @@ export function UserManagement() {
           {user?.role === 'coach' && (
             <div className="text-right">
               <div className="text-xs text-muted-foreground mb-1">Coach Access</div>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs flex items-center gap-1.5">
+                <Target className="h-3 w-3" />
                 View Assigned Students Only
               </Badge>
             </div>
@@ -837,7 +886,21 @@ export function UserManagement() {
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Badge className="bg-purple-100 text-purple-800">Manager</Badge>
+                              <Badge variant="purple" className="flex items-center gap-1.5">
+                                <ShieldCheck className="h-3 w-3" />
+                                Manager
+                              </Badge>
+                              <UserActions 
+                                user={manager} 
+                                onSuccess={(message) => {
+                                  // You can add a toast notification here if needed
+                                  console.log('Success:', message);
+                                }}
+                                onError={(error) => {
+                                  // You can add a toast notification here if needed
+                                  console.error('Error:', error);
+                                }}
+                              />
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -898,7 +961,18 @@ export function UserManagement() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge className="bg-purple-100 text-purple-800">Coach</Badge>
+                          
+                          <UserActions 
+                            user={coach} 
+                            onSuccess={(message) => {
+                              // You can add a toast notification here if needed
+                              console.log('Success:', message);
+                            }}
+                            onError={(error) => {
+                              // You can add a toast notification here if needed
+                              console.error('Error:', error);
+                            }}
+                          />
                           <Button
                             variant="ghost"
                             size="sm"
@@ -972,9 +1046,18 @@ export function UserManagement() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge className="bg-blue-100 text-blue-800">
-                            Student
-                          </Badge>
+                         
+                          <UserActions 
+                            user={student} 
+                            onSuccess={(message) => {
+                              // You can add a toast notification here if needed
+                              console.log('Success:', message);
+                            }}
+                            onError={(error) => {
+                              // You can add a toast notification here if needed
+                              console.error('Error:', error);
+                            }}
+                          />
                           <Button
                             variant="ghost"
                             size="sm"
@@ -1010,29 +1093,111 @@ export function UserManagement() {
         {/* Role Management Tab */}
         <TabsContent value="roles" className="space-y-6">
           {canModifyRoles ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Role Management
-                </CardTitle>
-                <CardDescription>
-                  Modify user roles and permissions (Super Admin only)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Crown className="mx-auto h-12 w-12 text-purple-500 mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Advanced Role Management</h3>
-                  <p className="text-muted-foreground mb-4">
-                    This feature allows Super Admins to modify user roles and custom permissions.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Feature coming soon - currently using default role permissions.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              {/* Super Admins Section */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Crown className="h-5 w-5 text-purple-500" />
+                        Super Administrators
+                      </CardTitle>
+                      <CardDescription>
+                        View all Super Administrators in the system
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.location.href = '/super-admin-list'}
+                    >
+                      <Crown className="h-4 w-4 mr-2" />
+                      View Full List
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    // Get all users with super_admin role
+                    const superAdmins = users.filter(u => u.role === 'super_admin');
+                    const currentUserIsSuperAdmin = user?.role === 'super_admin';
+                    
+                    return (
+                      <div className="space-y-3">
+                        {superAdmins.length === 0 ? (
+                          <div className="text-center py-8">
+                            <Crown className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                            <p className="text-muted-foreground">No Super Administrators found</p>
+                          </div>
+                        ) : (
+                          superAdmins.map((admin) => (
+                            <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex-1">
+                                <div className="font-medium flex items-center gap-2">
+                                  {admin.firstName} {admin.lastName}
+                                  {admin.id === user?.id && (
+                                    <Badge variant="gradient" className="text-xs">
+                                      You
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-sm text-muted-foreground">{admin.email}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  Created: {admin.created_at ? new Date(admin.created_at).toLocaleDateString() : 'Unknown'}
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Badge variant="gradient" className="flex items-center gap-1.5">
+                                  <Crown className="h-3 w-3" />
+                                  Super Admin
+                                </Badge>
+                                {admin.id !== user?.id && (
+                                  <UserActions 
+                                    user={admin} 
+                                    onSuccess={(message) => {
+                                      console.log('Success:', message);
+                                    }}
+                                    onError={(error) => {
+                                      console.error('Error:', error);
+                                    }}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+
+              {/* Advanced Role Management Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Advanced Role Management
+                  </CardTitle>
+                  <CardDescription>
+                    Modify user roles and permissions (Super Admin only)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12">
+                    <Crown className="mx-auto h-12 w-12 text-purple-500 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Advanced Role Management</h3>
+                    <p className="text-muted-foreground mb-4">
+                      This feature allows Super Admins to modify user roles and custom permissions.
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Feature coming soon - currently using default role permissions.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           ) : (
             <Card>
               <CardContent className="pt-6">
@@ -1252,7 +1417,8 @@ export function UserManagement() {
               {studentFormData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {studentFormData.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
+                    <Badge key={tag} variant="secondary" className="text-xs flex items-center gap-1.5">
+                      <Tag className="h-3 w-3" />
                       {tag}
                       <Button
                         type="button"
