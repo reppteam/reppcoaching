@@ -189,7 +189,7 @@ export function SuperAdminList() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
+        <div >
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Crown className="h-8 w-8 text-purple-500" />
             Super Administrators
