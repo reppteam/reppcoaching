@@ -79,10 +79,7 @@ export function SuperAdminDashboard() {
       let fetchedUsers: User[] = [];
       try {
         fetchedUsers = await eightbaseService.getUsers();
-        console.log('Fetched users:', fetchedUsers);
-        console.log('Fetched users length:', fetchedUsers.length);
-        console.log('Fetched users type:', typeof fetchedUsers);
-        console.log('Is fetchedUsers an array?', Array.isArray(fetchedUsers));
+        
       } catch (userError) {
         console.error('Error fetching users:', userError);
         fetchedUsers = [];
@@ -91,7 +88,6 @@ export function SuperAdminDashboard() {
       
       // Fetch all leads dynamically
       const leads = await eightbaseService.getLeads();
-      console.log('Fetched leads:', leads.length);
       
       // Calculate dynamic statistics based on actual data
       const students = fetchedUsers.filter(user => user.role === 'user');
@@ -112,8 +108,6 @@ export function SuperAdminDashboard() {
       try {
         // Fetch all pricing packages to calculate real revenue
         const pricingPackages = await eightbaseService.getCoachPricing();
-        console.log('Fetched pricing packages:', pricingPackages.length);
-        
         if (pricingPackages.length > 0) {
           // Calculate average price from all active pricing packages
           const activePackages = pricingPackages.filter(pkg => pkg.status === 'active');
@@ -126,13 +120,7 @@ export function SuperAdminDashboard() {
             totalRevenue = paidStudents.length * avgPackagePrice;
             avgRevenuePerStudent = paidStudents.length > 0 ? totalRevenue / paidStudents.length : avgPackagePrice;
             
-            console.log('Revenue calculation from Pricing Management:', {
-              activePackages: activePackages.length,
-              avgPackagePrice: avgPackagePrice,
-              paidStudents: paidStudents.length,
-              totalRevenue: totalRevenue,
-              pricingPackages: activePackages.map(pkg => ({ name: pkg.name, price: pkg.price }))
-            });
+            
           } else {
             // No active packages, use average of all packages
             const totalPackagePrices = pricingPackages.reduce((sum, pkg) => sum + pkg.price, 0);
@@ -141,18 +129,11 @@ export function SuperAdminDashboard() {
             totalRevenue = paidStudents.length * avgPackagePrice;
             avgRevenuePerStudent = paidStudents.length > 0 ? totalRevenue / paidStudents.length : avgPackagePrice;
             
-            console.log('Revenue calculation (no active packages):', {
-              totalPackages: pricingPackages.length,
-              avgPackagePrice: avgPackagePrice,
-              paidStudents: paidStudents.length,
-              totalRevenue: totalRevenue
-            });
           }
         } else {
           // Fallback if no pricing packages found
           totalRevenue = 0;
           avgRevenuePerStudent = 0;
-          console.log('No pricing packages found in Pricing Management, using fallback values');
         }
       } catch (error) {
         console.error('Error fetching pricing data for revenue calculation:', error);
@@ -168,15 +149,7 @@ export function SuperAdminDashboard() {
       // Calculate total active users (all roles)
       const totalActiveUsers = fetchedUsers.filter(user => user.is_active === true).length;
       
-      console.log('Calculated stats:', {
-        totalUsers: fetchedUsers.length,
-        students: students.length,
-        coaches: coaches.length,
-        activeStudents: activeStudents.length,
-        paidStudents: paidStudents.length,
-        totalLeads: totalLeadsGenerated,
-        revenue: totalRevenue
-      });
+      
       
       const finalStats = {
         totalUsers: fetchedUsers.length,
@@ -196,8 +169,6 @@ export function SuperAdminDashboard() {
         unassignedStudents: unassignedStudents.length
       };
       
-      console.log('Final stats being set:', finalStats);
-      console.log('Revenue value:', finalStats.revenue, 'Type:', typeof finalStats.revenue);
       
       setStats(finalStats);
       
@@ -248,15 +219,16 @@ export function SuperAdminDashboard() {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Super Admin Dashboard</h1>
-          <p className="text-muted-foreground mt-2">System-wide management and analytics for Real Estate Photographer Pro</p>
-                      <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-muted-foreground dark:text-white mt-2">System-wide management and analytics for Real Estate Photographer Pro</p>
+                      <p className="text-xs text-muted-foreground dark:text-white mt-1">
               Last updated: {lastUpdated.toLocaleTimeString()}
             </p>
         </div>
         <Button 
           onClick={loadDashboardData} 
           disabled={loading}
-          className="flex items-center gap-2"
+          variant="outline"
+          className="flex items-center gap-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           <Activity className="h-4 w-4" />
           {loading ? 'Refreshing...' : 'Refresh Data'}
@@ -270,7 +242,7 @@ export function SuperAdminDashboard() {
             <div className="flex items-center space-x-2">
               <Users className="h-8 w-8 text-blue-600" />
               <div>
-                <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                <div className="text-2xl font-bold text-foreground">{stats.totalUsers}</div>
                 <div className="text-sm text-muted-foreground">Total Users</div>
               </div>
             </div>
@@ -282,7 +254,7 @@ export function SuperAdminDashboard() {
             <div className="flex items-center space-x-2">
               <GraduationCap className="h-8 w-8 text-green-600" />
               <div>
-                <div className="text-2xl font-bold">{stats.students}</div>
+                <div className="text-2xl font-bold text-foreground">{stats.students}</div>
                 <div className="text-sm text-muted-foreground">Students</div>
               </div>
             </div>
@@ -294,7 +266,7 @@ export function SuperAdminDashboard() {
             <div className="flex items-center space-x-2">
               <UserCheck className="h-8 w-8 text-purple-600" />
               <div>
-                <div className="text-2xl font-bold">{stats.coaches}</div>
+                <div className="text-2xl font-bold text-foreground">{stats.coaches}</div>
                 <div className="text-sm text-muted-foreground">Coaches</div>
               </div>
             </div>
@@ -306,7 +278,7 @@ export function SuperAdminDashboard() {
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-8 w-8 text-orange-600" />
               <div>
-                <div className="text-2xl font-bold">{stats.active}</div>
+                <div className="text-2xl font-bold text-foreground">{stats.active}</div>
                 <div className="text-sm text-muted-foreground">Active</div>
               </div>
             </div>
@@ -318,7 +290,7 @@ export function SuperAdminDashboard() {
             <div className="flex items-center space-x-2">
               <Crown className="h-8 w-8 text-yellow-600" />
               <div>
-                <div className="text-2xl font-bold">{stats.paid}</div>
+                <div className="text-2xl font-bold text-foreground">{stats.paid}</div>
                 <div className="text-sm text-muted-foreground">Paid</div>
               </div>
             </div>
@@ -330,7 +302,7 @@ export function SuperAdminDashboard() {
             <div className="flex items-center space-x-2">
               <Target className="h-8 w-8 text-red-600" />
               <div>
-                <div className="text-2xl font-bold">{stats.totalLeads}</div>
+                <div className="text-2xl font-bold text-foreground">{stats.totalLeads}</div>
                 <div className="text-sm text-muted-foreground">Total Leads</div>
               </div>
             </div>
@@ -342,7 +314,7 @@ export function SuperAdminDashboard() {
             <div className="flex items-center space-x-2">
               <DollarSign className="h-8 w-8 text-green-600" />
               <div>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-foreground">
                   {stats.revenue >= 1000 
                     ? `$${(stats.revenue / 1000).toFixed(1)}k` 
                     : `$${stats.revenue.toLocaleString()}`
@@ -379,8 +351,8 @@ export function SuperAdminDashboard() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Paid Students</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">{stats.paidStudents}</span>
-                    <Badge variant="secondary" className="text-xs">
+                    <span className="font-semibold text-foreground">{stats.paidStudents}</span>
+                    <Badge variant="secondary" className="text-xs dark:bg-primary dark:text-white">
                       {stats.students > 0 ? Math.round((stats.paidStudents / stats.students) * 100) : 0}%
                     </Badge>
                   </div>
@@ -388,8 +360,8 @@ export function SuperAdminDashboard() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Free Students</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">{stats.freeStudents}</span>
-                    <Badge variant="secondary" className="text-xs">
+                    <span className="font-semibold text-foreground">{stats.freeStudents}</span>
+                    <Badge variant="secondary" className="text-xs dark:bg-primary dark:text-white">
                       {stats.students > 0 ? Math.round((stats.freeStudents / stats.students) * 100) : 0}%
                     </Badge>
                   </div>
@@ -397,15 +369,15 @@ export function SuperAdminDashboard() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Active Students</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">{stats.activeStudents}</span>
-                    <Badge variant="secondary" className="text-xs">
+                    <span className="font-semibold text-foreground">{stats.activeStudents}</span>
+                    <Badge variant="secondary" className="text-xs dark:bg-primary dark:text-white">
                       {stats.students > 0 ? Math.round((stats.activeStudents / stats.students) * 100) : 0}%
                     </Badge>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Total Coaches</span>
-                  <span className="font-semibold">{stats.totalCoaches}</span>
+                  <span className="font-semibold text-foreground">{stats.totalCoaches}</span>
                 </div>
               </CardContent>
             </Card>
@@ -421,19 +393,19 @@ export function SuperAdminDashboard() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Total Revenue</span>
-                  <span className="font-semibold">${stats.revenue.toLocaleString()}</span>
+                  <span className="font-semibold text-foreground">${stats.revenue.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Avg Revenue/Student</span>
-                  <span className="font-semibold">${stats.avgRevenuePerStudent.toLocaleString()}</span>
+                  <span className="font-semibold text-foreground">${stats.avgRevenuePerStudent.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Total Leads Generated</span>
-                  <span className="font-semibold">{stats.totalLeadsGenerated}</span>
+                  <span className="font-semibold text-foreground">{stats.totalLeadsGenerated}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Avg Leads/Student</span>
-                  <span className="font-semibold">{stats.avgLeadsPerStudent}</span>
+                  <span className="font-semibold text-foreground">{stats.avgLeadsPerStudent}</span>
                 </div>
               </CardContent>
             </Card>
@@ -490,19 +462,19 @@ export function SuperAdminDashboard() {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-muted rounded">
                         <span className="text-sm text-foreground">Super Admins</span>
-                        <Badge variant="secondary">{users.filter(u => u.role === 'super_admin').length}</Badge>
+                        <Badge variant="secondary" className="dark:bg-primary dark:text-white">{users.filter(u => u.role === 'super_admin').length}</Badge>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-muted rounded">
                         <span className="text-sm text-foreground">Coach Managers</span>
-                        <Badge variant="secondary">{users.filter(u => u.role === 'coach_manager').length}</Badge>
+                        <Badge variant="secondary" className="dark:bg-primary dark:text-white">{users.filter(u => u.role === 'coach_manager').length}</Badge>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-muted rounded">
                         <span className="text-sm text-foreground">Coaches</span>
-                        <Badge variant="secondary">{users.filter(u => u.role === 'coach').length}</Badge>
+                        <Badge variant="secondary" className="dark:bg-primary dark:text-white">{users.filter(u => u.role === 'coach').length}</Badge>
                       </div>
                       <div className="flex justify-between items-center p-2 bg-gray-50 dark:bg-muted rounded">
                         <span className="text-sm text-foreground">Students</span>
-                        <Badge variant="secondary">{users.filter(u => u.role === 'user').length}</Badge>
+                        <Badge variant="secondary" className="dark:bg-primary dark:text-white">{users.filter(u => u.role === 'user').length}</Badge>
                       </div>
                     </div>
                   </div>

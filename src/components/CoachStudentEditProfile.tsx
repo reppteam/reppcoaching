@@ -516,7 +516,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2 !dark:text-black !text-white" />
+                    <Save className="h-4 w-4 mr-2 !text-white" />
                     Save Changes
                   </>
                 )}

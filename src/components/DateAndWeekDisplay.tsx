@@ -31,8 +31,8 @@ export function DateAndWeekDisplay({ user }: DateAndWeekDisplayProps) {
             <div className="flex items-center space-x-2">
               <Calendar className="h-5 w-5 text-brand-blue" />
               <div>
-                <p className="font-medium text-brand-gray">Today</p>
-                <p className="text-sm text-muted-foreground">{todayFormatted}</p>
+                <p className="font-medium text-muted-foreground dark:text-white">Today</p>
+                <p className="text-sm text-muted-foreground dark:text-white">{todayFormatted}</p>
               </div>
             </div>
 

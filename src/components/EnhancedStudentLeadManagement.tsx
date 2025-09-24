@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { eightbaseService } from '../services/8baseService';
-import { Lead, MessageTemplate, EngagementTag, EngagementTagType, EngagementTagInfo, MessageTemplateType } from '../types';
+import { Lead, MessageTemplate, ScriptComponentTemplate, EngagementTag, EngagementTagType, EngagementTagInfo, MessageTemplateType } from '../types';
 // Updated Lead type includes leadnote field
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -116,10 +116,11 @@ interface EnhancedStudentLeadManagementProps {
 export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }: EnhancedStudentLeadManagementProps) {
   const { user } = useAuth();
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [templates, setTemplates] = useState<MessageTemplate[]>([]);
+  const [templates, setTemplates] = useState<ScriptComponentTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [templatesDialogOpen, setTemplatesDialogOpen] = useState(false);
+  const [editingTemplates, setEditingTemplates] = useState<Record<string, string>>({});
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [expandedLeads, setExpandedLeads] = useState<Set<string>>(new Set());
   const [editingNotes, setEditingNotes] = useState<string | null>(null);
@@ -168,7 +169,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
     try {
       const [leadsData, templatesData] = await Promise.all([
         eightbaseService.getStudentLeads(targetUserId),
-        eightbaseService.getMessageTemplates()
+        eightbaseService.getScriptComponentTemplates(targetUserId)
       ]);
       
       console.log('=== DEBUG loadData ===');
@@ -191,7 +192,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
 
   // Template variations organized by type
   const templateVariations = useMemo(() => {
-    const variations: Record<MessageTemplateType, MessageTemplate[]> = {
+    const variations: Record<MessageTemplateType, ScriptComponentTemplate[]> = {
       intro: [],
       hook: [],
       body1: [],
@@ -199,86 +200,45 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
       ending: []
     };
 
-    templates.forEach(template => {
-      if (variations[template.type]) {
-        variations[template.type].push(template);
-      }
-    });
+    // Since ScriptComponentTemplate contains all fields, we'll create virtual variations
+    templates.forEach((template, index) => {
+      // Create virtual MessageTemplate-like objects for each field
+      const introTemplate = {
+        ...template,
+        type: 'intro' as MessageTemplateType,
+        content: template.intro,
+        variation_number: index + 1
+      };
+      const hookTemplate = {
+        ...template,
+        type: 'hook' as MessageTemplateType,
+        content: template.hook,
+        variation_number: index + 1
+      };
+      const body1Template = {
+        ...template,
+        type: 'body1' as MessageTemplateType,
+        content: template.body1,
+        variation_number: index + 1
+      };
+      const body2Template = {
+        ...template,
+        type: 'body2' as MessageTemplateType,
+        content: template.body2,
+        variation_number: index + 1
+      };
+      const endingTemplate = {
+        ...template,
+        type: 'ending' as MessageTemplateType,
+        content: template.ending,
+        variation_number: index + 1
+      };
 
-    // Add default templates if none exist
-    const defaultTemplates = {
-      intro: [
-        { 
-          id: 'default-intro', 
-          type: 'intro' as MessageTemplateType, 
-          content: 'Hi {name}! I saw your recent listing on {property_address}.', 
-          variation_number: 1,
-          category: 'dm',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ],
-      hook: [
-        { 
-          id: 'default-hook', 
-          type: 'hook' as MessageTemplateType, 
-          content: 'Your photos look great, but I specialize in helping realtors like you get 3x more engagement with premium photography.', 
-          variation_number: 1,
-          category: 'dm',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ],
-      body1: [
-        { 
-          id: 'default-body1', 
-          type: 'body1' as MessageTemplateType, 
-          content: 'I work with top agents in the area and my photos typically help listings sell 20% faster.', 
-          variation_number: 1,
-          category: 'dm',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ],
-      body2: [
-        { 
-          id: 'default-body2', 
-          type: 'body2' as MessageTemplateType, 
-          content: 'Would love to show you some before/after examples.', 
-          variation_number: 1,
-          category: 'dm',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ],
-      ending: [
-        { 
-          id: 'default-ending', 
-          type: 'ending' as MessageTemplateType, 
-          content: 'When would be a good time for a quick 10-minute call this week?', 
-          variation_number: 1,
-          category: 'dm',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ]
-    };
-
-    // Use default templates if no templates exist for a type
-    Object.keys(variations).forEach(type => {
-      if (variations[type as MessageTemplateType].length === 0) {
-        variations[type as MessageTemplateType] = defaultTemplates[type as keyof typeof defaultTemplates];
-      }
-    });
-
-    // Sort each type by variation number
-    Object.keys(variations).forEach(type => {
-      variations[type as MessageTemplateType].sort((a, b) => a.variation_number - b.variation_number);
+      variations.intro.push(introTemplate);
+      variations.hook.push(hookTemplate);
+      variations.body1.push(body1Template);
+      variations.body2.push(body2Template);
+      variations.ending.push(endingTemplate);
     });
 
     return variations;
@@ -348,7 +308,8 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
 
   const generateRandomScript = async () => {
     try {
-      const randomScript = await eightbaseService.generateRandomScript();
+      const targetUserId = isCoachView && studentId ? studentId : user?.id;
+      const randomScript = await eightbaseService.generateRandomScript(targetUserId || '');
       return randomScript;
     } catch (error) {
       console.error('Failed to generate random script:', error);
@@ -398,10 +359,10 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
         // Show default template script
         const defaultScript = Object.values(templateVariations).map(templates => {
           if (templates.length > 0) {
-            return templates[0].content;
+            return templates[0].content || '';
           }
           return '';
-        }).filter(text => text.trim()).join('\n\n');
+        }).filter(text => text && text.trim()).join('\n\n');
         
         script = defaultScript;
       }
@@ -869,7 +830,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
             <Button 
               variant="outline" 
               onClick={handleImportLeads}
-              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               <Upload className="mr-2 h-4 w-4" />
               Import from Monday
@@ -877,12 +838,12 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
             <Button 
               variant="outline" 
               onClick={handleExportLeads}
-              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               <Download className="mr-2 h-4 w-4" />
               Export Leads
             </Button>
-          <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={() => setDialogOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary">
             <Plus className="mr-2 h-4 w-4" />
             Add Lead
           </Button>
@@ -1221,42 +1182,226 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                     Copy and customize these message templates.
                   </CardDescription>
                 </div>
+                <Dialog open={templatesDialogOpen} onOpenChange={setTemplatesDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="h-8 w-8 p-0 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600"
+                    >
+                      <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Manage DM Templates</DialogTitle>
+                      <DialogDescription>
+                        Edit your 5 variations for each message section. Random selection prevents spam detection.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Tabs defaultValue="intro" className="w-full">
+                      <TabsList className="grid w-full grid-cols-5">
+                        <TabsTrigger value="intro">Intros</TabsTrigger>
+                        <TabsTrigger value="hook">Hooks</TabsTrigger>
+                        <TabsTrigger value="body1">Body 1</TabsTrigger>
+                        <TabsTrigger value="body2">Body 2</TabsTrigger>
+                        <TabsTrigger value="ending">Endings</TabsTrigger>
+                      </TabsList>
+                      
+                      {(['intro', 'hook', 'body1', 'body2', 'ending'] as MessageTemplateType[]).map(type => (
+                        <TabsContent key={type} value={type} className="space-y-4">
+                          <div className="text-sm text-muted-foreground mb-4">
+                            {type === 'intro' ? 'Intros' : type === 'hook' ? 'Hooks' : type === 'body1' ? 'Body 1' : type === 'body2' ? 'Body 2' : 'Endings'} - Each will be randomly selected
+                          </div>
+                          
+                          {/* Show 5 different template variations */}
+                          {Array.from({ length: 5 }, (_, index) => {
+                            const variationNumber = index + 1;
+                            
+                            // Define 5 different template variations for each type
+                            const defaultTemplates = {
+                              intro: [
+                                "Hi {name}! I saw your recent listing on {property_address}.",
+                                "Hello {name}! I came across your beautiful property listing.",
+                                "Hey {name}! Your recent property post caught my attention.",
+                                "Hi there {name}! I noticed your impressive real estate portfolio.",
+                                "Good morning {name}! I've been following your listings and they look fantastic."
+                              ],
+                              hook: [
+                                "Your photos look great, but I specialize in helping realtors like you get 3x more engagement with premium photography.",
+                                "I noticed your listing has potential, but professional photography could make it stand out even more.",
+                                "Your property looks amazing! I help agents like you create stunning visuals that drive more inquiries.",
+                                "I work with top agents in the area and my photos typically help listings sell 20% faster.",
+                                "Your marketing is solid, but I can help you take it to the next level with premium photography."
+                              ],
+                              body1: [
+                                "I work with top agents in the area and my photos typically help listings sell 20% faster.",
+                                "My photography has helped over 200 agents increase their listing engagement by 300%.",
+                                "I specialize in real estate photography that makes properties irresistible to buyers.",
+                                "My work has been featured in top real estate publications and helps agents close deals faster.",
+                                "I've helped agents in your market increase their listing views by 400% with professional photos."
+                              ],
+                              body2: [
+                                "Would love to show you some before/after examples of my work.",
+                                "I can send you a portfolio of my recent work with agents in your area.",
+                                "Let me show you how I've transformed other listings in your market.",
+                                "I'd be happy to share some case studies of successful campaigns I've created.",
+                                "Would you like to see some examples of how I've helped similar properties sell faster?"
+                              ],
+                              ending: [
+                                "When would be a good time for a quick 10-minute call this week?",
+                                "Are you available for a brief call to discuss how I can help your listings?",
+                                "Would you be interested in a quick chat about boosting your listing performance?",
+                                "Can we schedule a short call to explore how professional photography could help you?",
+                                "I'd love to discuss how I can help you get more leads from your listings."
+                              ]
+                            };
+                            
+                            const defaultContent = defaultTemplates[type as keyof typeof defaultTemplates]?.[index] || '';
+                            
+                            // Check if user has custom templates for this variation (using templates state)
+                            const userTemplates = templateVariations[type] || [];
+                            const existingTemplate = userTemplates.find(t => t.variation_number === variationNumber);
+                            const templateId = existingTemplate?.id || `static-${type}-${variationNumber}`;
+                            
+                            return (
+                              <div key={`variation-${variationNumber}`} className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                  <Badge variant="outline">#{variationNumber}</Badge>
+                                  Variation {variationNumber}
+                                </Label>
+                                <Textarea
+                                  value={editingTemplates[templateId] !== undefined ? editingTemplates[templateId] : existingTemplate?.content || defaultContent}
+                                  onChange={(e) => setEditingTemplates(prev => ({
+                                    ...prev,
+                                    [templateId]: e.target.value
+                                  }))}
+                                  rows={2}
+                                  className="text-sm"
+                                  placeholder={`Enter ${type} variation ${variationNumber}...`}
+                                />
+                                <div className="flex justify-end">
+                                  <Button
+                                    size="sm"
+                                    onClick={async () => {
+                                      const content = editingTemplates[templateId] !== undefined ? editingTemplates[templateId] : existingTemplate?.content || defaultContent;
+                                      const targetUserId = isCoachView && studentId ? studentId : user?.id;
+                                      if (targetUserId) {
+                                        try {
+                                          if (existingTemplate) {
+                                            // Update existing template
+                                            await eightbaseService.updateScriptComponentTemplate(existingTemplate.id, {
+                                              [type]: content
+                                            });
+                                          } else {
+                                            // Create new template
+                                            const templateData: any = {
+                                              intro: '',
+                                              hook: '',
+                                              body1: '',
+                                              body2: '',
+                                              ending: '',
+                                              user: { connect: { id: targetUserId } }
+                                            };
+                                            templateData[type] = content;
+                                            
+                                            await eightbaseService.createScriptComponentTemplate(templateData);
+                                          }
+                                          await loadData();
+                                          setEditingTemplates(prev => {
+                                            const newState = { ...prev };
+                                            delete newState[templateId];
+                                            return newState;
+                                          });
+                                        } catch (error) {
+                                          console.error('Failed to save template:', error);
+                                        }
+                                      }
+                                    }}
+                                    disabled={editingTemplates[templateId] === undefined}
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </TabsContent>
+                      ))}
+                    </Tabs>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
-              {/* Individual Template Cards */}
+              {/* Template Sections - Static Templates */}
               <div className="space-y-3">
-                {Object.entries(templateVariations).map(([type, templates]) => {
-                  if (templates.length === 0) return null;
-                  
-                  const template = templates[0]; // Show first template as example
-                  const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
-                  
-                  return (
-                    <div key={type} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-2">
-                            {capitalizedType}
-                          </h4>
-                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                            {template.content}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard(template.content)}
-                          className="ml-3 h-8 w-8 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 shrink-0"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
+                {/* Intro Section */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm text-gray-900 dark:text-white">Intro (5)</h4>
+                    <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
+                  </div>
+                  <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {"Hi {name}! I saw your recent listing on {property_address}...."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Hook Section */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm text-gray-900 dark:text-white">Hook (5)</h4>
+                    <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
+                  </div>
+                  <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {"Your photos look great, but I specialize in helping realtors..."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Body1 Section */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm text-gray-900 dark:text-white">Body1 (5)</h4>
+                    <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
+                  </div>
+                  <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {"I work with top agents in the area and my photos typically h..."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Body2 Section */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm text-gray-900 dark:text-white">Body2 (5)</h4>
+                    <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
+                  </div>
+                  <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {"Would love to show you some before/after examples...."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Ending Section */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm text-gray-900 dark:text-white">Ending (5)</h4>
+                    <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
+                  </div>
+                  <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {"When would be a good time for a quick 10-minute call this we..."}
+                    </p>
+                  </div>
+                </div>
               </div>
-              
+
               <Separator />
               
               {/* <div className="flex gap-2">

@@ -629,7 +629,7 @@ export function UserManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-foreground">
             <Users2 className="h-6 w-6 text-brand-blue" />
             User Management
           </h2>
@@ -642,12 +642,12 @@ export function UserManagement() {
               variant={user?.role === 'super_admin' ? 'gradient' : 
                       user?.role === 'coach_manager' ? 'info' : 
                       user?.role === 'coach' ? 'success' : 'outline'}
-              className="flex items-center gap-1.5"
+              className="flex items-center gap-1.5 dark:bg-primary dark:text-white"
             >
               {getRoleDisplayInfo(user?.role || 'user')?.icon}
               {getRoleDisplayInfo(user?.role || 'user')?.displayName}
             </Badge>
-            <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+            <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md dark:bg-gray-800 dark:text-gray-300">
               {canCreateCoach ? 'Can create coaches' : ''} 
               {canCreateCoach && canCreateStudent ? ' • ' : ''}
               {canCreateStudent ? 'Can create students' : ''}
@@ -681,7 +681,7 @@ export function UserManagement() {
                         id="create-firstName"
                         value={createUserForm.firstName}
                         onChange={(e) => setCreateUserForm({...createUserForm, firstName: e.target.value})}
-                        className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                         required
                       />
                     </div>
@@ -691,7 +691,7 @@ export function UserManagement() {
                         id="create-lastName"
                         value={createUserForm.lastName}
                         onChange={(e) => setCreateUserForm({...createUserForm, lastName: e.target.value})}
-                        className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                         required
                       />
                     </div>
@@ -712,7 +712,7 @@ export function UserManagement() {
                   <div>
                     <Label htmlFor="create-role" className="text-foreground">Role</Label>
                     <Select value={createUserForm.role} onValueChange={(value) => setCreateUserForm({...createUserForm, role: value as 'user' | 'coach' | 'coach_manager' | 'super_admin', assignedCoachId: 'none'})}>
-                      <SelectTrigger className="bg-background border-border text-foreground">
+                      <SelectTrigger className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -728,9 +728,9 @@ export function UserManagement() {
                     <div>
                       <Label htmlFor="create-coach" className="text-foreground">Assign Coach (Optional)</Label>
                       <Select value={createUserForm.assignedCoachId} onValueChange={(value) => setCreateUserForm({...createUserForm, assignedCoachId: value})}>
-                        <SelectTrigger className="bg-background border-border text-foreground">
-                          <SelectValue placeholder="Select a coach (optional)" />
-                        </SelectTrigger>
+                    <SelectTrigger className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
+                      <SelectValue placeholder="Select a coach (optional)" />
+                    </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">No coach assigned</SelectItem>
                           {coaches.map((coach) => (

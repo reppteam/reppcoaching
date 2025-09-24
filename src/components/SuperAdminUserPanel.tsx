@@ -442,7 +442,7 @@ export function SuperAdminUserPanel() {
                     id="create-firstName"
                     value={createUserForm.firstName}
                     onChange={(e) => setCreateUserForm({...createUserForm, firstName: e.target.value})}
-                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                     required
                   />
                 </div>
@@ -452,7 +452,7 @@ export function SuperAdminUserPanel() {
                     id="create-lastName"
                     value={createUserForm.lastName}
                     onChange={(e) => setCreateUserForm({...createUserForm, lastName: e.target.value})}
-                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                     required
                   />
                 </div>
@@ -465,7 +465,7 @@ export function SuperAdminUserPanel() {
                   type="email"
                   value={createUserForm.email}
                   onChange={(e) => setCreateUserForm({...createUserForm, email: e.target.value})}
-                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                   required
                 />
               </div>
@@ -473,7 +473,7 @@ export function SuperAdminUserPanel() {
               <div>
                 <Label htmlFor="create-role" className="text-foreground">Role</Label>
                 <Select value={createUserForm.role} onValueChange={(value) => setCreateUserForm({...createUserForm, role: value as 'user' | 'coach' | 'coach_manager' | 'super_admin', assignedCoachId: 'none'})}>
-                  <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectTrigger className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -489,7 +489,7 @@ export function SuperAdminUserPanel() {
                 <div>
                   <Label htmlFor="create-coach" className="text-foreground">Assign Coach (Optional)</Label>
                   <Select value={createUserForm.assignedCoachId} onValueChange={(value) => setCreateUserForm({...createUserForm, assignedCoachId: value})}>
-                    <SelectTrigger className="bg-background border-border text-foreground">
+                    <SelectTrigger className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
                       <SelectValue placeholder="Select a coach (optional)" />
                     </SelectTrigger>
                     <SelectContent>
@@ -623,7 +623,7 @@ export function SuperAdminUserPanel() {
                 placeholder="Search by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
               />
             </div>
             <div>
@@ -954,7 +954,7 @@ export function SuperAdminUserPanel() {
                   id="firstName"
                   value={editForm.firstName}
                   onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
-                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                 />
               </div>
               <div>
@@ -963,7 +963,7 @@ export function SuperAdminUserPanel() {
                   id="lastName"
                   value={editForm.lastName}
                   onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
-                  className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                 />
               </div>
             </div>
@@ -975,7 +975,7 @@ export function SuperAdminUserPanel() {
                 type="email"
                 value={editForm.email}
                 onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
               />
             </div>
             

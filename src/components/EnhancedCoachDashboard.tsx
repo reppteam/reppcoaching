@@ -736,14 +736,14 @@ export function EnhancedCoachDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button onClick={loadCoachData} variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <Button onClick={loadCoachData} variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh Data
               </Button>
               <Button 
                 variant="default" 
                 size="sm" 
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary"
                 onClick={() => setIsLogCallModalOpen(true)}
               >
                 <Phone className="h-4 w-4 mr-2" />
@@ -752,7 +752,7 @@ export function EnhancedCoachDashboard() {
               <Button 
                 variant="default" 
                 size="sm" 
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white dark:bg-green-600 dark:text-white"
                 onClick={() => setIsCreateNoteModalOpen(true)}
               >
                 <FileText className="h-4 w-4 mr-2" />
@@ -1071,7 +1071,7 @@ export function EnhancedCoachDashboard() {
                         <p className="font-medium text-gray-900 dark:text-white">{student.firstName} {student.lastName}: No weekly report submitted in the last 7 days.</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-black">
+                    <Button variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700">
                       Review
                     </Button>
                   </div>

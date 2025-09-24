@@ -102,7 +102,7 @@ export function SuperAdminDataManagement() {
         eightbaseService.getAllProducts(),
         eightbaseService.getAllSubitems(),
         eightbaseService.getAllCallLogs(),
-        eightbaseService.getMessageTemplates()
+        eightbaseService.getMessageTemplates() // Using backward compatibility method
       ]);
 
       setState(prev => ({
@@ -161,7 +161,7 @@ export function SuperAdminDataManagement() {
           setState(prev => ({ ...prev, callLogs: [...prev.callLogs, result] }));
           break;
         case 'messageTemplate':
-          result = await eightbaseService.createMessageTemplate(data);
+          result = await eightbaseService.createMessageTemplate(data); // Using backward compatibility method
           setState(prev => ({ ...prev, messageTemplates: [...prev.messageTemplates, result] }));
           break;
       }
@@ -233,7 +233,7 @@ export function SuperAdminDataManagement() {
           }));
           break;
         case 'messageTemplate':
-          result = await eightbaseService.updateMessageTemplate(id, data);
+          result = await eightbaseService.updateMessageTemplate(id, data); // Using backward compatibility method
           setState(prev => ({ 
             ...prev, 
             messageTemplates: prev.messageTemplates.map(m => m.id === id ? result : m) 
@@ -307,7 +307,7 @@ export function SuperAdminDataManagement() {
           }));
           break;
         case 'messageTemplate':
-          await eightbaseService.deleteMessageTemplate(id);
+          await eightbaseService.deleteMessageTemplate(id); // Using backward compatibility method
           setState(prev => ({ 
             ...prev, 
             messageTemplates: prev.messageTemplates.filter(m => m.id !== id) 

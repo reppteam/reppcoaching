@@ -191,7 +191,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({ coachId }) => {
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <CalendarDays className="h-4 w-4" />
-          <span>Today, {new Date().toLocaleDateString('en-US', { 
+          <span className="text-gray-900 dark:text-white">Today, {new Date().toLocaleDateString('en-US', { 
             weekday: 'long', 
             year: 'numeric', 
             month: 'long', 

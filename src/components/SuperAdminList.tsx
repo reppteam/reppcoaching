@@ -198,10 +198,10 @@ export function SuperAdminList() {
             Manage and view all Super Administrator accounts in the system
           </p>
         </div>
-        <Button onClick={handleRefresh} variant="outline" size="sm">
+        <Button onClick={handleRefresh} variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700">
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
-        </Button>
+        </Button>7
       </div>
 
       {/* Stats Cards */}
@@ -322,7 +322,7 @@ export function SuperAdminList() {
           ) : (
              <div className="space-y-4">
                {filteredSuperAdmins.map((admin: any) => (
-                 <div key={admin.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                 <div key={admin.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors dark:border-gray-600 dark:hover:bg-gray-800">
                    <div className="flex items-center space-x-4">
                      <div className="flex-shrink-0">
                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
@@ -351,7 +351,7 @@ export function SuperAdminList() {
                                disabled={saving}
                              />
                              {admin.id === user?.id && (
-                               <Badge variant="gradient" className="text-xs">
+                               <Badge variant="gradient" className="text-xs dark:bg-primary dark:text-white">
                                  You
                                </Badge>
                              )}
@@ -377,7 +377,7 @@ export function SuperAdminList() {
                              </div>
                              <Badge 
                                variant={admin.is_active !== false ? "default" : "destructive"}
-                               className="text-xs"
+                               className="text-xs dark:bg-primary dark:text-white"
                              >
                                {admin.is_active !== false ? 'Active' : 'Blocked'}
                              </Badge>
@@ -391,7 +391,7 @@ export function SuperAdminList() {
                                {admin.firstName} {admin.lastName}
                              </h3>
                              {admin.id === user?.id && (
-                               <Badge variant="gradient" className="text-xs">
+                               <Badge variant="gradient" className="text-xs dark:bg-primary dark:text-white">
                                  You
                                </Badge>
                              )}
@@ -409,7 +409,7 @@ export function SuperAdminList() {
                              </div>
                              <Badge 
                                variant={admin.is_active !== false ? "default" : "destructive"}
-                               className="text-xs"
+                               className="text-xs dark:bg-primary dark:text-white"
                              >
                                {admin.is_active !== false ? 'Active' : 'Blocked'}
                              </Badge>
@@ -419,7 +419,7 @@ export function SuperAdminList() {
                      </div>
                    </div>
                    <div className="flex items-center space-x-2">
-                     <Badge variant="gradient" className="flex items-center gap-1.5">
+                     <Badge variant="gradient" className="flex items-center gap-1.5 dark:bg-primary dark:text-white">
                        <Crown className="h-3 w-3" />
                        Super Admin
                      </Badge>
@@ -432,6 +432,7 @@ export function SuperAdminList() {
                            variant="outline"
                            onClick={handleCancelEdit}
                            disabled={saving}
+                           className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
                          >
                            <X className="h-3 w-3" />
                          </Button>
@@ -439,6 +440,7 @@ export function SuperAdminList() {
                            size="sm"
                            onClick={() => handleSaveEdit(admin.id)}
                            disabled={saving}
+                           className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary"
                          >
                            {saving ? (
                              <RefreshCw className="h-3 w-3 animate-spin" />
@@ -455,6 +457,7 @@ export function SuperAdminList() {
                            variant="outline"
                            onClick={() => handleEditUser(admin)}
                            title="Edit user details"
+                           className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
                          >
                            <Edit2 className="h-3 w-3" />
                          </Button>

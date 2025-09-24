@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client';
 import {
-  User, WeeklyReport, Goal, Pricing, Lead, Note, MessageTemplate,
+  User, WeeklyReport, Goal, Pricing, Lead, Note, MessageTemplate, ScriptComponentTemplate,
   StudentProfile, CallLog, GlobalVariables, Product, Subitem,
   EngagementTag, StudentKPIData, CoachKPISummary, KPIBenchmarks, CoachPricingItem, StudentActivitySummary
 } from '../types';
@@ -1622,33 +1622,153 @@ export const eightbaseService = {
     await executeMutation(queries.DELETE_NOTE, { id });
   },
 
-  // Message Templates
+  // Script Component Templates (User-specific)
+  async getScriptComponentTemplates(userId: string): Promise<ScriptComponentTemplate[]> {
+    const data = await executeQuery(queries.GET_SCRIPT_COMPONENTS_BY_USER, {
+      userId: userId
+    });
+    return data.scriptComponentsList.items;
+  },
+
+  // Backward compatibility - Message Templates (now returns empty array)
   async getMessageTemplates(): Promise<MessageTemplate[]> {
-    const data = await executeQuery(queries.GET_MESSAGE_TEMPLATES_BY_FILTER, {
-      filter: { is_active: { equals: true } }
-    });
-    return data.messageTemplatesList.items;
+    // Return empty array since we're now using ScriptComponent templates
+    return [];
   },
 
-  async getTemplatesByType(type: string): Promise<MessageTemplate[]> {
-    const data = await executeQuery(queries.GET_MESSAGE_TEMPLATES_BY_FILTER, {
-      filter: { type: { equals: type }, is_active: { equals: true } }
-    });
-    return data.messageTemplatesList.items;
+  async createScriptComponentTemplate(template: any): Promise<ScriptComponentTemplate> {
+    const data = await executeMutation(queries.CREATE_SCRIPT_COMPONENT_TEMPLATE, { data: template });
+    return data.scriptComponentCreate;
   },
 
-  async createMessageTemplate(template: Omit<MessageTemplate, 'id' | 'created_at' | 'updated_at'>): Promise<MessageTemplate> {
-    const data = await executeMutation(queries.CREATE_MESSAGE_TEMPLATE, { data: template });
-    return data.messageTemplateCreate;
+  async updateScriptComponentTemplate(id: string, updates: Partial<ScriptComponentTemplate>): Promise<ScriptComponentTemplate> {
+    const data = await executeMutation(queries.UPDATE_SCRIPT_COMPONENT_TEMPLATE, { id, data: updates });
+    return data.scriptComponentUpdate;
   },
 
-  async updateMessageTemplate(id: string, updates: Partial<MessageTemplate>): Promise<MessageTemplate> {
-    const data = await executeMutation(queries.UPDATE_MESSAGE_TEMPLATE, { id, data: updates });
-    return data.messageTemplateUpdate;
+  async deleteScriptComponentTemplate(id: string): Promise<void> {
+    await executeMutation(queries.DELETE_SCRIPT_COMPONENT_TEMPLATE, { id });
+  },
+
+  // Backward compatibility methods
+  async createMessageTemplate(template: any): Promise<MessageTemplate> {
+    // Return a mock template for backward compatibility
+    return {
+      id: 'mock-id',
+      type: 'intro',
+      content: '',
+      category: 'dm',
+      variation_number: 1,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+  },
+
+  async updateMessageTemplate(id: string, updates: any): Promise<MessageTemplate> {
+    // Return a mock template for backward compatibility
+    return {
+      id: 'mock-id',
+      type: 'intro',
+      content: '',
+      category: 'dm',
+      variation_number: 1,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
   },
 
   async deleteMessageTemplate(id: string): Promise<void> {
-    await executeMutation(queries.DELETE_MESSAGE_TEMPLATE, { id });
+    // No-op for backward compatibility
+    return;
+  },
+
+  // Generate random script from user's template variations
+  async generateRandomScript(userId: string): Promise<{intro: string, hook: string, body1: string, body2: string, ending: string}> {
+    const templates = await this.getScriptComponentTemplates(userId);
+    
+    if (templates.length === 0) {
+      // Return empty script if no templates exist
+      return {
+        intro: '',
+        hook: '',
+        body1: '',
+        body2: '',
+        ending: ''
+      };
+    }
+
+    // Get a random template from user's templates
+    const randomIndex = Math.floor(Math.random() * templates.length);
+    const randomTemplate = templates[randomIndex];
+
+    return {
+      intro: randomTemplate.intro || '',
+      hook: randomTemplate.hook || '',
+      body1: randomTemplate.body1 || '',
+      body2: randomTemplate.body2 || '',
+      ending: randomTemplate.ending || ''
+    };
+  },
+
+  // Initialize default templates for a user if none exist
+  async initializeDefaultTemplates(userId: string): Promise<void> {
+    const existingTemplates = await this.getScriptComponentTemplates(userId);
+    
+    if (existingTemplates.length > 0) return; // User templates already exist
+
+    const defaultTemplates = [
+      {
+        intro: 'Hi {name}! I saw your recent listing on {property_address}.',
+        hook: 'Your photos look great, but I specialize in helping realtors like you get 3x more engagement with premium photography.',
+        body1: 'I work with top agents in the area and my photos typically help listings sell 20% faster.',
+        body2: 'Would love to show you some examples of my work and discuss how I can help you get more leads.',
+        ending: 'When would be a good time for a quick call to discuss this further?',
+        user: { connect: { id: userId } }
+      },
+      {
+        intro: 'Hey {name}! Your latest listing caught my attention.',
+        hook: 'I love your listing style! I work with top agents to help them stand out with professional photography.',
+        body1: 'My photography has helped over 200 agents increase their listing views by 300%.',
+        body2: 'I\'d be happy to share my portfolio and show you the difference professional photos can make.',
+        ending: 'Would you be open to a brief call this week to explore how I can help you?',
+        user: { connect: { id: userId } }
+      },
+      {
+        intro: 'Hi {name}! I noticed your beautiful property listing.',
+        hook: 'Your property looks fantastic! I help realtors like you get more views and faster sales with premium photos.',
+        body1: 'I specialize in luxury real estate photography that gets results for top performers.',
+        body2: 'Let me show you some before/after examples of how my photography has helped other agents.',
+        ending: 'I\'d love to chat about how we can work together. When works best for you?',
+        user: { connect: { id: userId } }
+      },
+      {
+        intro: 'Hello {name}! I came across your recent property post.',
+        hook: 'Great listing! I specialize in helping agents like you get 20% more engagement with professional photography.',
+        body1: 'My clients typically see 25% more showings and faster sales with my photography.',
+        body2: 'I can send you some examples of my recent work and discuss a potential collaboration.',
+        ending: 'Are you available for a quick call to discuss how I can help boost your listings?',
+        user: { connect: { id: userId } }
+      },
+      {
+        intro: 'Hi {name}! Your property listing looks amazing.',
+        hook: 'Your photos are nice! I help top realtors get 3x more leads with premium photography services.',
+        body1: 'I work exclusively with high-performing agents who want to stand out from the competition.',
+        body2: 'Would you be interested in seeing some examples of how I\'ve helped other top agents?',
+        ending: 'Would you be interested in a brief conversation about how I can help your business?',
+        user: { connect: { id: userId } }
+      }
+    ];
+
+    // Create all default templates for the user
+    for (const template of defaultTemplates) {
+      try {
+        await this.createScriptComponentTemplate(template);
+      } catch (error) {
+        console.error('Failed to create default template:', error);
+      }
+    }
   },
 
   // Global Variables
@@ -1753,25 +1873,6 @@ export const eightbaseService = {
     });
   },
 
-  // Random script generation
-  async generateRandomScript(): Promise<{intro: string, hook: string, body1: string, body2: string, ending: string}> {
-    const templates = await this.getMessageTemplates();
-
-    const getRandomTemplate = (type: string): string => {
-      const typeTemplates = templates.filter(t => t.type === type);
-      if (typeTemplates.length === 0) return '';
-      const randomIndex = Math.floor(Math.random() * typeTemplates.length);
-      return typeTemplates[randomIndex].content;
-    };
-
-    return {
-      intro: getRandomTemplate('intro'),
-      hook: getRandomTemplate('hook'),
-      body1: getRandomTemplate('body1'),
-      body2: getRandomTemplate('body2'),
-      ending: getRandomTemplate('ending')
-    };
-  },
 
   // Super Admin Methods - Platform Overview
   async getPlatformOverview() {

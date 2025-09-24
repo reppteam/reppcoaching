@@ -309,7 +309,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                       value={formData.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       placeholder="Enter first name"
-                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                      className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                       required
                     />
                 </div>
@@ -320,7 +320,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                       value={formData.lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
                       placeholder="Enter last name"
-                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                      className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                       required
                     />
                 </div>
@@ -334,7 +334,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     placeholder="Enter email address"
-                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                    className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                     required
                   />
                 </div>
@@ -346,7 +346,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                     value={formData.phone || ''}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     placeholder="Enter phone number"
-                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                    className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
@@ -365,7 +365,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
               <div className="space-y-2">
                 <Label htmlFor="role" className="text-foreground">User Role *</Label>
                                                                                                                                      <Select value={formData.role} onValueChange={handleRoleChange}>
-                    <SelectTrigger className="bg-background border-border text-foreground">
+                    <SelectTrigger className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                   <SelectContent>
@@ -415,7 +415,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                 <div className="space-y-2">
                   <Label htmlFor="assigned_admin_id" className="text-foreground">Assigned Coach</Label>
                                                                            <Select value={formData.assigned_admin_id} onValueChange={(value) => handleInputChange('assigned_admin_id', value)}>
-                      <SelectTrigger className="bg-background border-border text-foreground">
+                      <SelectTrigger className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
                         <SelectValue placeholder="Select a coach (optional)" />
                       </SelectTrigger>
                                          <SelectContent>
@@ -442,7 +442,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                         type="date"
                         value={formData.access_start}
                         onChange={(e) => handleInputChange('access_start', e.target.value)}
-                        className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                       />
                   </div>
                   <div className="space-y-2">
@@ -452,7 +452,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                         type="date"
                         value={formData.access_end}
                         onChange={(e) => handleInputChange('access_end', e.target.value)}
-                        className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                        className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                       />
                   </div>
                 </div>
@@ -484,7 +484,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                      value={formData.assigned_students || 'none'} 
                      onValueChange={(value) => handleInputChange('assigned_students', value)}
                    >
-                     <SelectTrigger className="bg-background border-border text-foreground">
+                     <SelectTrigger className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white">
                        <SelectValue placeholder="Select students to assign (optional)" />
                      </SelectTrigger>
                    <SelectContent>
@@ -520,7 +520,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                     value={formData.custom_message}
                     onChange={(e) => handleInputChange('custom_message', e.target.value)}
                     placeholder="Add a personal message to include in the invitation email..."
-                    className="bg-background border-border text-foreground placeholder:text-muted-foreground"
+                    className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white placeholder:text-muted-foreground"
                     rows={3}
                   />
                 <p className="text-xs text-muted-foreground">

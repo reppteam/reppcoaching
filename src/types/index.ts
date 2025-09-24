@@ -185,7 +185,7 @@ export interface Note {
   created_by_name: string;
 }
 
-// Enhanced MessageTemplate system for multiple variations
+// Enhanced MessageTemplate system for multiple variations using ScriptComponents
 export type MessageTemplateType = 'intro' | 'hook' | 'body1' | 'body2' | 'ending';
 
 export interface MessageTemplate {
@@ -197,6 +197,31 @@ export interface MessageTemplate {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+// ScriptComponent template interface for user-specific templates
+export interface ScriptComponentTemplate {
+  id: string;
+  intro: string;
+  hook: string;
+  body1: string;
+  body2: string;
+  ending: string;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  lead?: {
+    id: string;
+  };
+  created_at: string;
+  updated_at: string;
+  // Additional properties for template management UI
+  type?: MessageTemplateType;
+  content?: string;
+  variation_number?: number;
 }
 
 // Helper interface for template management

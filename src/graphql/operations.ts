@@ -2621,16 +2621,31 @@ export const DELETE_NOTE = gql`
 // MESSAGE TEMPLATE OPERATIONS
 // ============================================================================
 
-export const GET_MESSAGE_TEMPLATES_BY_FILTER = gql`
-  query GetMessageTemplatesByFilter($filter: MessageTemplateFilter) {
-    messageTemplatesList(filter: $filter) {
+export const GET_SCRIPT_COMPONENTS_BY_USER = gql`
+  query GetScriptComponentsByUser($userId: ID!) {
+    scriptComponentsList(
+      filter: {
+        user: {
+          id: { equals: $userId }
+        }
+      }
+    ) {
       items {
         id
-        type
-        content
-        category
-        variation_number
-        is_active
+        intro
+        hook
+        body1
+        body2
+        ending
+        user {
+          id
+          email
+          firstName
+          lastName
+        }
+        lead {
+          id
+        }
         createdAt
         updatedAt
       }
@@ -2638,39 +2653,51 @@ export const GET_MESSAGE_TEMPLATES_BY_FILTER = gql`
   }
 `;
 
-export const CREATE_MESSAGE_TEMPLATE = gql`
-  mutation CreateMessageTemplate($data: MessageTemplateCreateInput!) {
-    messageTemplatesCreate(data: $data) {
+export const CREATE_SCRIPT_COMPONENT_TEMPLATE = gql`
+  mutation CreateScriptComponentTemplate($data: ScriptComponentCreateInput!) {
+    scriptComponentCreate(data: $data) {
       id
-      type
-      content
-      category
-      variation_number
-      is_active
+      intro
+      hook
+      body1
+      body2
+      ending
+      user {
+        id
+        email
+        firstName
+        lastName
+      }
       createdAt
       updatedAt
     }
   }
 `;
 
-export const UPDATE_MESSAGE_TEMPLATE = gql`
-  mutation UpdateMessageTemplate($id: ID!, $data: MessageTemplateUpdateInput!) {
-    messageTemplatesUpdate(filter: { id: $id }, data: $data) {
+export const UPDATE_SCRIPT_COMPONENT_TEMPLATE = gql`
+  mutation UpdateScriptComponentTemplate($id: ID!, $data: ScriptComponentUpdateInput!) {
+    scriptComponentUpdate(filter: { id: $id }, data: $data) {
       id
-      type
-      content
-      category
-      variation_number
-      is_active
+      intro
+      hook
+      body1
+      body2
+      ending
+      user {
+        id
+        email
+        firstName
+        lastName
+      }
       createdAt
       updatedAt
     }
   }
 `;
 
-export const DELETE_MESSAGE_TEMPLATE = gql`
-  mutation DeleteMessageTemplate($id: ID!) {
-    messageTemplatesDelete(filter: { id: $id }) {
+export const DELETE_SCRIPT_COMPONENT_TEMPLATE = gql`
+  mutation DeleteScriptComponentTemplate($id: ID!) {
+    scriptComponentDelete(filter: { id: $id }) {
       success
     }
   }

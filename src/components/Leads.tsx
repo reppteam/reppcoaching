@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { eightbaseService } from '../services/8baseService';
-import { Lead, MessageTemplate, EngagementTag, EngagementTagType, EngagementTagInfo, MessageTemplateType, TemplateVariationSet } from '../types';
+import { Lead, MessageTemplate, ScriptComponentTemplate, EngagementTag, EngagementTagType, EngagementTagInfo, MessageTemplateType, TemplateVariationSet } from '../types';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -120,8 +120,20 @@ interface LeadFilters {
 
 export function Leads() {
   const { user } = useAuth();
+  
+  // Static template examples
+  const staticTemplates = {
+    intro: "Hi {name}! I saw your recent listing on {property_address}....",
+    hook: "Your photos look great, but I specialize in helping realtors...",
+    body1: "I work with top agents in the area and my photos typically h...",
+    body2: "Would love to show you some before/after examples....",
+    ending: "When would be a good time for a quick 10-minute call this we..."
+  };
+
+  // Debug log to verify templates are loaded
+  console.log('Static templates loaded:', staticTemplates);
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [templates, setTemplates] = useState<MessageTemplate[]>([]);
+  const [templates, setTemplates] = useState<ScriptComponentTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [scriptDialogOpen, setScriptDialogOpen] = useState(false);
@@ -175,9 +187,12 @@ export function Leads() {
     
     setLoading(true);
     try {
+      // Initialize default templates if none exist for this user
+      await eightbaseService.initializeDefaultTemplates(user.id);
+      
       const [leadsData, templatesData] = await Promise.all([
         user.role === 'user' ? eightbaseService.getLeads(user.id) : eightbaseService.getLeadsByCoach(user.id),
-        eightbaseService.getMessageTemplates()
+        eightbaseService.getScriptComponentTemplates(user.id)
       ]);
       
       setLeads(leadsData);
@@ -195,7 +210,7 @@ export function Leads() {
 
   // Template variations organized by type
   const templateVariations = useMemo(() => {
-    const variations: Record<MessageTemplateType, MessageTemplate[]> = {
+    const variations: Record<MessageTemplateType, ScriptComponentTemplate[]> = {
       intro: [],
       hook: [],
       body1: [],
@@ -203,15 +218,45 @@ export function Leads() {
       ending: []
     };
 
-    templates.forEach(template => {
-      if (variations[template.type]) {
-        variations[template.type].push(template);
-      }
-    });
+    // Since ScriptComponentTemplate contains all fields, we'll create virtual variations
+    templates.forEach((template, index) => {
+      // Create virtual MessageTemplate-like objects for each field
+      const introTemplate = {
+        ...template,
+        type: 'intro' as MessageTemplateType,
+        content: template.intro,
+        variation_number: index + 1
+      };
+      const hookTemplate = {
+        ...template,
+        type: 'hook' as MessageTemplateType,
+        content: template.hook,
+        variation_number: index + 1
+      };
+      const body1Template = {
+        ...template,
+        type: 'body1' as MessageTemplateType,
+        content: template.body1,
+        variation_number: index + 1
+      };
+      const body2Template = {
+        ...template,
+        type: 'body2' as MessageTemplateType,
+        content: template.body2,
+        variation_number: index + 1
+      };
+      const endingTemplate = {
+        ...template,
+        type: 'ending' as MessageTemplateType,
+        content: template.ending,
+        variation_number: index + 1
+      };
 
-    // Sort each type by variation number
-    Object.keys(variations).forEach(type => {
-      variations[type as MessageTemplateType].sort((a, b) => a.variation_number - b.variation_number);
+      variations.intro.push(introTemplate);
+      variations.hook.push(hookTemplate);
+      variations.body1.push(body1Template);
+      variations.body2.push(body2Template);
+      variations.ending.push(endingTemplate);
     });
 
     return variations;
@@ -456,7 +501,7 @@ export function Leads() {
   // Enhanced script generation with random templates
   const generateRandomScript = async () => {
     try {
-      const randomScript = await eightbaseService.generateRandomScript();
+      const randomScript = await eightbaseService.generateRandomScript(user?.id || '');
       return randomScript;
     } catch (error) {
       console.error('Failed to generate random script:', error);
@@ -487,9 +532,10 @@ export function Leads() {
     }
   };
 
-  const updateTemplate = async (templateId: string, content: string) => {
+  const updateTemplate = async (templateId: string, field: string, content: string) => {
     try {
-      await eightbaseService.updateMessageTemplate(templateId, { content });
+      const updates: any = { [field]: content };
+      await eightbaseService.updateScriptComponentTemplate(templateId, updates);
       await loadData();
     } catch (error) {
       console.error('Failed to update template:', error);
@@ -1624,8 +1670,12 @@ export function Leads() {
                 </div>
                 <Dialog open={templatesDialogOpen} onOpenChange={setTemplatesDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Settings className="h-4 w-4" />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="h-8 w-8 p-0 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600"
+                    >
+                      <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
@@ -1649,40 +1699,118 @@ export function Leads() {
                           <div className="text-sm text-muted-foreground mb-4">
                             {type === 'intro' ? 'Intros' : type === 'hook' ? 'Hooks' : type === 'body1' ? 'Body 1' : type === 'body2' ? 'Body 2' : 'Endings'} - Each will be randomly selected
                           </div>
-                          {templateVariations[type]?.map((template, index) => (
-                            <div key={template.id} className="space-y-2">
-                              <Label className="flex items-center gap-2">
-                                <Badge variant="outline">#{index + 1}</Badge>
-                                Variation {index + 1}
-                              </Label>
-                              <Textarea
-                                value={editingTemplates[template.id] !== undefined ? editingTemplates[template.id] : template.content}
-                                onChange={(e) => setEditingTemplates(prev => ({
-                                  ...prev,
-                                  [template.id]: e.target.value
-                                }))}
-                                rows={2}
-                                className="text-sm"
-                              />
-                              <div className="flex justify-end">
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    const content = editingTemplates[template.id] !== undefined ? editingTemplates[template.id] : template.content;
-                                    updateTemplate(template.id, content);
-                                    setEditingTemplates(prev => {
-                                      const newState = { ...prev };
-                                      delete newState[template.id];
-                                      return newState;
-                                    });
-                                  }}
-                                  disabled={editingTemplates[template.id] === undefined}
-                                >
-                                  Save
-                                </Button>
+                          
+                          {/* Show 5 different template variations */}
+                          {Array.from({ length: 5 }, (_, index) => {
+                            const variationNumber = index + 1;
+                            
+                            // Define 5 different template variations for each type
+                            const defaultTemplates = {
+                              intro: [
+                                "Hi {name}! I saw your recent listing on {property_address}.",
+                                "Hello {name}! I came across your beautiful property listing.",
+                                "Hey {name}! Your recent property post caught my attention.",
+                                "Hi there {name}! I noticed your impressive real estate portfolio.",
+                                "Good morning {name}! I've been following your listings and they look fantastic."
+                              ],
+                              hook: [
+                                "Your photos look great, but I specialize in helping realtors like you get 3x more engagement with premium photography.",
+                                "I noticed your listing has potential, but professional photography could make it stand out even more.",
+                                "Your property looks amazing! I help agents like you create stunning visuals that drive more inquiries.",
+                                "I work with top agents in the area and my photos typically help listings sell 20% faster.",
+                                "Your marketing is solid, but I can help you take it to the next level with premium photography."
+                              ],
+                              body1: [
+                                "I work with top agents in the area and my photos typically help listings sell 20% faster.",
+                                "My photography has helped over 200 agents increase their listing engagement by 300%.",
+                                "I specialize in real estate photography that makes properties irresistible to buyers.",
+                                "My work has been featured in top real estate publications and helps agents close deals faster.",
+                                "I've helped agents in your market increase their listing views by 400% with professional photos."
+                              ],
+                              body2: [
+                                "Would love to show you some before/after examples of my work.",
+                                "I can send you a portfolio of my recent work with agents in your area.",
+                                "Let me show you how I've transformed other listings in your market.",
+                                "I'd be happy to share some case studies of successful campaigns I've created.",
+                                "Would you like to see some examples of how I've helped similar properties sell faster?"
+                              ],
+                              ending: [
+                                "When would be a good time for a quick 10-minute call this week?",
+                                "Are you available for a brief call to discuss how I can help your listings?",
+                                "Would you be interested in a quick chat about boosting your listing performance?",
+                                "Can we schedule a short call to explore how professional photography could help you?",
+                                "I'd love to discuss how I can help you get more leads from your listings."
+                              ]
+                            };
+                            
+                            const defaultContent = defaultTemplates[type as keyof typeof defaultTemplates]?.[index] || '';
+                            
+                            // Check if user has custom templates for this variation (using templates state)
+                            const userTemplates = templateVariations[type] || [];
+                            const existingTemplate = userTemplates.find(t => t.variation_number === variationNumber);
+                            const templateId = existingTemplate?.id || `static-${type}-${variationNumber}`;
+                            
+                            return (
+                              <div key={`variation-${variationNumber}`} className="space-y-2">
+                                <Label className="flex items-center gap-2">
+                                  <Badge variant="outline">#{variationNumber}</Badge>
+                                  Variation {variationNumber}
+                                </Label>
+                                <Textarea
+                                  value={editingTemplates[templateId] !== undefined ? editingTemplates[templateId] : existingTemplate?.content || defaultContent}
+                                  onChange={(e) => setEditingTemplates(prev => ({
+                                    ...prev,
+                                    [templateId]: e.target.value
+                                  }))}
+                                  rows={2}
+                                  className="text-sm"
+                                  placeholder={`Enter ${type} variation ${variationNumber}...`}
+                                />
+                                <div className="flex justify-end">
+                                  <Button
+                                    size="sm"
+                                    onClick={async () => {
+                                      const content = editingTemplates[templateId] !== undefined ? editingTemplates[templateId] : existingTemplate?.content || defaultContent;
+                                      if (user) {
+                                        try {
+                                          if (existingTemplate) {
+                                            // Update existing template
+                                            await eightbaseService.updateScriptComponentTemplate(existingTemplate.id, {
+                                              [type]: content
+                                            });
+                                          } else {
+                                            // Create new template
+                                            const templateData: any = {
+                                              intro: '',
+                                              hook: '',
+                                              body1: '',
+                                              body2: '',
+                                              ending: '',
+                                              user: { connect: { id: user.id } }
+                                            };
+                                            templateData[type] = content;
+                                            
+                                            await eightbaseService.createScriptComponentTemplate(templateData);
+                                          }
+                                          await loadData();
+                                          setEditingTemplates(prev => {
+                                            const newState = { ...prev };
+                                            delete newState[templateId];
+                                            return newState;
+                                          });
+                                        } catch (error) {
+                                          console.error('Failed to save template:', error);
+                                        }
+                                      }
+                                    }}
+                                    disabled={editingTemplates[templateId] === undefined}
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </TabsContent>
                       ))}
                     </Tabs>
@@ -1711,21 +1839,73 @@ export function Leads() {
                   <strong>How it works:</strong> Each script randomly selects 1 of 5 variations from each section to create unique messages and avoid spam detection.
                 </p>
                 
-                {Object.entries(templateVariations).map(([type, templates]) => (
-                  templates.length > 0 && (
-                    <div key={type} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-sm capitalize">{type} ({templates.length})</h4>
-                        <Badge variant="outline" className="text-xs">
-                          {templates.length}/5
-                        </Badge>
-                      </div>
-                      <div className="text-xs text-muted-foreground border rounded p-2 bg-muted/50">
-                        {templates[0]?.content.substring(0, 60)}...
-                      </div>
+                {/* Template Sections - Static Templates */}
+                <div className="space-y-3">
+                  {/* Intro Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-gray-900 dark:text-white">Intro (5)</h4>
+                      <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
                     </div>
-                  )
-                ))}
+                    <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {staticTemplates.intro}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Hook Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-gray-900 dark:text-white">Hook (5)</h4>
+                      <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
+                    </div>
+                    <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {staticTemplates.hook}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Body1 Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-gray-900 dark:text-white">Body1 (5)</h4>
+                      <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
+                    </div>
+                    <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {staticTemplates.body1}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Body2 Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-gray-900 dark:text-white">Body2 (5)</h4>
+                      <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
+                    </div>
+                    <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {staticTemplates.body2}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Ending Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-gray-900 dark:text-white">Ending (5)</h4>
+                      <Badge variant="outline" className="text-xs bg-green-100 text-green-800">5/5</Badge>
+                    </div>
+                    <div className="border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {staticTemplates.ending}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1735,7 +1915,7 @@ export function Leads() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Engagement Guide
+                Engagement Guide dsadsadsa
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
