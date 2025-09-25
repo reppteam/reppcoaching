@@ -181,7 +181,7 @@ export function CoachLogin() {
 
               {response && (
                 <Alert className={response.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-black dark:text-white">
                     {response.success ? (
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     ) : (

@@ -127,7 +127,7 @@ export function CoachManagerDashboard() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="h-5 w-5 animate-pulse text-brand-blue" />
-          <span>Loading coach manager dashboard...</span>
+          <span className="text-black dark:text-white">Loading coach manager dashboard...</span>
         </div>
       </div>
     );
@@ -137,7 +137,7 @@ export function CoachManagerDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="flex items-center gap-2">
+        <h1 className="flex items-center gap-2 text-black dark:text-white">
           <ShieldCheck className="h-6 w-6 text-brand-blue" />
           Coach Manager Dashboard
         </h1>
@@ -155,7 +155,7 @@ export function CoachManagerDashboard() {
                 <p className="text-xs text-muted-foreground">
                   Total Coaches & Managers
                 </p>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold text-foreground">
                   {coachAndManagerUsers.length}
                 </p>
               </div>
@@ -169,7 +169,7 @@ export function CoachManagerDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Active Users</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-foreground">
                   {
                     coachAndManagerUsers.filter((u) => u.is_active !== false)
                       .length
@@ -186,7 +186,7 @@ export function CoachManagerDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Coaches</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-foreground">
                   {coaches.length}
                 </p>
               </div>
@@ -200,7 +200,7 @@ export function CoachManagerDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Coach Managers</p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-2xl font-bold text-foreground">
                   {coachManagers.length}
                 </p>
               </div>

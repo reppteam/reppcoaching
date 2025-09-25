@@ -61,7 +61,7 @@ export function EmailTest() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-black dark:text-white">
           <Mail className="h-5 w-5" />
           SendGrid Email Test
         </CardTitle>
@@ -158,7 +158,7 @@ export function EmailTest() {
 
         {error && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <div className="flex items-center gap-2 text-red-700">
+            <div className="flex items-center gap-2 text-black dark:text-white text-red-700">
               <XCircle className="h-4 w-4" />
               <span className="text-sm font-medium">Error</span>
             </div>
@@ -168,7 +168,7 @@ export function EmailTest() {
 
         {result && (
           <div className="mt-4 space-y-3">
-            <div className="flex items-center gap-2 text-green-700">
+            <div className="flex items-center gap-2 text-black dark:text-white text-green-700">
               <CheckCircle className="h-4 w-4" />
               <span className="text-sm font-medium">Success!</span>
             </div>

@@ -617,7 +617,7 @@ export function UserManagement() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <Users className="h-5 w-5 animate-pulse text-brand-blue" />
-          <span>Loading users...</span>
+          <span className="text-black dark:text-white">Loading users...</span>
         </div>
       </div>
     );
@@ -629,7 +629,7 @@ export function UserManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2 text-foreground">
+          <h2 className="flex items-center gap-2 text-black dark:text-white">
             <Users2 className="h-6 w-6 text-brand-blue" />
             User Management
           </h2>
@@ -857,7 +857,7 @@ export function UserManagement() {
             {user?.role === 'super_admin' && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                     <ShieldCheck className="h-5 w-5" />
                     Coach Managers ({coachManagers.length})
                   </CardTitle>
@@ -929,7 +929,7 @@ export function UserManagement() {
         {canManageUsers && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                 <Shield className="h-5 w-5" />
                 Coaches ({coaches.length})
               </CardTitle>
@@ -1000,7 +1000,7 @@ export function UserManagement() {
         {/* Students List */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-black dark:text-white">
               <GraduationCap className="h-5 w-5" />
               Students ({students.length})
             </CardTitle>
@@ -1099,7 +1099,7 @@ export function UserManagement() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                         <Crown className="h-5 w-5 text-purple-500" />
                         Super Administrators
                       </CardTitle>
@@ -1134,7 +1134,7 @@ export function UserManagement() {
                           superAdmins.map((admin) => (
                             <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg">
                               <div className="flex-1">
-                                <div className="font-medium flex items-center gap-2">
+                                <div className="font-medium flex items-center gap-2 text-black dark:text-white">
                                   {admin.firstName} {admin.lastName}
                                   {admin.id === user?.id && (
                                     <Badge variant="gradient" className="text-xs">
@@ -1176,7 +1176,7 @@ export function UserManagement() {
               {/* Advanced Role Management Section */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                     <Settings className="h-5 w-5" />
                     Advanced Role Management
                   </CardTitle>
@@ -1187,7 +1187,7 @@ export function UserManagement() {
                 <CardContent>
                   <div className="text-center py-12">
                     <Crown className="mx-auto h-12 w-12 text-purple-500 mb-4" />
-                    <h3 className="text-lg font-medium mb-2">Advanced Role Management</h3>
+                    <h3 className="text-lg font-medium mb-2 text-foreground">Advanced Role Management</h3>
                     <p className="text-muted-foreground mb-4">
                       This feature allows Super Admins to modify user roles and custom permissions.
                     </p>
@@ -1203,7 +1203,7 @@ export function UserManagement() {
               <CardContent className="pt-6">
                 <div className="text-center py-12">
                   <Lock className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Access Restricted</h3>
+                  <h3 className="text-lg font-medium mb-2 text-foreground">Access Restricted</h3>
                   <p className="text-muted-foreground">
                     Only Super Admins can access role management features.
                   </p>
@@ -1226,7 +1226,7 @@ export function UserManagement() {
       <Dialog open={createCoachDialogOpen} onOpenChange={setCreateCoachDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <UserPlus className="h-5 w-5" />
               Create New Coach
             </DialogTitle>
@@ -1309,7 +1309,7 @@ export function UserManagement() {
       <Dialog open={createStudentDialogOpen} onOpenChange={setCreateStudentDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <GraduationCap className="h-5 w-5" />
               Create New Student
             </DialogTitle>
@@ -1451,7 +1451,7 @@ export function UserManagement() {
       <Dialog open={confirmationDialogOpen} onOpenChange={setConfirmationDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <CheckCircle className="h-5 w-5 text-green-600" />
               User Created Successfully!
             </DialogTitle>
@@ -1491,7 +1491,7 @@ export function UserManagement() {
       <AlertDialog open={deleteConfirmDialogOpen} onOpenChange={setDeleteConfirmDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
+            <AlertDialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <AlertTriangle className="h-5 w-5 text-red-600" />
               Delete User
             </AlertDialogTitle>
@@ -1534,7 +1534,7 @@ export function UserManagement() {
       }}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <Edit className="h-5 w-5" />
               Edit User - {editingUser ? `${editingUser.firstName} ${editingUser.lastName}` : ''}
             </DialogTitle>

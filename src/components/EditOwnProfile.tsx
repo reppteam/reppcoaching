@@ -99,7 +99,7 @@ export const EditOwnProfile: React.FC<EditOwnProfileProps> = ({ onClose }) => {
     <div className="max-w-4xl mx-auto space-y-6">
       <Card className="bg-white dark:bg-[#1A1A1A] border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white text-gray-900 dark:text-white">
             <User className="h-5 w-5" />
             Edit Your Profile
           </CardTitle>

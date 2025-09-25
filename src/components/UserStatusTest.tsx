@@ -81,7 +81,7 @@ export function UserStatusTest() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <User className="h-5 w-5" />
             User Status Test
           </CardTitle>
@@ -175,14 +175,14 @@ export function UserStatusTest() {
           )}
 
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+            <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 border border-red-200 rounded-md">
               <AlertCircle className="h-4 w-4 text-red-600" />
               <span className="text-sm text-red-600">{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-md">
+            <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 border border-green-200 rounded-md">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <span className="text-sm text-green-600">{success}</span>
             </div>

@@ -57,7 +57,7 @@ export function CoachHeader({
 
           {/* Right: User Profile & Actions */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-black dark:text-white">
               <User className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">Coach</span>
               <span className="text-sm text-muted-foreground">{user.email}</span>

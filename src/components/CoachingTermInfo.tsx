@@ -56,7 +56,7 @@ export function CoachingTermInfo({ user, showTitle = true, compact = false }: Co
     <Card>
       {showTitle && (
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="text-lg flex items-center gap-2 text-black dark:text-white">
             <Calendar className="h-5 w-5 text-brand-blue" />
             Coaching Term
           </CardTitle>

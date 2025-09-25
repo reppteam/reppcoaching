@@ -41,7 +41,7 @@ export function TokenTest() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-black dark:text-white">
           <RefreshCw className="h-5 w-5" />
           Auth0 Token Test
         </CardTitle>
@@ -69,7 +69,7 @@ export function TokenTest() {
 
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-            <div className="flex items-center gap-2 text-red-700">
+            <div className="flex items-center gap-2 text-black dark:text-white text-red-700">
               <XCircle className="h-4 w-4" />
               <span className="text-sm font-medium">Error</span>
             </div>

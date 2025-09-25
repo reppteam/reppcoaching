@@ -207,7 +207,7 @@ export function SuperAdminDashboard() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <Activity className="h-5 w-5 animate-pulse text-blue-600" />
-          <span>Loading dashboard data...</span>
+          <span className="text-black dark:text-white">Loading dashboard data...</span>
         </div>
       </div>
     );
@@ -219,16 +219,16 @@ export function SuperAdminDashboard() {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Super Admin Dashboard</h1>
-          <p className="text-muted-foreground dark:text-white mt-2">System-wide management and analytics for Real Estate Photographer Pro</p>
-                      <p className="text-xs text-muted-foreground dark:text-white mt-1">
-              Last updated: {lastUpdated.toLocaleTimeString()}
-            </p>
+          <p className="text-muted-foreground mt-2">System-wide management and analytics for Real Estate Photographer Pro</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Last updated: {lastUpdated.toLocaleTimeString()}
+          </p>
         </div>
         <Button 
           onClick={loadDashboardData} 
           disabled={loading}
           variant="outline"
-          className="flex items-center gap-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+          className="flex items-center gap-2 text-black dark:text-white"
         >
           <Activity className="h-4 w-4" />
           {loading ? 'Refreshing...' : 'Refresh Data'}
@@ -342,7 +342,7 @@ export function SuperAdminDashboard() {
             {/* User Distribution */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <PieChart className="h-5 w-5" />
                   User Distribution
                 </CardTitle>
@@ -350,7 +350,7 @@ export function SuperAdminDashboard() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Paid Students</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-black dark:text-white">
                     <span className="font-semibold text-foreground">{stats.paidStudents}</span>
                     <Badge variant="secondary" className="text-xs dark:bg-primary dark:text-white">
                       {stats.students > 0 ? Math.round((stats.paidStudents / stats.students) * 100) : 0}%
@@ -359,7 +359,7 @@ export function SuperAdminDashboard() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Free Students</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-black dark:text-white">
                     <span className="font-semibold text-foreground">{stats.freeStudents}</span>
                     <Badge variant="secondary" className="text-xs dark:bg-primary dark:text-white">
                       {stats.students > 0 ? Math.round((stats.freeStudents / stats.students) * 100) : 0}%
@@ -368,7 +368,7 @@ export function SuperAdminDashboard() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Active Students</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-black dark:text-white">
                     <span className="font-semibold text-foreground">{stats.activeStudents}</span>
                     <Badge variant="secondary" className="text-xs dark:bg-primary dark:text-white">
                       {stats.students > 0 ? Math.round((stats.activeStudents / stats.students) * 100) : 0}%
@@ -385,7 +385,7 @@ export function SuperAdminDashboard() {
             {/* Platform Performance */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <LineChart className="h-5 w-5" />
                   Platform Performance
                 </CardTitle>
@@ -413,7 +413,7 @@ export function SuperAdminDashboard() {
             {/* Coach Distribution */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <Users className="h-5 w-5" />
                   Coach Distribution
                 </CardTitle>
@@ -450,7 +450,7 @@ export function SuperAdminDashboard() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <Settings className="h-5 w-5" />
                   System Configuration
                 </CardTitle>

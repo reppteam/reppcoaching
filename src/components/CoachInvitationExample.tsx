@@ -44,7 +44,7 @@ export function CoachInvitationExample() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <Shield className="h-5 w-5" />
             Invite Coach
           </CardTitle>
@@ -74,13 +74,13 @@ export function CoachInvitationExample() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="coach">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <User className="h-4 w-4" />
                       Coach
                     </div>
                   </SelectItem>
                   <SelectItem value="coach_manager">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Shield className="h-4 w-4" />
                       Coach Manager
                     </div>

@@ -393,7 +393,7 @@ export function SuperAdminDataManagement() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-5 w-5 animate-spin text-brand-blue" />
-          <span>Loading data management system...</span>
+          <span className="text-black dark:text-white">Loading data management system...</span>
         </div>
       </div>
     );
@@ -404,7 +404,7 @@ export function SuperAdminDataManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-black dark:text-white">
             <Database className="h-6 w-6 text-brand-blue" />
             Super Admin Data Management
           </h2>
@@ -950,7 +950,7 @@ export function SuperAdminDataManagement() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
+            <AlertDialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <AlertTriangle className="h-5 w-5 text-red-600" />
               Delete Item
             </AlertDialogTitle>

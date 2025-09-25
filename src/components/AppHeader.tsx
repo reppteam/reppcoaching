@@ -89,7 +89,7 @@ export function AppHeader({
           <div className="flex items-center gap-3">
             {/* Super Admin Viewing As */}
             {originalUser && (
-              <div className="hidden lg:flex items-center gap-2">
+              <div className="hidden lg:flex items-center gap-2 text-black dark:text-white">
                 <Badge
                   variant="outline"
                   className="bg-blue-50 text-blue-700 border-blue-200"
@@ -116,7 +116,7 @@ export function AppHeader({
               </Button>
             )}
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-black dark:text-white">
               <User className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">{roleDisplayName}</span>
               <span className="text-sm text-muted-foreground">{user.email}</span>

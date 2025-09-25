@@ -108,7 +108,7 @@ export function EmailTemplatePreview({
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <Mail className="h-5 w-5" />
             Email Template Preview
           </CardTitle>
@@ -160,7 +160,7 @@ export function EmailTemplatePreview({
 
               {/* Login Information */}
                               <div className="bg-gray-50 dark:bg-muted rounded-lg p-4">
-                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2 text-black dark:text-white">
                   <Lock className="h-4 w-4" />
                   Your Login Information
                 </h3>

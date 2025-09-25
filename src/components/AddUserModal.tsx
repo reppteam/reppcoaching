@@ -265,7 +265,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
             <UserPlus className="h-5 w-5" />
             Add New User
           </DialogTitle>
@@ -376,7 +376,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                                            'User only';
                       return (
                         <SelectItem key={role.id} value={role.id}>
-                          <div className="flex items-center gap-2 w-full">
+                          <div className="flex items-center gap-2 text-black dark:text-white w-full">
                             {getRoleIcon(role.name)}
                             <div className="flex flex-col flex-1">
                               <span>{role.name}</span>
@@ -422,7 +422,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
                        <SelectItem value="none">No coach assigned</SelectItem>
                        {availableCoaches.map((coach) => (
                         <SelectItem key={coach.id} value={coach.id}>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 text-black dark:text-white">
                             <Shield className="h-4 w-4" />
                             <span>{coach.name}</span>
                             <Badge variant="outline" className="ml-auto">
@@ -504,7 +504,7 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
           {/* Invitation Message */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
+              <CardTitle className="text-lg flex items-center gap-2 text-black dark:text-white">
                 <Mail className="h-5 w-5" />
                 Invitation Message
               </CardTitle>
@@ -639,12 +639,12 @@ export function AddUserModal({ open, onOpenChange, onUserCreated }: AddUserModal
              </Button>
             <Button type="submit" disabled={loading}>
               {loading ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-black dark:text-white">
                   <Send className="h-4 w-4 animate-pulse" />
                   Creating User & Sending Invitation...
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-black dark:text-white">
                   <UserPlus className="h-4 w-4" />
                   Create User & Send Invitation
                 </div>

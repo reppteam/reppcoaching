@@ -391,7 +391,7 @@ export function Dashboard() {
             <div className="lg:col-span-1">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                     <Shield className="h-5 w-5" />
                     Navigation
                   </CardTitle>

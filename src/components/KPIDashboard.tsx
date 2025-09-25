@@ -246,7 +246,7 @@ export function KPIDashboard({showCoachSummary = true}: {showCoachSummary?: bool
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <BarChart3 className="h-5 w-5 animate-pulse text-brand-blue" />
-          <span>Loading KPI dashboard...</span>
+          <span className="text-black dark:text-white">Loading KPI dashboard...</span>
         </div>
       </div>
     );
@@ -269,7 +269,7 @@ export function KPIDashboard({showCoachSummary = true}: {showCoachSummary?: bool
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-black dark:text-white">
             <BarChart3 className="h-6 w-6 text-brand-blue" />
             KPI Dashboard
           </h1>

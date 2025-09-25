@@ -227,7 +227,7 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
             Set and track goals for your students
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-black dark:text-white">
           <Button variant="outline" onClick={loadData}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
@@ -649,7 +649,7 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
                 </div>
                                  <div>
                    <Label className="text-sm font-medium">Goal Type</Label>
-                   <div className="flex items-center gap-2 mt-1">
+                   <div className="flex items-center gap-2 text-black dark:text-white mt-1">
                      {getCategoryIcon(viewingGoal.goal_type)}
                      <span className="capitalize">{viewingGoal.goal_type}</span>
                    </div>

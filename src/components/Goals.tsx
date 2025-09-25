@@ -522,7 +522,7 @@ export const Goals: React.FC = () => {
           <Card key={goal.id} className="relative">
             <CardHeader>
               <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 text-black dark:text-white">
                 {getGoalIcon(goal.goal_type)}
                 <div>
                   <CardTitle className="text-lg text-foreground">{goal.title}</CardTitle>
@@ -561,7 +561,7 @@ export const Goals: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-black dark:text-white text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 <span>Due: {new Date(goal.deadline).toLocaleDateString()}</span>
               </div>

@@ -804,7 +804,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <MessageSquare className="h-5 w-5 animate-pulse text-blue-600" />
-          <span>Loading leads...</span>
+          <span className="text-black dark:text-white">Loading leads...</span>
         </div>
       </div>
     );
@@ -815,7 +815,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
       {/* Header - Matches image layout */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2 text-black dark:text-white">
             <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
               <MessageSquare className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
@@ -865,7 +865,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                     Click on any lead to expand and manage engagement progress
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-black dark:text-white">
                   <Badge variant="outline" className="text-sm font-medium">
                     {filteredLeads.length} of {leads.length} Leads
                   </Badge>
@@ -968,7 +968,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                             
                             {/* Contact Information */}
                             <div>
-                              <h4 className="font-medium mb-3 flex items-center gap-2 text-gray-900 dark:text-white">
+                              <h4 className="font-medium mb-3 flex items-center gap-2 text-black dark:text-white text-gray-900 dark:text-white">
                                 <Users className="h-4 w-4" />
                                 Contact Information
                               </h4>
@@ -1020,7 +1020,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                             
                             {/* Engagement Progress - Matches image design */}
                             <div>
-                              <h4 className="font-medium mb-3 flex items-center gap-2 text-gray-900 dark:text-white">
+                              <h4 className="font-medium mb-3 flex items-center gap-2 text-black dark:text-white text-gray-900 dark:text-white">
                                 <Target className="h-4 w-4" />
                                 Engagement Progress
                               </h4>
@@ -1060,7 +1060,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                             {/* DM Script Section */}
                             <div>
                               <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium flex items-center gap-2 text-gray-900 dark:text-white">
+                                <h4 className="font-medium flex items-center gap-2 text-black dark:text-white text-gray-900 dark:text-white">
                                   <MessageCircle className="h-4 w-4" />
                                   DM Script
                                 </h4>
@@ -1108,7 +1108,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                             {/* Lead Notes Section */}
                             <div>
                               <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium flex items-center gap-2 text-gray-900 dark:text-white">
+                                <h4 className="font-medium flex items-center gap-2 text-black dark:text-white text-gray-900 dark:text-white">
                                   <FileText className="h-4 w-4" />
                                   Lead Notes
                                 </h4>
@@ -1174,7 +1174,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
             <CardHeader className="border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-black dark:text-white">
                     <Wand2 className="h-5 w-5 text-blue-600" />
                     Quick DM Templates
                   </CardTitle>
@@ -1266,7 +1266,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
                             
                             return (
                               <div key={`variation-${variationNumber}`} className="space-y-2">
-                                <Label className="flex items-center gap-2">
+                                <Label className="flex items-center gap-2 text-black dark:text-white">
                                   <Badge variant="outline">#{variationNumber}</Badge>
                                   Variation {variationNumber}
                                 </Label>
@@ -1426,7 +1426,7 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
           {/* Engagement Guide Card */}
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-black dark:text-white">
                 <Users className="h-5 w-5 text-green-600" />
                 Engagement Guide
               </CardTitle>

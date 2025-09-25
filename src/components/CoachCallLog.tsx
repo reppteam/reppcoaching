@@ -188,7 +188,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
             Track and manage your coaching calls with students
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-black dark:text-white">
           <Button variant="outline" size="sm" onClick={loadData}>
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -327,7 +327,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-black dark:text-white">
               <Filter className="h-4 w-4" />
               <Label>Filters:</Label>
             </div>
@@ -397,7 +397,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-black dark:text-white">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <div>
                           <p className="font-medium">{new Date(call.call_date).toLocaleDateString()}</p>
@@ -433,7 +433,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-black dark:text-white">
                         <Button
                           variant="ghost"
                           size="sm"

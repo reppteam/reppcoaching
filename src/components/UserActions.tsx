@@ -151,7 +151,7 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
         </DialogTrigger>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <Key className="h-5 w-5" />
               Send Password Reset Email
             </DialogTitle>
@@ -168,14 +168,14 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 border border-red-200 rounded-md">
                 <AlertCircle className="h-4 w-4 text-red-600" />
                 <span className="text-sm text-red-600">{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-md">
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 border border-green-200 rounded-md">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <span className="text-sm text-green-600">{success}</span>
               </div>
@@ -216,7 +216,7 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
         </DialogTrigger>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <Shield className="h-5 w-5 text-red-600" />
               Block User Account
             </DialogTitle>
@@ -246,14 +246,14 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 border border-red-200 rounded-md">
                 <AlertCircle className="h-4 w-4 text-red-600" />
                 <span className="text-sm text-red-600">{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-md">
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 border border-green-200 rounded-md">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <span className="text-sm text-green-600">{success}</span>
               </div>
@@ -295,7 +295,7 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
         </DialogTrigger>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <ShieldOff className="h-5 w-5 text-green-600" />
               Unblock User Account
             </DialogTitle>
@@ -326,14 +326,14 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
             )}
 
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 border border-red-200 rounded-md">
                 <AlertCircle className="h-4 w-4 text-red-600" />
                 <span className="text-sm text-red-600">{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-md">
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 border border-green-200 rounded-md">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <span className="text-sm text-green-600">{success}</span>
               </div>

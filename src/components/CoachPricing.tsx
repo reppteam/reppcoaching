@@ -373,7 +373,7 @@ export function CoachPricing() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <DollarSign className="h-5 w-5 animate-pulse text-brand-blue" />
-          <span>Loading pricing packages...</span>
+          <span className="text-black dark:text-white">Loading pricing packages...</span>
         </div>
       </div>
     );
@@ -384,7 +384,7 @@ export function CoachPricing() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-black dark:text-white">
             <DollarSign className="h-6 w-6 text-green-600" />
             Pricing Management
           </h2>
@@ -576,7 +576,7 @@ export function CoachPricing() {
       <Dialog open={createPackageDialogOpen} onOpenChange={setCreatePackageDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <Plus className="h-5 w-5" />
               Create New Package
             </DialogTitle>
@@ -715,7 +715,7 @@ export function CoachPricing() {
       <Dialog open={editPackageDialogOpen} onOpenChange={setEditPackageDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <Edit className="h-5 w-5" />
               Edit Package
             </DialogTitle>
@@ -842,7 +842,7 @@ export function CoachPricing() {
       <AlertDialog open={deletePackageDialogOpen} onOpenChange={setDeletePackageDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
+            <AlertDialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <Trash2 className="h-5 w-5 text-red-600" />
               Delete Package
             </AlertDialogTitle>

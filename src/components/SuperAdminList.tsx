@@ -179,7 +179,7 @@ export function SuperAdminList() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <Crown className="h-5 w-5 animate-pulse text-purple-500" />
-          <span>Loading Super Administrators...</span>
+          <span className="text-black dark:text-white">Loading Super Administrators...</span>
         </div>
       </div>
     );
@@ -190,7 +190,7 @@ export function SuperAdminList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div >
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2 text-black dark:text-white">
             <Crown className="h-8 w-8 text-purple-500" />
             Super Administrators
           </h1>
@@ -268,7 +268,7 @@ export function SuperAdminList() {
       {/* Search and Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <Search className="h-5 w-5" />
             Search Super Administrators
           </CardTitle>
@@ -294,7 +294,7 @@ export function SuperAdminList() {
       {/* Super Admins List */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <Users className="h-5 w-5" />
             Super Administrator Accounts
             <Badge variant="secondary" className="ml-2">
@@ -333,7 +333,7 @@ export function SuperAdminList() {
                        {editingUser === admin.id ? (
                          // Edit Mode
                          <div className="space-y-3">
-                           <div className="flex items-center gap-2">
+                           <div className="flex items-center gap-2 text-black dark:text-white">
                              <Input
                                value={editForm.firstName}
                                onChange={(e) => handleInputChange('firstName', e.target.value)}
@@ -356,7 +356,7 @@ export function SuperAdminList() {
                                </Badge>
                              )}
                            </div>
-                           <div className="flex items-center gap-2">
+                           <div className="flex items-center gap-2 text-black dark:text-white">
                              <Mail className="h-3 w-3 text-muted-foreground" />
                              <Input
                                value={editForm.email}
@@ -386,7 +386,7 @@ export function SuperAdminList() {
                        ) : (
                          // View Mode
                          <>
-                           <div className="flex items-center gap-2">
+                           <div className="flex items-center gap-2 text-black dark:text-white">
                              <h3 className="font-medium text-lg">
                                {admin.firstName} {admin.lastName}
                              </h3>
@@ -396,7 +396,7 @@ export function SuperAdminList() {
                                </Badge>
                              )}
                            </div>
-                           <div className="flex items-center gap-2 mt-1">
+                           <div className="flex items-center gap-2 text-black dark:text-white mt-1">
                              <Mail className="h-3 w-3 text-muted-foreground" />
                              <span className="text-sm text-muted-foreground">{admin.email}</span>
                            </div>
@@ -489,7 +489,7 @@ export function SuperAdminList() {
       {/* Information Card */}
       {/* <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <Shield className="h-5 w-5" />
             Super Administrator Information
           </CardTitle>

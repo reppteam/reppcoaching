@@ -118,7 +118,7 @@ export function EmailTestPanel() {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-black dark:text-white">
           <Mail className="h-5 w-5" />
           Email Functionality Test Panel
         </CardTitle>
@@ -178,7 +178,7 @@ export function EmailTestPanel() {
         </div>
 
         {result && (
-          <div className={`flex items-center gap-2 p-3 rounded-md ${
+          <div className={`flex items-center gap-2 text-black dark:text-white p-3 rounded-md ${
             result.type === 'success' 
               ? 'bg-green-50 border border-green-200' 
               : 'bg-red-50 border border-red-200'

@@ -801,7 +801,7 @@ export function DataEditForm({ type, data, mode, onSubmit, onCancel }: DataEditF
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             {mode === 'create' ? <Plus className="h-5 w-5" /> : <X className="h-5 w-5" />}
             {mode === 'create' ? 'Create New' : 'Edit'} {type}
           </CardTitle>

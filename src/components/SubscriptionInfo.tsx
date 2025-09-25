@@ -39,7 +39,7 @@ export function SubscriptionInfo({ user }: SubscriptionInfoProps) {
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <CreditCard className="h-5 w-5" />
             Subscription Info
           </CardTitle>

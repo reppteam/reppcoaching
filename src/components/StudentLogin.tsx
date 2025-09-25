@@ -208,11 +208,11 @@ export function StudentLogin() {
             <CardContent>
               <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'signup')}>
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="login" className="flex items-center gap-2">
+                  <TabsTrigger value="login" className="flex items-center gap-2 text-black dark:text-white">
                     <LogIn className="h-4 w-4" />
                     Login
                   </TabsTrigger>
-                  <TabsTrigger value="signup" className="flex items-center gap-2">
+                  <TabsTrigger value="signup" className="flex items-center gap-2 text-black dark:text-white">
                     <UserPlus className="h-4 w-4" />
                     Sign Up
                   </TabsTrigger>

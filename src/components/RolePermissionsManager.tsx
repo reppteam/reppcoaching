@@ -288,7 +288,7 @@ export function RolePermissionsManager() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-black dark:text-white">
             <Crown className="h-6 w-6 text-purple-600" />
             Role & Permissions Manager
           </h2>
@@ -377,7 +377,7 @@ export function RolePermissionsManager() {
               {selectedRole && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                       {React.createElement(ROLES.find(r => r.id === selectedRole)?.icon || User, { className: "h-5 w-5" })}
                       {ROLES.find(r => r.id === selectedRole)?.name} Permissions
                     </CardTitle>
@@ -393,7 +393,7 @@ export function RolePermissionsManager() {
                         
                         return (
                           <div key={category}>
-                            <div className={`flex items-center gap-2 mb-3 ${getCategoryColor(category)}`}>
+                            <div className={`flex items-center gap-2 text-black dark:text-white mb-3 ${getCategoryColor(category)}`}>
                               {getCategoryIcon(category)}
                               <h4 className="font-medium capitalize">{category} Permissions</h4>
                               <Badge variant="outline" className="text-xs">
@@ -454,7 +454,7 @@ export function RolePermissionsManager() {
               return (
                 <Card key={category}>
                   <CardHeader>
-                    <CardTitle className={`flex items-center gap-2 capitalize ${getCategoryColor(category)}`}>
+                    <CardTitle className={`flex items-center gap-2 text-black dark:text-white capitalize ${getCategoryColor(category)}`}>
                       {getCategoryIcon(category)}
                       {category} Permissions
                     </CardTitle>

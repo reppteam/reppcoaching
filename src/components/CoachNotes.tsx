@@ -184,7 +184,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
             Manage your notes about students and coaching sessions
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-black dark:text-white">
           <Button variant="outline" size="sm" onClick={loadData}>
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -285,7 +285,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 flex-1">
+            <div className="flex items-center gap-2 text-black dark:text-white flex-1">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search notes..."
@@ -295,7 +295,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
               />
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <Filter className="h-4 w-4" />
                 <Label>Filters:</Label>
               </div>
@@ -371,7 +371,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium">
@@ -384,7 +384,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -558,7 +558,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
               {/* Created Date */}
               <div>
                 <Label className="text-sm font-medium text-muted-foreground">Created On</Label>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 text-black dark:text-white mt-1">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm">
                     {new Date(viewingNote.created_at).toLocaleString()}

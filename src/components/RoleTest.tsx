@@ -45,7 +45,7 @@ export function RoleTest() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <Users className="h-5 w-5" />
             Available Roles in 8base
           </CardTitle>

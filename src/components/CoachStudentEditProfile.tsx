@@ -490,7 +490,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
               </div>
               <Badge className="bg-blue-600 dark:bg-blue-500 text-white">Paid Student</Badge>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-black dark:text-white">
               <Button
                 variant="ghost"
                 size="sm"
@@ -807,7 +807,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
                       {/* Current Goals from Profile */}
                       {formData.goals && formData.goals.trim() && (
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                             <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                             <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Profile Goals</span>
                           </div>
@@ -821,7 +821,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
                           <div key={goal.id} className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                                   <h4 className="font-semibold text-gray-900 dark:text-gray-100">{goal.title}</h4>
                                   <Badge 
                                     variant="outline" 
@@ -903,7 +903,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                      <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 text-black dark:text-white">
                         <Calculator className="h-5 w-5" />
                         Profit Calculator
                       </CardTitle>
@@ -918,7 +918,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
                 <CardContent>
                   <div className="space-y-4">
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                         <Calculator className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                         <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Student's Profit Calculator</span>
                       </div>
@@ -967,7 +967,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
                       {notes.map((note) => (
                         <div key={note.id} className="p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                           <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 text-black dark:text-white">
                               <FileText className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                               <h4 className="font-semibold text-gray-900 dark:text-gray-100">{note.title}</h4>
                             </div>

@@ -282,7 +282,7 @@ export function RolePermissionsMatrix({ currentUser, onRoleChange, onPermissionC
       {/* Detailed Permissions Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <Settings className="h-5 w-5" />
             Detailed Permissions Matrix
           </CardTitle>
@@ -345,7 +345,7 @@ export function RolePermissionsMatrix({ currentUser, onRoleChange, onPermissionC
       {currentUser && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-black dark:text-white">
               <UserIcon className="h-5 w-5" />
               Your Current Access Level
             </CardTitle>
@@ -372,7 +372,7 @@ export function RolePermissionsMatrix({ currentUser, onRoleChange, onPermissionC
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h4 className="font-medium text-sm mb-3 text-green-600 flex items-center gap-2">
+                  <h4 className="font-medium text-sm mb-3 text-green-600 flex items-center gap-2 text-black dark:text-white">
                     <Unlock className="h-4 w-4" />
                     What You Can Do
                   </h4>
@@ -391,7 +391,7 @@ export function RolePermissionsMatrix({ currentUser, onRoleChange, onPermissionC
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-sm mb-3 text-red-600 flex items-center gap-2">
+                  <h4 className="font-medium text-sm mb-3 text-red-600 flex items-center gap-2 text-black dark:text-white">
                     <Lock className="h-4 w-4" />
                     What You Cannot Do
                   </h4>

@@ -168,7 +168,7 @@ export function UniversalRegistration({ onSuccess, onCancel }: UniversalRegistra
   const renderStudentForm = () => (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-black dark:text-white">
           <GraduationCap className="h-5 w-5" />
           Student Registration
         </CardTitle>
@@ -309,7 +309,7 @@ export function UniversalRegistration({ onSuccess, onCancel }: UniversalRegistra
   const renderCoachForm = () => (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-black dark:text-white">
           <User className="h-5 w-5" />
           Coach Registration
         </CardTitle>

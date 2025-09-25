@@ -234,7 +234,7 @@ export function CoachProfileDashboard() {
             Manage your coach profile and view your students
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-black dark:text-white">
           <Button onClick={loadCoachProfile} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
@@ -444,12 +444,12 @@ export function CoachProfileDashboard() {
                         <TableCell>
                           <div className="space-y-1">
                             {student.phone && (
-                              <div className="flex items-center gap-2 text-sm">
+                              <div className="flex items-center gap-2 text-black dark:text-white text-sm">
                                 <Phone className="h-3 w-3" />
                                 {student.phone}
                               </div>
                             )}
-                            <div className="flex items-center gap-2 text-sm">
+                            <div className="flex items-center gap-2 text-black dark:text-white text-sm">
                               <Mail className="h-3 w-3" />
                               {student.email}
                             </div>
@@ -463,7 +463,7 @@ export function CoachProfileDashboard() {
                               </div>
                             )}
                             {student.location && (
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2 text-black dark:text-white text-sm text-muted-foreground">
                                 <MapPin className="h-3 w-3" />
                                 {student.location}
                               </div>

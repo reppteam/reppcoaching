@@ -29,7 +29,7 @@ export function StudentWeekOverview({ student, showDetails = false, className = 
     return (
       <Card className={className}>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white text-base">
             <UserIcon className="h-4 w-4 text-brand-blue" />
             {student.firstName} {student.lastName}
           </CardTitle>

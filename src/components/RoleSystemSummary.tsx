@@ -79,7 +79,7 @@ export function RoleSystemSummary() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <CheckCircle className="h-5 w-5 text-green-600" />
             Role System Implementation Status
           </CardTitle>
@@ -93,7 +93,7 @@ export function RoleSystemSummary() {
               <Card key={info.role} className="border-2">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="text-base flex items-center gap-2 text-black dark:text-white">
                       {info.icon}
                       {info.role}
                     </CardTitle>
@@ -142,7 +142,7 @@ export function RoleSystemSummary() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <ShieldCheck className="h-5 w-5 text-blue-600" />
             Coach Pricing CRUD Features
           </CardTitle>
@@ -208,7 +208,7 @@ export function RoleSystemSummary() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <AlertTriangle className="h-5 w-5 text-orange-600" />
             Demo Account Access
           </CardTitle>

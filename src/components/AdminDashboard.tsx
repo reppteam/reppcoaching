@@ -149,7 +149,7 @@ export function AdminDashboard() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <Shield className="h-5 w-5 animate-pulse text-brand-blue" />
-          <span>Loading admin dashboard...</span>
+          <span className="text-black dark:text-white">Loading admin dashboard...</span>
         </div>
       </div>
     );
@@ -166,7 +166,7 @@ export function AdminDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="flex items-center gap-2">
+        <h1 className="flex items-center gap-2 text-black dark:text-white">
           <Shield className="h-6 w-6 text-brand-blue" />
           Admin Dashboard
         </h1>
@@ -182,7 +182,7 @@ export function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Assigned Students</p>
-                <p className="text-2xl font-bold">{assignedStudents.length}</p>
+                <p className="text-2xl font-bold text-foreground">{assignedStudents.length}</p>
               </div>
               <Users className="h-8 w-8 text-blue-600 opacity-60" />
             </div>
@@ -194,7 +194,7 @@ export function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Active Students</p>
-                <p className="text-2xl font-bold text-green-600">{activeStudents.length}</p>
+                <p className="text-2xl font-bold text-foreground">{activeStudents.length}</p>
               </div>
               <Activity className="h-8 w-8 text-green-600 opacity-60" />
             </div>
@@ -206,7 +206,7 @@ export function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Paid Students</p>
-                <p className="text-2xl font-bold text-emerald-600">{paidStudents.length}</p>
+                <p className="text-2xl font-bold text-foreground">{paidStudents.length}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-emerald-600 opacity-60" />
             </div>
@@ -218,7 +218,7 @@ export function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Total Leads</p>
-                <p className="text-2xl font-bold text-orange-600">{totalLeads}</p>
+                <p className="text-2xl font-bold text-foreground">{totalLeads}</p>
               </div>
               <Target className="h-8 w-8 text-orange-600 opacity-60" />
             </div>
@@ -230,7 +230,7 @@ export function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold text-green-600">${Math.round(totalRevenue / 1000)}k</p>
+                <p className="text-2xl font-bold text-foreground">${Math.round(totalRevenue / 1000)}k</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-600 opacity-60" />
             </div>
@@ -242,7 +242,7 @@ export function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Call Logs</p>
-                <p className="text-2xl font-bold text-purple-600">{callLogs.length}</p>
+                <p className="text-2xl font-bold text-foreground">{callLogs.length}</p>
               </div>
               <Phone className="h-8 w-8 text-purple-600 opacity-60" />
             </div>
@@ -283,7 +283,7 @@ export function AdminDashboard() {
                       <div key={student.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <div className="font-medium">{student.firstName} {student.lastName}</div>
+                            <div className="font-medium text-foreground">{student.firstName} {student.lastName}</div>
                             <div className="text-sm text-muted-foreground">{student.email}</div>
                           </div>
                           <Badge className={student.has_paid ? 'bg-emerald-100 text-emerald-800' : 'bg-muted text-muted-foreground'}>
@@ -294,15 +294,15 @@ export function AdminDashboard() {
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
                             <div className="text-muted-foreground">Reports</div>
-                            <div className="font-medium">{studentReports.length}</div>
+                            <div className="font-medium text-foreground">{studentReports.length}</div>
                           </div>
                           <div>
                             <div className="text-muted-foreground">Leads</div>
-                            <div className="font-medium">{studentLeads.length}</div>
+                            <div className="font-medium text-foreground">{studentLeads.length}</div>
                           </div>
                           <div>
                             <div className="text-muted-foreground">Goals</div>
-                            <div className="font-medium">{studentGoals.length}</div>
+                            <div className="font-medium text-foreground">{studentGoals.length}</div>
                           </div>
                         </div>
                         
@@ -395,7 +395,7 @@ export function AdminDashboard() {
             {/* Call Log Tool */}
           <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <Phone className="h-5 w-5" />
                   Call Log Tool
                 </CardTitle>
@@ -414,7 +414,7 @@ export function AdminDashboard() {
             {/* Note Tool */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <FileText className="h-5 w-5" />
                   Note Tool
                 </CardTitle>
@@ -433,7 +433,7 @@ export function AdminDashboard() {
             {/* Week Tracker */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <Calendar className="h-5 w-5" />
                   Week Tracker
                 </CardTitle>
@@ -449,7 +449,7 @@ export function AdminDashboard() {
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <Settings className="h-5 w-5" />
                   Quick Actions
                 </CardTitle>

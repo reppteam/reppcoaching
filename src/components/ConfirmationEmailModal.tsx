@@ -104,7 +104,7 @@ export function ConfirmationEmailModal({
           {/* Account Details */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
+              <CardTitle className="flex items-center gap-2 text-black dark:text-white text-lg">
                 {userInfo.icon}
                 Account Details
               </CardTitle>
@@ -145,7 +145,7 @@ export function ConfirmationEmailModal({
           {/* Email Confirmation Details */}
           <Card className="bg-blue-50 border-blue-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-900">
+              <CardTitle className="flex items-center gap-2 text-black dark:text-white text-blue-900">
                 <Mail className="h-5 w-5" />
                 Confirmation Email Sent
               </CardTitle>
@@ -187,7 +187,7 @@ export function ConfirmationEmailModal({
           {/* Next Steps */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                 <ArrowRight className="h-5 w-5" />
                 Next Steps
               </CardTitle>

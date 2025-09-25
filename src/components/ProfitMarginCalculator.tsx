@@ -365,7 +365,7 @@ export function ProfitMarginCalculator() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <Calculator className="h-5 w-5 animate-pulse text-brand-blue" />
-          <span>Loading calculator...</span>
+          <span className="text-black dark:text-white">Loading calculator...</span>
         </div>
       </div>
     );
@@ -376,7 +376,7 @@ export function ProfitMarginCalculator() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2 text-gray-900 dark:text-white">
+          <h2 className="flex items-center gap-2 text-black dark:text-white text-gray-900 dark:text-white">
             <Calculator className="h-6 w-6 text-brand-blue dark:text-white" />
             Profit Margin Calculator
           </h2>

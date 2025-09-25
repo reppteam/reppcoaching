@@ -200,7 +200,7 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
             Manage your assigned students and track their progress
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-black dark:text-white">
           <Button variant="outline" onClick={loadStudentData}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
@@ -390,7 +390,7 @@ export const CoachStudentManagement: React.FC<CoachStudentManagementProps> = ({ 
               <p className="text-sm text-muted-foreground">
                 Showing {filteredAndSortedStudents.length} of {students.length} students
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <Button 
                   variant="outline" 
                   size="sm"

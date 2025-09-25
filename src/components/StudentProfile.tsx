@@ -202,7 +202,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
         <CardHeader>
       <div className="flex items-center justify-between">
           <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                 <User className="h-5 w-5" />
                 {student.firstName} {student.lastName}
               </CardTitle>
@@ -217,29 +217,29 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Location:</span>
                 <span>{profile?.location || 'Not specified'}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <Target className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Target Market:</span>
                 <span>{profile?.target_market || 'Not specified'}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Preferred Contact:</span>
                 <span>{profile?.preferred_contact_method || 'Not specified'}</span>
               </div>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Availability:</span>
                 <span>{profile?.availability || 'Not specified'}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <Award className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Business:</span>
                 <span>{profile?.business_name || 'Not specified'}</span>
@@ -269,7 +269,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
             {/* Strengths */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <Star className="h-5 w-5 text-green-600" />
                   Strengths
                 </CardTitle>
@@ -284,7 +284,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
             {/* Challenges */}
           <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <AlertTriangle className="h-5 w-5 text-orange-600" />
                   Challenges
                 </CardTitle>
@@ -299,7 +299,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
             {/* Goals */}
             <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <TargetIcon className="h-5 w-5 text-blue-600" />
                   Goals
                 </CardTitle>
@@ -314,7 +314,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
             {/* Notes */}
             <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                   <FileText className="h-5 w-5 text-purple-600" />
                   General Notes
                 </CardTitle>
@@ -403,7 +403,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
               <Card key={note.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                           <Badge variant={note.visibility === 'public' ? 'default' : 'secondary'}>
                             {note.visibility}
                           </Badge>
@@ -433,7 +433,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                 {/* Current Goals */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                       <Target className="h-5 w-5 text-blue-600" />
                       Current Goals
                     </CardTitle>
@@ -477,7 +477,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                 {/* Goal History */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                       <TrendingUp className="h-5 w-5 text-green-600" />
                       Goal History
                     </CardTitle>
@@ -517,7 +517,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                 {/* Lead Summary */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                       <Users className="h-5 w-5 text-blue-600" />
                       Lead Summary
                     </CardTitle>
@@ -547,7 +547,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                 {/* Top Sources */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                       <TrendingUp className="h-5 w-5 text-green-600" />
                       Top Sources
                     </CardTitle>
@@ -556,7 +556,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Referrals</span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                           <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div className="bg-blue-600 h-2 rounded-full" style={{width: '40%'}}></div>
                           </div>
@@ -565,7 +565,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Social Media</span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                           <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div className="bg-green-600 h-2 rounded-full" style={{width: '30%'}}></div>
                           </div>
@@ -574,7 +574,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Website</span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                           <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div className="bg-orange-600 h-2 rounded-full" style={{width: '20%'}}></div>
                           </div>
@@ -583,7 +583,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Other</span>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                           <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div className="bg-gray-600 h-2 rounded-full" style={{width: '10%'}}></div>
                           </div>
@@ -597,7 +597,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                 {/* Recent Activity */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                       <Clock className="h-5 w-5 text-orange-600" />
                       Recent Activity
                     </CardTitle>
@@ -635,7 +635,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
             <TabsContent value="profit" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                     <DollarSign className="h-5 w-5 text-green-600" />
                     Student's Profit Calculator
                   </CardTitle>
@@ -648,7 +648,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                     {/* Quick Financial Overview */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                           <DollarSign className="h-5 w-5 text-green-600" />
                           <span className="text-sm font-medium text-green-900 dark:text-green-100">Total Revenue</span>
                         </div>
@@ -656,7 +656,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                         <p className="text-xs text-green-700 dark:text-green-300">This month</p>
                       </div>
                       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                           <TrendingUp className="h-5 w-5 text-blue-600" />
                           <span className="text-sm font-medium text-blue-900 dark:text-blue-100">Net Profit</span>
                         </div>
@@ -664,7 +664,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                         <p className="text-xs text-blue-700 dark:text-blue-300">After expenses</p>
                       </div>
                       <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                           <Target className="h-5 w-5 text-orange-600" />
                           <span className="text-sm font-medium text-orange-900 dark:text-orange-100">Profit Margin</span>
                         </div>
@@ -672,7 +672,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
                         <p className="text-xs text-orange-700 dark:text-orange-300">Industry avg: 45%</p>
                       </div>
                       <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                           <Users className="h-5 w-5 text-purple-600" />
                           <span className="text-sm font-medium text-purple-900 dark:text-purple-100">Avg. Order Value</span>
                         </div>

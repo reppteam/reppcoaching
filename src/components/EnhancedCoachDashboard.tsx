@@ -735,7 +735,7 @@ export function EnhancedCoachDashboard() {
                 <CompanyWeekDisplay variant="compact" />
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-black dark:text-white">
               <Button onClick={loadCoachData} variant="outline" size="sm" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh Data
@@ -862,7 +862,7 @@ export function EnhancedCoachDashboard() {
                   
                   {/* Action Buttons */}
                   <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       {customDateRange.start && customDateRange.end && (
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                           <Calendar className="h-4 w-4 inline mr-1" />
@@ -1053,7 +1053,7 @@ export function EnhancedCoachDashboard() {
         {getStudentsWithoutRecentReports().length > 0 && (
           <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <AlertCircle className="h-5 w-5 text-orange-500 dark:text-orange-400" />
                 <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Alerts</CardTitle>
               </div>
@@ -1207,7 +1207,7 @@ export function EnhancedCoachDashboard() {
                           )}
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 text-black dark:text-white">
                             {student.firstName} {student.lastName}
                             {totalRevenue > 1000 && <Crown className="h-4 w-4 text-yellow-500" />}
                             {recentReports > 0 && <Sparkles className="h-4 w-4 text-blue-500" />}
@@ -1250,28 +1250,28 @@ export function EnhancedCoachDashboard() {
                     {/* First Row - Basic Metrics */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <FileText className="h-4 w-4 text-blue-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reports</p>
                         </div>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">{reports.length}</p>
                       </div>
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <Clock className="h-4 w-4 text-green-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Recent Reports</p>
                         </div>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">{recentReports}</p>
                       </div>
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <TrendingUp className="h-4 w-4 text-emerald-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue</p>
                         </div>
                         <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">${totalRevenue.toLocaleString()}</p>
                       </div>
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <DollarSign className="h-4 w-4 text-green-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Profit</p>
                         </div>
@@ -1282,28 +1282,28 @@ export function EnhancedCoachDashboard() {
                     {/* Second Row - Shoot Metrics */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <Camera className="h-4 w-4 text-purple-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Paid Shoots</p>
                         </div>
                         <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{totalPaidShoots}</p>
                       </div>
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <Zap className="h-4 w-4 text-orange-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Free Shoots</p>
                         </div>
                         <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{totalFreeShoots}</p>
                       </div>
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <UserCheck className="h-4 w-4 text-indigo-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">New Clients</p>
                         </div>
                         <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{totalNewClients}</p>
                       </div>
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <BarChart3 className="h-4 w-4 text-cyan-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg AOV</p>
                         </div>
@@ -1314,21 +1314,21 @@ export function EnhancedCoachDashboard() {
                     {/* Third Row - Cost Metrics */}
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <TrendingDown className="h-4 w-4 text-red-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
                         </div>
                         <p className="text-2xl font-bold text-red-600 dark:text-red-400">${totalExpenses.toLocaleString()}</p>
                       </div>
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <Shield className="h-4 w-4 text-amber-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Editing Cost</p>
                         </div>
                         <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">${totalEditingCost.toLocaleString()}</p>
                       </div>
                       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-black dark:border-gray-700 hover:shadow-sm transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                           <Award className="h-4 w-4 text-pink-500" />
                           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Latest Status</p>
                         </div>
@@ -1347,7 +1347,7 @@ export function EnhancedCoachDashboard() {
                     {/* Latest Report Details */}
                     {latestReport && (
                       <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                        <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center gap-2 text-black dark:text-white mb-3">
                           <Star className="h-5 w-5 text-yellow-500" />
                           <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Latest Report Details</h4>
                         </div>

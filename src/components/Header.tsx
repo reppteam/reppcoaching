@@ -96,7 +96,7 @@ export function Header({
                 variant="outline"
                 size="sm"
                 onClick={onEditProfile}
-                className="text-xs px-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="text-xs px-2"
               >
                 <Edit className="h-4 w-4 mr-1" /> Edit Profile
               </Button>
@@ -107,14 +107,14 @@ export function Header({
           <div className="flex items-center gap-3">
             {/* Hide on small screens */}
             {originalUser && (
-              <div className="hidden lg:flex items-center gap-2">
+              <div className="hidden lg:flex items-center gap-2 text-black dark:text-white">
                 <Badge
                   variant="outline"
                   className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
                 >
                   Viewing as: {user.firstName} {user.lastName}
                 </Badge>
-                <Button variant="ghost" size="sm" onClick={logout} className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <Button variant="ghost" size="sm" onClick={logout}>
                   <ArrowLeft className="mr-2 h-3 w-3" />
                   Return to Super Admin
                 </Button>
@@ -124,15 +124,15 @@ export function Header({
 
             {/* User Info */}
             <div className="hidden md:block text-right truncate max-w-[160px]">
-              <p className="text-sm font-medium truncate text-gray-900 dark:text-white">{user.firstName} {user.lastName}</p>
-              <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+              <p className="text-sm font-medium truncate text-foreground">{user.firstName} {user.lastName}</p>
+              <p className="text-xs text-muted-foreground truncate">
                 {user.email}
               </p>
             </div>
 
             <ThemeToggle />
 
-            <Button variant="ghost" size="sm" onClick={logout} className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+            <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut className="h-4 w-4" />
               <span className="sr-only">Logout</span>
             </Button>

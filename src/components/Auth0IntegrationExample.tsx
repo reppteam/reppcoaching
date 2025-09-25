@@ -15,7 +15,7 @@ export function Auth0IntegrationExample() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Loading...</span>
+          <span className="text-black dark:text-white">Loading...</span>
         </div>
       </div>
     );
@@ -75,7 +75,7 @@ export function Auth0IntegrationExample() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             {getRoleIcon()}
             Welcome, {user.name}!
           </CardTitle>

@@ -61,7 +61,7 @@ export function CompanyWeekDisplay({ className = '', variant = 'compact' }: Comp
 
   if (variant === 'compact') {
     return (
-      <div className={`flex items-center gap-2 ${className}`}>
+      <div className={`flex items-center gap-2 text-black dark:text-white ${className}`}>
         <Calendar className="h-4 w-4 text-muted-foreground" />
         <span className="text-sm font-medium">Week {weekNumber}</span>
         <Badge variant="outline" className={weekStatus.color}>
@@ -74,7 +74,7 @@ export function CompanyWeekDisplay({ className = '', variant = 'compact' }: Comp
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-2 text-black dark:text-white text-lg">
           <Calendar className="h-5 w-5 text-blue-600" />
           Company Week Tracker
         </CardTitle>
@@ -124,7 +124,7 @@ export function CompanyWeekDisplay({ className = '', variant = 'compact' }: Comp
 
           {/* ISO 8601 Info */}
           <div className="pt-2 border-t">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-black dark:text-white text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
               <span>ISO 8601 Standard (Monday-to-Monday)</span>
             </div>

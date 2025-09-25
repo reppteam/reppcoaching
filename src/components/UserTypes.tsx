@@ -205,7 +205,7 @@ export const UserTypes: React.FC = () => {
         {roleStats.map((stat) => (
           <Card key={stat.role}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                 {getRoleIcon(stat.role)}
                 {getRoleDescription(stat.role)}
                 <Badge className={getRoleBadgeColor(stat.role)}>
@@ -284,7 +284,7 @@ export const UserTypes: React.FC = () => {
                   <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       {getRoleIcon(user.role)}
                       <Badge className={getRoleBadgeColor(user.role)}>
                         {user.role}

@@ -250,7 +250,7 @@ export function SuperAdminAnalytics() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-5 w-5 animate-spin text-brand-blue" />
-          <span>Loading analytics...</span>
+          <span className="text-black dark:text-white">Loading analytics...</span>
         </div>
       </div>
     );
@@ -261,7 +261,7 @@ export function SuperAdminAnalytics() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-black dark:text-white">
             <BarChart3 className="h-6 w-6 text-brand-blue" />
             System Analytics
           </h2>

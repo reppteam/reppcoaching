@@ -49,19 +49,19 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBackToLogin })
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-6 w-6 text-green-600" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
-            <CardTitle className="text-2xl font-bold">Check Your Email</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold text-foreground">Check Your Email</CardTitle>
+            <CardDescription className="text-muted-foreground">
               {message}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Alert>
               <Mail className="h-4 w-4" />
-              <AlertDescription>
-                We've sent a password reset link to <strong>{email}</strong>. 
+              <AlertDescription className="text-foreground">
+                We've sent a password reset link to <strong className="text-foreground">{email}</strong>. 
                 Please check your inbox and follow the instructions to reset your password.
               </AlertDescription>
             </Alert>
@@ -96,15 +96,15 @@ export const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBackToLogin })
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Forgot Password?</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-bold text-foreground">Forgot Password?</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Enter your email address and we'll send you a link to reset your password.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email" className="text-foreground">Email Address</Label>
               <Input
                 id="email"
                 type="email"

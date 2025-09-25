@@ -108,7 +108,7 @@ export function RoleImplementationStatus() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <CheckCircle className="h-5 w-5 text-green-600" />
             Role-Based Access Control - Implementation Complete ✅
           </CardTitle>
@@ -122,7 +122,7 @@ export function RoleImplementationStatus() {
               <Card key={roleId} className={`border-2 ${user?.role === roleId ? 'border-blue-500 bg-blue-50' : ''}`}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       {spec.icon}
                       <CardTitle className="text-base">{spec.name}</CardTitle>
                     </div>
@@ -149,7 +149,7 @@ export function RoleImplementationStatus() {
       {currentUserRole && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-black dark:text-white">
               {currentUserRole.icon}
               Your Current Access Level: {currentUserRole.name}
             </CardTitle>
@@ -224,7 +224,7 @@ export function RoleImplementationStatus() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 border rounded-lg bg-blue-50">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                 <BarChart3 className="h-5 w-5 text-blue-600" />
                 <span className="font-medium">KPI Dashboard Sharing</span>
               </div>
@@ -234,7 +234,7 @@ export function RoleImplementationStatus() {
             </div>
 
             <div className="p-4 border rounded-lg bg-purple-50">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                 <Crown className="h-5 w-5 text-purple-600" />
                 <span className="font-medium">Permissions Interface</span>
               </div>
@@ -244,7 +244,7 @@ export function RoleImplementationStatus() {
             </div>
 
             <div className="p-4 border rounded-lg bg-green-50">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                 <Shield className="h-5 w-5 text-green-600" />
                 <span className="font-medium">Role-Based Access</span>
               </div>
@@ -265,19 +265,19 @@ export function RoleImplementationStatus() {
           <div className="p-4 bg-muted rounded-lg">
             <div className="font-medium mb-3">All accounts use password: "password"</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <Crown className="h-4 w-4 text-purple-600" />
                 <span>Super Admin: superadmin@example.com</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <ShieldCheck className="h-4 w-4 text-blue-600" />
                 <span>Coach Manager: coachmanager@example.com</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <Shield className="h-4 w-4 text-green-600" />
                 <span>Coach: coach@example.com</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-black dark:text-white">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span>Student: student@example.com</span>
               </div>

@@ -243,7 +243,7 @@ export function CoachManagement() {
             Manage coaches and their assigned students
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-black dark:text-white">
           <Button onClick={loadCoaches} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
@@ -254,7 +254,7 @@ export function CoachManagement() {
       {/* Search and Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <Search className="h-5 w-5" />
             Search & Filter Coaches
           </CardTitle>
@@ -279,7 +279,7 @@ export function CoachManagement() {
       {/* Coaches Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-black dark:text-white">
             <Users className="h-5 w-5" />
             All Coaches ({filteredCoaches.length})
           </CardTitle>
@@ -327,7 +327,7 @@ export function CoachManagement() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Mail className="h-4 w-4 text-muted-foreground" />
                       {coach.email}
                     </div>
@@ -345,19 +345,19 @@ export function CoachManagement() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <UserCheck className="h-4 w-4 text-muted-foreground" />
                       {getStudentCount(coach)}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       {new Date(coach.createdAt).toLocaleDateString()}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Button
                         variant="outline"
                         size="sm"
@@ -476,7 +476,7 @@ export function CoachManagement() {
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-muted-foreground">Email</Label>
-                        <p className="flex items-center gap-2">
+                        <p className="flex items-center gap-2 text-black dark:text-white">
                           <Mail className="h-4 w-4" />
                           {selectedCoach.email}
                         </p>
@@ -501,7 +501,7 @@ export function CoachManagement() {
                     </div>
                     <div className="mt-4">
                       <Label className="text-sm font-medium text-muted-foreground">Created</Label>
-                      <p className="flex items-center gap-2 mt-1">
+                      <p className="flex items-center gap-2 text-black dark:text-white mt-1">
                         <Calendar className="h-4 w-4" />
                         {new Date(selectedCoach.createdAt).toLocaleDateString()}
                       </p>
@@ -523,21 +523,21 @@ export function CoachManagement() {
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div>
                               <Label className="text-sm font-medium text-muted-foreground">Phone</Label>
-                              <p className="flex items-center gap-2">
+                              <p className="flex items-center gap-2 text-black dark:text-white">
                                 <Phone className="h-4 w-4" />
                                 {student.phone || 'Not provided'}
                               </p>
                             </div>
                             <div>
                               <Label className="text-sm font-medium text-muted-foreground">Business</Label>
-                              <p className="flex items-center gap-2">
+                              <p className="flex items-center gap-2 text-black dark:text-white">
                                 <Target className="h-4 w-4" />
                                 {student.business_name || 'Not provided'}
                               </p>
                             </div>
                             <div>
                               <Label className="text-sm font-medium text-muted-foreground">Location</Label>
-                              <p className="flex items-center gap-2">
+                              <p className="flex items-center gap-2 text-black dark:text-white">
                                 <MapPin className="h-4 w-4" />
                                 {student.location || 'Not provided'}
                               </p>

@@ -257,7 +257,7 @@ export const CoachMessaging: React.FC<CoachMessagingProps> = ({ coachId }) => {
             Communicate with your students
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-black dark:text-white">
           <Button variant="outline" onClick={loadData}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
@@ -334,19 +334,19 @@ export const CoachMessaging: React.FC<CoachMessagingProps> = ({ coachId }) => {
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="inbox" className="flex items-center gap-2">
+          <TabsTrigger value="inbox" className="flex items-center gap-2 text-black dark:text-white">
             <Inbox className="h-4 w-4" />
             Inbox
           </TabsTrigger>
-          <TabsTrigger value="sent" className="flex items-center gap-2">
+          <TabsTrigger value="sent" className="flex items-center gap-2 text-black dark:text-white">
             <Send className="h-4 w-4" />
             Sent
           </TabsTrigger>
-          <TabsTrigger value="drafts" className="flex items-center gap-2">
+          <TabsTrigger value="drafts" className="flex items-center gap-2 text-black dark:text-white">
             <FileText className="h-4 w-4" />
             Drafts
           </TabsTrigger>
-          <TabsTrigger value="templates" className="flex items-center gap-2">
+          <TabsTrigger value="templates" className="flex items-center gap-2 text-black dark:text-white">
             <Star className="h-4 w-4" />
             Templates
           </TabsTrigger>
@@ -462,7 +462,7 @@ export const CoachMessaging: React.FC<CoachMessagingProps> = ({ coachId }) => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                           {getMessageTypeIcon(message.message_type)}
                           <span className="capitalize">{message.message_type}</span>
                         </div>
@@ -716,7 +716,7 @@ export const CoachMessaging: React.FC<CoachMessagingProps> = ({ coachId }) => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium">Type</Label>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 text-black dark:text-white mt-1">
                     {getMessageTypeIcon(viewingMessage.message_type)}
                     <span className="capitalize">{viewingMessage.message_type}</span>
                   </div>

@@ -879,7 +879,7 @@ export function Leads() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <MessageSquare className="h-5 w-5 animate-pulse text-brand-blue" />
-          <span>Loading leads...</span>
+          <span className="text-black dark:text-white">Loading leads...</span>
         </div>
       </div>
     );
@@ -890,7 +890,7 @@ export function Leads() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-black dark:text-white">
             <MessageSquare className="h-6 w-6 text-brand-blue" />
             Lead Management & Outreach
           </h2>
@@ -1469,7 +1469,7 @@ export function Leads() {
                             
                             {/* Contact Information Editor */}
                             <div>
-                              <h4 className="font-medium mb-3 flex items-center gap-2">
+                              <h4 className="font-medium mb-3 flex items-center gap-2 text-black dark:text-white">
                                 <Users className="h-4 w-4" />
                                 Contact Information
                               </h4>
@@ -1502,7 +1502,7 @@ export function Leads() {
                             
                             {/* Engagement Tracking */}
                             <div>
-                              <h4 className="font-medium mb-3 flex items-center gap-2">
+                              <h4 className="font-medium mb-3 flex items-center gap-2 text-black dark:text-white">
                                 <Target className="h-4 w-4" />
                                 Engagement Progress
                               </h4>
@@ -1542,7 +1542,7 @@ export function Leads() {
                             {/* DM Script Preview */}
                             <div>
                               <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium flex items-center gap-2">
+                                <h4 className="font-medium flex items-center gap-2 text-black dark:text-white">
                                   <MessageCircle className="h-4 w-4" />
                                   DM Script
                                 </h4>
@@ -1592,7 +1592,7 @@ export function Leads() {
 
                             {/* Lead Notes */}
                             <div>
-                              <h4 className="font-medium mb-3 flex items-center gap-2">
+                              <h4 className="font-medium mb-3 flex items-center gap-2 text-black dark:text-white">
                                 <FileText className="h-4 w-4" />
                                 Lead Notes
                               </h4>
@@ -1660,7 +1660,7 @@ export function Leads() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                     <Wand2 className="h-5 w-5" />
                     Smart DM Templates
                   </CardTitle>
@@ -1752,7 +1752,7 @@ export function Leads() {
                             
                             return (
                               <div key={`variation-${variationNumber}`} className="space-y-2">
-                                <Label className="flex items-center gap-2">
+                                <Label className="flex items-center gap-2 text-black dark:text-white">
                                   <Badge variant="outline">#{variationNumber}</Badge>
                                   Variation {variationNumber}
                                 </Label>
@@ -1913,26 +1913,26 @@ export function Leads() {
           {/* Engagement Guide */}
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-black dark:text-white">
                 <Users className="h-5 w-5" />
                 Engagement Guide dsadsadsa
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="text-sm space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-black dark:text-white">
                   <Badge className="bg-blue-100 text-blue-800 text-xs">👀 Follow Day</Badge>
                   <span className="text-xs">Like 2-3 recent posts</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-black dark:text-white">
                   <Badge className="bg-green-100 text-green-800 text-xs">📱 Day 1</Badge>
                   <span className="text-xs">Comment on latest post</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-black dark:text-white">
                   <Badge className="bg-purple-100 text-purple-800 text-xs">💬 Day 2</Badge>
                   <span className="text-xs">View their stories</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-black dark:text-white">
                   <Badge className="bg-orange-100 text-orange-800 text-xs">📩 DM</Badge>
                   <span className="text-xs">Send personalized message</span>
                 </div>

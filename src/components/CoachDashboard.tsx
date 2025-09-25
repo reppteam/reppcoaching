@@ -189,7 +189,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({ coachId }) => {
             Manage and support your assigned students
           </p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-black dark:text-white text-sm text-muted-foreground">
           <CalendarDays className="h-4 w-4" />
           <span className="text-gray-900 dark:text-white">Today, {new Date().toLocaleDateString('en-US', { 
             weekday: 'long', 
@@ -266,7 +266,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({ coachId }) => {
       {getStudentsWithoutRecentReports().length > 0 && (
         <Card className="bg-white border border-gray-200">
           <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-black dark:text-white">
               <AlertCircle className="h-5 w-5 text-orange-500" />
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Alerts</CardTitle>
             </div>
@@ -302,7 +302,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({ coachId }) => {
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">My Students</CardTitle>
               <CardDescription className="text-gray-600">Manage your assigned students and their progress</CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-black dark:text-white">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
                 <Input
@@ -330,7 +330,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({ coachId }) => {
                       <h3 className="font-semibold text-gray-900 dark:text-white">{student.firstName} {student.lastName}</h3>
                       <p className="text-sm text-gray-500">{student.email}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50">
                         Monitor
                       </Button>

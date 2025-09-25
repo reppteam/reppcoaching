@@ -65,16 +65,16 @@ const PricingList: React.FC<PricingListProps> = ({
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {data.map((pkg) => (
-                <div key={pkg.id} className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200">
+                <div key={pkg.id} className="bg-card border border-border dark:border-card rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200">
                     {/* Header with status and category */}
                     <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                             {getCategoryIcon(pkg.category)}
                             <Badge variant="secondary" className={getCategoryColor(pkg.category)}>
                                 {pkg.category}
                             </Badge>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-black dark:text-white">
                             {onToggleStatus && (
                                 <Switch
                                     checked={pkg.status === 'active'}
@@ -95,7 +95,7 @@ const PricingList: React.FC<PricingListProps> = ({
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-1">
                             <DollarSign className="h-4 w-4 text-green-600" />
-                            <span className="text-2xl font-bold text-green-600">${pkg.price}</span>
+                            <span className="text-2xl font-bold text-green-600">{pkg.price}</span>
                         </div>
                         <div className="flex items-center gap-1 text-muted-foreground">
                             <Clock className="h-4 w-4" />
@@ -121,7 +121,7 @@ const PricingList: React.FC<PricingListProps> = ({
                     </div>
 
                     {/* Action buttons */}
-                                         <div className="flex items-center justify-end gap-2 pt-4 border-t border-border">
+                                         <div className="flex items-center justify-end gap-2 pt-4 border-t border-border dark:border-card">
                         <Button
                             variant="ghost"
                             size="sm"

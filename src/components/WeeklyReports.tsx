@@ -521,7 +521,7 @@ export const WeeklyReports: React.FC = () => {
                   {reports.map((report) => (
                     <TableRow key={report.id}>
                       <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="font-medium text-foreground">
@@ -537,7 +537,7 @@ export const WeeklyReports: React.FC = () => {
                     <div className="font-medium text-foreground">${report.revenue.toLocaleString()}</div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <span className="font-medium text-foreground">{report.paid_shoots + report.free_shoots}</span>
                       <div className="text-xs text-muted-foreground">
                         {report.paid_shoots} paid, {report.free_shoots} free
@@ -545,7 +545,7 @@ export const WeeklyReports: React.FC = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <span>{report.new_clients}</span>
                     </div>
@@ -573,7 +573,7 @@ export const WeeklyReports: React.FC = () => {
                     </Badge>
                       </TableCell>
                         <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white">
                       <Button 
                         variant="ghost" 
                         size="sm"

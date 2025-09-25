@@ -104,7 +104,7 @@ export function Pricing() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <DollarSign className="h-5 w-5 animate-pulse text-brand-blue" />
-          <span>Loading pricing data...</span>
+          <span className="text-black dark:text-white">Loading pricing data...</span>
         </div>
       </div>
     );
@@ -115,7 +115,7 @@ export function Pricing() {
       {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-          <h1 className="flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-black dark:text-white">
             <DollarSign className="h-6 w-6 text-brand-blue" />
             Pricing Management
           </h1>

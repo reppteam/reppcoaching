@@ -401,7 +401,7 @@ export function SuperAdminUserPanel() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <Users className="h-5 w-5 animate-pulse text-brand-blue" />
-          <span>Loading user panel...</span>
+          <span className="text-black dark:text-white">Loading user panel...</span>
         </div>
       </div>
     );
@@ -411,7 +411,7 @@ export function SuperAdminUserPanel() {
     <div className="space-y-6">
       {/* Header */}
         <div>
-          <h1 className="flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-black dark:text-white">
             <Users className="h-6 w-6 text-brand-blue" />
             User Management Panel
           </h1>

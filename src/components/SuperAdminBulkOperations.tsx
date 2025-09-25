@@ -411,7 +411,7 @@ export function SuperAdminBulkOperations() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-5 w-5 animate-spin text-brand-blue" />
-          <span>Loading bulk operations...</span>
+          <span className="text-black dark:text-white">Loading bulk operations...</span>
         </div>
       </div>
     );
@@ -422,7 +422,7 @@ export function SuperAdminBulkOperations() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-black dark:text-white">
             <Settings className="h-6 w-6 text-brand-blue" />
             Bulk Operations
           </h2>
@@ -706,7 +706,7 @@ export function SuperAdminBulkOperations() {
       <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
+            <AlertDialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <AlertTriangle className="h-5 w-5 text-red-600" />
               Bulk Delete {selectedOperation}
             </AlertDialogTitle>

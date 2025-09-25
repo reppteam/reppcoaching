@@ -258,7 +258,7 @@ export function StudentProfileView({ studentId, onClose }: StudentProfileViewPro
                 Student Profile - View and manage student information
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-black dark:text-white">
               <Button onClick={handleEdit} variant="outline" size="sm">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Profile
@@ -391,7 +391,7 @@ export function StudentProfileView({ studentId, onClose }: StudentProfileViewPro
               <CardContent>
                 <div className="space-y-4">
                   <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 text-black dark:text-white mb-2">
                       <FileText className="h-4 w-4 text-gray-500" />
                       <span className="text-sm font-medium text-gray-700">General Notes</span>
                     </div>
