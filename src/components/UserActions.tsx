@@ -161,23 +161,23 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
           </DialogHeader>
           
           <form onSubmit={handleForgotPassword} className="space-y-4">
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-800">
+            <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-md">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
                 This will send a password reset email to the user. They will be able to set a new password using the link in the email.
               </p>
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 border border-red-200 rounded-md">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <span className="text-sm text-red-600">{error}</span>
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-md">
+                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <span className="text-sm text-red-600 dark:text-red-400">{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 border border-green-200 rounded-md">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-600">{success}</span>
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-md">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-sm text-green-600 dark:text-green-400">{success}</span>
               </div>
             )}
 
@@ -217,7 +217,7 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
-              <Shield className="h-5 w-5 text-red-600" />
+              <Shield className="h-5 w-5 text-red-600 dark:text-red-400" />
               Block User Account
             </DialogTitle>
             <DialogDescription>
@@ -226,7 +226,7 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
           </DialogHeader>
           
           <form onSubmit={handleBlockAccount} className="space-y-4">
-            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+            <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-md">
               <p className="text-sm text-red-800">
                 <strong>Warning:</strong> This will prevent the user from logging in to the system. 
                 They will receive an error message when attempting to log in. This action can be reversed by unblocking the account.
@@ -235,27 +235,27 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
 
             <div>
               <Label htmlFor="block-reason" className="text-foreground">Reason for blocking (optional)</Label>
-              <Textarea
+              {/* <Textarea
                 id="block-reason"
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
                 placeholder="Enter reason for blocking this account..."
                 rows={3}
                 className="mt-1"
-              />
+              /> */}
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 border border-red-200 rounded-md">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <span className="text-sm text-red-600">{error}</span>
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-md">
+                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <span className="text-sm text-red-600 dark:text-red-400">{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 border border-green-200 rounded-md">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-600">{success}</span>
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-md">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-sm text-green-600 dark:text-green-400">{success}</span>
               </div>
             )}
 
@@ -296,7 +296,7 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
-              <ShieldOff className="h-5 w-5 text-green-600" />
+              <ShieldOff className="h-5 w-5 text-green-600 dark:text-green-400" />
               Unblock User Account
             </DialogTitle>
             <DialogDescription>
@@ -305,7 +305,7 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
           </DialogHeader>
           
           <form onSubmit={handleUnblockAccount} className="space-y-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+            <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-md">
               <p className="text-sm text-green-800">
                 This will restore the user's ability to log in to the system. 
                 They will be able to access their account normally.
@@ -313,12 +313,12 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
             </div>
 
             {blockingStatus.blockedAt && (
-              <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-                <p className="text-sm text-gray-600">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-md">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   <strong>Account blocked on:</strong> {new Date(blockingStatus.blockedAt).toLocaleString()}
                 </p>
                 {blockingStatus.reason && (
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     <strong>Reason:</strong> {blockingStatus.reason}
                   </p>
                 )}
@@ -326,16 +326,16 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
             )}
 
             {error && (
-              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 border border-red-200 rounded-md">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <span className="text-sm text-red-600">{error}</span>
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-md">
+                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <span className="text-sm text-red-600 dark:text-red-400">{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 border border-green-200 rounded-md">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-600">{success}</span>
+              <div className="flex items-center gap-2 text-black dark:text-white p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-md">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-sm text-green-600 dark:text-green-400">{success}</span>
               </div>
             )}
 
