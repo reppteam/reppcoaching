@@ -417,6 +417,13 @@ input:focus, textarea:focus, select:focus {
   color: var(--foreground) !important;
 }
 
+/* Override for white text buttons in modals */
+[data-radix-dialog-content] button.text-white,
+[data-radix-alert-dialog-content] button.text-white,
+[role="dialog"] button.text-white {
+  color: white !important;
+}
+
 /* Ensure links are visible in modals */
 [data-radix-dialog-content] a,
 [data-radix-alert-dialog-content] a,

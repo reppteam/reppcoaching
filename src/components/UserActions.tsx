@@ -234,7 +234,7 @@ export function UserActions({ user, onSuccess, onError }: UserActionsProps) {
             </div>
 
             <div>
-              <Label htmlFor="block-reason" className="text-foreground">Reason for blocking (optional)</Label>
+              {/* <Label htmlFor="block-reason" className="text-foreground">Reason for blocking (optional)</Label> */}
               {/* <Textarea
                 id="block-reason"
                 value={blockReason}

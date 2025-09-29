@@ -703,7 +703,7 @@ export function CoachPricing() {
               <Button type="button" variant="outline" onClick={() => setCreatePackageDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" className="text-white [&>*]:text-white">
                 Create Package
               </Button>
             </div>

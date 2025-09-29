@@ -527,7 +527,7 @@ export function SuperAdminUserPanel() {
                 <Button variant="outline" onClick={() => setCreateUserDialogOpen(false)} className="text-foreground">
                   Cancel
                 </Button>
-                <Button onClick={handleCreateUser} disabled={createUserLoading}>
+                <Button onClick={handleCreateUser} disabled={createUserLoading} className="text-white">
                   {createUserLoading ? 'Creating...' : 'Create User'}
                 </Button>
               </div>
