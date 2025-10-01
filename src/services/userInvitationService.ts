@@ -184,8 +184,8 @@ class UserInvitationService {
       // Get a fresh management token
       const managementToken = await auth0TokenService.getManagementToken();
 
-      // Create user in Auth0 with a random password (they'll reset it)
-      const randomPassword = this.generateTemporaryPassword();
+      // Create user in Auth0 with FirstName@LastName password format
+      const defaultPassword = this.generateDefaultPassword(invitationData.firstName, invitationData.lastName);
 
       const auth0Response = await fetch(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/api/v2/users`, {
         method: 'POST',
@@ -195,7 +195,7 @@ class UserInvitationService {
         },
         body: JSON.stringify({
           email: invitationData.email,
-          password: randomPassword,
+          password: defaultPassword,
           name: `${invitationData.firstName} ${invitationData.lastName}`,
           given_name: invitationData.firstName,
           family_name: invitationData.lastName,
@@ -345,6 +345,17 @@ class UserInvitationService {
       console.error('Error creating invitation record:', error);
       return null;
     }
+  }
+
+  // Generate default password in format: FirstName@LastName (first letter capitalized)
+  private generateDefaultPassword(firstName: string, lastName: string): string {
+    // Capitalize first letter of firstName, rest lowercase
+    const formattedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+    
+    // Make lastName all lowercase
+    const formattedLastName = lastName.toLowerCase();
+    
+    return `${formattedFirstName}@${formattedLastName}`;
   }
 
   // Generate temporary password

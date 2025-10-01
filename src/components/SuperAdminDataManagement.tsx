@@ -251,7 +251,10 @@ export function SuperAdminDataManagement() {
     try {
       switch (type) {
         case 'user':
-          await eightbaseService.deleteUser(id);
+          // Find the user to get their email
+          const userToDelete = state.users.find(u => u.id === id);
+          const userEmail = userToDelete?.email;
+          await eightbaseService.deleteUser(id, userEmail);
           setState(prev => ({ 
             ...prev, 
             users: prev.users.filter(u => u.id !== id) 

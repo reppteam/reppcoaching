@@ -63,6 +63,7 @@ export function UserManagement() {
   const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [coaches, setCoaches] = useState<any[]>([]);
+  const [coachManagers, setCoachManagers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Dialog states
@@ -121,14 +122,22 @@ export function UserManagement() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const [fetchedCoaches, fetchedStudents] = await Promise.all([
+      const [fetchedCoaches, fetchedStudents, allUsersFromUserTable] = await Promise.all([
         eightbaseService.getAllCoachesDirect(),
-        eightbaseService.getAllStudents()
+        eightbaseService.getAllStudents(),
+        eightbaseService.getUsers() // Get all users from User table
       ]);
       console.log('Fetched coaches from Coach table:', fetchedCoaches);
       console.log('Fetched students from Student table:', fetchedStudents);
+      console.log('Fetched all users from User table:', allUsersFromUserTable);
+      
+      // Filter Coach Managers from User table
+      const fetchedCoachManagers = allUsersFromUserTable.filter(u => u.role === 'coach_manager');
+      console.log('Filtered Coach Managers:', fetchedCoachManagers);
+      
       setCoaches(fetchedCoaches);
       setUsers(fetchedStudents); // Using users state to store students for compatibility
+      setCoachManagers(fetchedCoachManagers);
     } catch (error) {
       console.error('Failed to load users:', error);
     } finally {
@@ -309,24 +318,67 @@ export function UserManagement() {
     if (!userToDelete) return;
 
     try {
-      // Determine if it's a coach or student and use appropriate delete method
+      // Determine user type
       const isCoach = coaches.some(c => c.id === userToDelete.id);
+      const isCoachManager = coachManagers.some(cm => cm.id === userToDelete.id);
+      const isStudent = users.some(u => u.id === userToDelete.id);
       
-      // Use the existing delete user method
-      await eightbaseService.deleteUser(userToDelete.id);
-      
-      // Remove from appropriate list
-      if (isCoach) {
+      if (isCoachManager) {
+        // For coach managers, the ID is already the User table ID
+        console.log('Deleting coach manager with User ID:', userToDelete.id, 'Email:', userToDelete.email);
+        
+        await eightbaseService.deleteUser(userToDelete.id, userToDelete.email);
+        setCoachManagers(prev => prev.filter(cm => cm.id !== userToDelete.id));
+      } else if (isCoach) {
+        // For coaches, get the User table ID from the coach record
+        const coachRecord = coaches.find(c => c.id === userToDelete.id);
+        if (!coachRecord) {
+          console.error('Coach record not found');
+          return;
+        }
+        
+        // Get the User table ID from the coach record
+        // The coach.users or coach.user field contains the User table reference
+        const userId = (coachRecord as any).users?.id || (coachRecord as any).user?.id;
+        if (!userId) {
+          console.error('User ID not found in coach record');
+          alert('Cannot delete coach: User ID not found');
+          return;
+        }
+        
+        console.log('Deleting coach with Coach ID:', userToDelete.id, 'User ID:', userId, 'Email:', userToDelete.email);
+        
+        // First delete from Coach table, then from User table (deleteUser handles both)
+        await eightbaseService.deleteUser(userId, userToDelete.email);
         setCoaches(prev => prev.filter(c => c.id !== userToDelete.id));
-      } else {
-      setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+      } else if (isStudent) {
+        // For students, get the User table ID from the student record
+        const studentRecord = users.find(u => u.id === userToDelete.id);
+        if (!studentRecord) {
+          console.error('Student record not found');
+          return;
+        }
+        
+        // Get the User table ID from the student record
+        const userId = (studentRecord as any).user?.id;
+        if (!userId) {
+          console.error('User ID not found in student record');
+          alert('Cannot delete student: User ID not found');
+          return;
+        }
+        
+        console.log('Deleting student with Student ID:', userToDelete.id, 'User ID:', userId, 'Email:', userToDelete.email);
+        
+        // Use the updated delete user method with email for Auth0 deletion
+        await eightbaseService.deleteUser(userId, userToDelete.email);
+        setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
       }
       
       setDeleteConfirmDialogOpen(false);
       setUserToDelete(null);
     } catch (error) {
       console.error('Failed to delete user:', error);
-      // You can add a toast notification here for better UX
+      alert('Error deleting user. Please try again.');
     }
   };
 
@@ -600,7 +652,6 @@ export function UserManagement() {
   };
 
   // Filter users based on role permissions
-  const coachManagers = users.filter(u => u.role === 'coach_manager'); // Keep for compatibility
   const students = users; // All users are now students from Student table
   const availableStudents = students.filter(s => !s.coach || user?.role === 'super_admin' || user?.role === 'coach_manager');
   
@@ -886,10 +937,6 @@ export function UserManagement() {
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Badge variant="purple" className="flex items-center gap-1.5">
-                                <ShieldCheck className="h-3 w-3" />
-                                Manager
-                              </Badge>
                               <UserActions 
                                 user={manager} 
                                 onSuccess={(message) => {
@@ -1667,15 +1714,15 @@ export function UserManagement() {
               </div>
               
               {/* Access dates and payment status are managed through User table relationship */}
-              <div className="text-sm text-muted-foreground">
+              {/* <div className="text-sm text-muted-foreground">
                 Access dates and payment status are managed through the User table relationship.
-              </div>
+              </div> */}
               
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={() => setEditUserDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={() => handleEditUser(editingUser)}>
+                <Button className='text-white' onClick={() => handleEditUser(editingUser)}>
                   Save Changes
                 </Button>
               </div>

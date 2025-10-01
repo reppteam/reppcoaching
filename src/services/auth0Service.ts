@@ -1,5 +1,6 @@
 import { authClient } from '../8baseClient';
 import { eightBaseUserService } from './8baseUserService';
+import { eightBaseM2MAuthService } from './8baseM2MAuthService';
 import { User } from '../types';
 import { getRoleByEmail, getAuth0RoleName } from '../config/roleMapping';
 
@@ -195,30 +196,15 @@ class Auth0Service {
     }
   }
 
-  // Get management API token
+  // Get management API token using M2M service
   private async getManagementToken(): Promise<string> {
     try {
-      const response = await fetch(`https://${process.env.REACT_APP_AUTH0_DOMAIN}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          grant_type: 'client_credentials',
-          client_id: process.env.REACT_APP_AUTH0_CLIENT_ID,
-          client_secret: process.env.REACT_APP_AUTH0_CLIENT_SECRET,
-          audience: `https://${process.env.REACT_APP_AUTH0_DOMAIN}/api/v2/`,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get management token');
-      }
-
-      const data = await response.json();
-      return data.access_token;
+      console.log('Getting management token via M2M service...');
+      const token = await eightBaseM2MAuthService.getManagementToken();
+      console.log('Management token obtained successfully');
+      return token;
     } catch (error) {
-      console.error('Error getting management token:', error);
+      console.error('Error getting management token via M2M service:', error);
       throw error;
     }
   }
@@ -327,6 +313,62 @@ class Auth0Service {
     }
   }
 
+
+  // Delete user from Auth0
+  async deleteUser(userEmail: string): Promise<boolean> {
+    try {
+      const managementToken = await this.getManagementToken();
+      
+      // First, get the user by email to get their user_id
+      const userResponse = await fetch(
+        `https://${process.env.REACT_APP_AUTH0_DOMAIN}/api/v2/users-by-email?email=${encodeURIComponent(userEmail)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${managementToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!userResponse.ok) {
+        const error = await userResponse.json();
+        throw new Error(`Failed to find user: ${error.message || error.error}`);
+      }
+
+      const users = await userResponse.json();
+      if (!users || users.length === 0) {
+        console.warn('User not found in Auth0:', userEmail);
+        return false; // User doesn't exist in Auth0, consider it "deleted"
+      }
+
+      const auth0User = users[0];
+      
+      // Delete the user from Auth0
+      const deleteResponse = await fetch(
+        `https://${process.env.REACT_APP_AUTH0_DOMAIN}/api/v2/users/${auth0User.user_id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${managementToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!deleteResponse.ok) {
+        const error = await deleteResponse.json();
+        throw new Error(`Failed to delete user from Auth0: ${error.message || error.error}`);
+      }
+
+      console.log('User deleted from Auth0 successfully');
+      return true;
+
+    } catch (error) {
+      console.error('Error deleting user from Auth0:', error);
+      throw error;
+    }
+  }
 
   // Generate temporary password
   private generateTemporaryPassword(): string {

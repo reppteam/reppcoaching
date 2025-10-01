@@ -302,9 +302,27 @@ export function SuperAdminUserPanel() {
     if (!userToDelete) return;
     
     try {
-      const success = await eightbaseService.deleteUser(userToDelete.id);
+      // Find the student record to get their user ID and email
+      const studentToDelete = users.find(u => u.id === userToDelete.id);
+      if (!studentToDelete) {
+        alert('User not found.');
+        return;
+      }
+
+      // Get the User table ID from the student record
+      const userId = (studentToDelete as any).user?.id;
+      const userEmail = studentToDelete.email;
+      
+      if (!userId) {
+        alert('User ID not found. Cannot delete user.');
+        return;
+      }
+      
+      console.log('Deleting user with User ID:', userId, 'Student ID:', userToDelete.id, 'Email:', userEmail);
+      
+      const success = await eightbaseService.deleteUser(userId, userEmail);
       if (success) {
-        // Remove the user from the local state
+        // Remove the student from the local state
         setUsers(users.filter(user => user.id !== userToDelete.id));
         setDeleteDialogOpen(false);
         setUserToDelete(null);
@@ -527,7 +545,7 @@ export function SuperAdminUserPanel() {
                 <Button variant="outline" onClick={() => setCreateUserDialogOpen(false)} className="text-foreground">
                   Cancel
                 </Button>
-                <Button onClick={handleCreateUser} disabled={createUserLoading} className="text-white">
+                <Button onClick={handleCreateUser} disabled={createUserLoading} className="text-white" style={{color: 'white'}}>
                   {createUserLoading ? 'Creating...' : 'Create User'}
                 </Button>
               </div>

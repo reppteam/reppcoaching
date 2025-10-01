@@ -226,7 +226,7 @@ export function SuperAdminBulkOperations() {
       switch (selectedOperation) {
         case 'users':
           await Promise.all(selectedData.map(user => 
-            eightbaseService.deleteUser(user.id)
+            eightbaseService.deleteUser(user.id, user.email)
           ));
           break;
         case 'weeklyReports':

@@ -57,7 +57,7 @@ class SaasUserCreationService {
       }
 
       // Step 4: Send verification email with password information
-      const verificationResult = await this.sendVerificationEmail(auth0User.user_id, userData.email);
+      const verificationResult = await this.sendVerificationEmail(auth0User.user_id, userData.email, userData.firstName, userData.lastName);
       console.log('Verification email result:', verificationResult);
 
       console.log('=== SAAS USER CREATION COMPLETED ===');
@@ -99,8 +99,8 @@ class SaasUserCreationService {
         throw new Error('Email is required for user creation');
       }
 
-      // Set password as the user's email ID
-      const userPassword = email;
+      // Generate password in format: FirstName@LastName (first letter capitalized)
+      const userPassword = this.generateDefaultPassword(firstName, lastName);
       
       // Generate a valid username (1-15 chars, no email format)
       const username = this.generateUsername(firstName, lastName);
@@ -109,7 +109,7 @@ class SaasUserCreationService {
         connection: 'Username-Password-Authentication',
         email: email,
         username: username,
-        password: userPassword, // Password is the user's email
+        password: userPassword, // Password is FirstName@LastName format
         given_name: firstName,
         family_name: lastName,
         name: `${firstName} ${lastName}`,
@@ -150,13 +150,16 @@ class SaasUserCreationService {
   /**
    * Send verification email via Auth0 Management API
    */
-  private async sendVerificationEmail(userId: string, userEmail: string): Promise<{ success: boolean; error?: string; ticketUrl?: string }> {
+  private async sendVerificationEmail(userId: string, userEmail: string, firstName?: string, lastName?: string): Promise<{ success: boolean; error?: string; ticketUrl?: string }> {
     try {
       const managementToken = await eightBaseM2MAuthService.getManagementToken();
       
+      // Generate password for display in redirect URL
+      const defaultPassword = firstName && lastName ? this.generateDefaultPassword(firstName, lastName) : 'FirstName@LastName';
+      
       const ticketData = {
         user_id: userId,
-        result_url: `${window.location.origin}/auth/callback?password=${encodeURIComponent(userEmail)}`, // Include password info in redirect
+        result_url: `${window.location.origin}/auth/callback?password=${encodeURIComponent(defaultPassword)}`, // Include password info in redirect
         ttl_sec: 3600, // 1 hour expiry
         includeEmailInRedirect: false
       };
@@ -479,7 +482,7 @@ class SaasUserCreationService {
     if (verificationSent && verificationLink) {
       message += `\n📧 Verification email sent successfully`;
       message += `\n🔗 Verification Link: ${verificationLink}`;
-      message += `\n🔐 Password: ${userEmail} (same as email address)`;
+      message += `\n🔐 Password: FirstName@LastName format (e.g., Test@test)`;
     } else {
       message += `\n⚠️ Note: Verification email could not be sent`;
       message += `\n💡 User may need manual setup`;
@@ -488,7 +491,7 @@ class SaasUserCreationService {
     message += `\n\n📋 Next Steps:`;
     message += `\n1. User receives verification email`;
     message += `\n2. User clicks verification link to verify email`;
-    message += `\n3. User can log in with email and password (same as email)`;
+    message += `\n3. User can log in with email and FirstName@LastName password`;
     message += `\n4. Records are already created in 8base (User + ${role === 'coach' ? 'Coach' : 'Student'} tables)`;
     
     return message;
@@ -547,7 +550,7 @@ class SaasUserCreationService {
       if (verificationResult.success) {
         return {
           success: true,
-          message: `Verification email sent successfully. Password: ${email}`
+          message: `Verification email sent successfully. Password: FirstName@LastName format`
         };
       } else {
         return {
@@ -592,6 +595,19 @@ class SaasUserCreationService {
     username = username.substring(0, 15 - randomSuffix.length) + randomSuffix;
     
     return username;
+  }
+
+  /**
+   * Generate default password in format: FirstName@LastName (first letter capitalized)
+   */
+  private generateDefaultPassword(firstName: string, lastName: string): string {
+    // Capitalize first letter of firstName, rest lowercase
+    const formattedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+    
+    // Make lastName all lowercase
+    const formattedLastName = lastName.toLowerCase();
+    
+    return `${formattedFirstName}@${formattedLastName}`;
   }
 
   /**

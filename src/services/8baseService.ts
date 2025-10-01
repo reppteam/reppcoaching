@@ -681,18 +681,116 @@ export const eightbaseService = {
     return transformUser(data.userUpdate);
   },
 
-  async deleteUser(userId: string): Promise<boolean> {
+  async deleteUser(userId: string, userEmail?: string): Promise<boolean> {
     try {
-      const { data } = await apolloClient.mutate({
-        mutation: gql`${queries.DELETE_USER}`,
-        variables: {
-          filter: {
+      console.log('=== USER DELETION STARTED ===');
+      console.log('Deleting user ID:', userId);
+      console.log('User email:', userEmail);
+
+      let auth0Deleted = false;
+      let studentDeleted = false;
+      let coachDeleted = false;
+      let eightbaseDeleted = false;
+
+      // Step 1a: Check and delete associated Student record
+      try {
+        console.log('Checking for associated Student record...');
+        const { data: studentData } = await apolloClient.query({
+          query: gql`${queries.GET_STUDENT_BY_USER_ID}`,
+          variables: { userId },
+          fetchPolicy: 'network-only'
+        });
+
+        const studentRecord = studentData?.studentsList?.items?.[0];
+        
+        if (studentRecord && studentRecord.id) {
+          console.log('Found Student record with ID:', studentRecord.id);
+          console.log('Deleting Student record...');
+          
+          const { data: deleteStudentData } = await apolloClient.mutate({
+            mutation: gql`${queries.DELETE_STUDENT_RECORD}`,
+            variables: {
+              id: studentRecord.id
+            }
+          });
+          
+          studentDeleted = deleteStudentData.studentDestroy.success;
+          console.log('Student record deleted:', studentDeleted);
+        } else {
+          console.log('No Student record found for this user');
+        }
+      } catch (studentError) {
+        console.error('Failed to delete Student record:', studentError);
+        // Continue with user deletion even if student deletion fails
+      }
+
+      // Step 1b: Check and delete associated Coach record
+      try {
+        console.log('Checking for associated Coach record...');
+        const { data: coachData } = await apolloClient.query({
+          query: gql`${queries.GET_COACH_BY_USER_ID}`,
+          variables: { userId },
+          fetchPolicy: 'network-only'
+        });
+
+        const coachRecord = coachData?.coachesList?.items?.[0];
+        
+        if (coachRecord && coachRecord.id) {
+          console.log('Found Coach record with ID:', coachRecord.id);
+          console.log('Deleting Coach record...');
+          
+          const { data: deleteCoachData } = await apolloClient.mutate({
+            mutation: gql`${queries.DELETE_COACH_BY_ID}`,
+            variables: {
+              id: coachRecord.id
+            }
+          });
+          
+          coachDeleted = deleteCoachData.coachDestroy.success;
+          console.log('Coach record deleted:', coachDeleted);
+        } else {
+          console.log('No Coach record found for this user');
+        }
+      } catch (coachError) {
+        console.error('Failed to delete Coach record:', coachError);
+        // Continue with user deletion even if coach deletion fails
+      }
+
+      // Step 2: Delete from Auth0 (if email is provided)
+      if (userEmail) {
+        try {
+          const { auth0Service } = await import('./auth0Service');
+          auth0Deleted = await auth0Service.deleteUser(userEmail);
+          console.log('User deleted from Auth0:', auth0Deleted);
+        } catch (auth0Error) {
+          console.error('Failed to delete user from Auth0:', auth0Error);
+          // Continue with 8base deletion even if Auth0 fails
+        }
+      }
+
+      // Step 3: Delete from 8base User table
+      try {
+        const { data } = await apolloClient.mutate({
+          mutation: gql`${queries.DELETE_USER}`,
+          variables: {
             id: userId
           }
-        }
-      });
-      
-      return data.userDestroy.success;
+        });
+        
+        eightbaseDeleted = data.userDelete.success;
+        console.log('User deleted from 8base:', eightbaseDeleted);
+      } catch (eightbaseError) {
+        console.error('Failed to delete user from 8base:', eightbaseError);
+        throw eightbaseError;
+      }
+
+      console.log('=== USER DELETION COMPLETED ===');
+      console.log('Student deletion:', studentDeleted);
+      console.log('Coach deletion:', coachDeleted);
+      console.log('Auth0 deletion:', auth0Deleted);
+      console.log('8base deletion:', eightbaseDeleted);
+
+      return eightbaseDeleted; // Return 8base deletion status as primary success indicator
     } catch (error) {
       console.error('Error deleting user:', error);
       throw error;

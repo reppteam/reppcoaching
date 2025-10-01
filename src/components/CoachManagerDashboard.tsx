@@ -223,7 +223,7 @@ export function CoachManagerDashboard() {
     setActionSuccess('');
     
     try {
-      const result = await eightbaseService.deleteUser(selectedUser.id);
+      const result = await eightbaseService.deleteUser(selectedUser.id, selectedUser.email);
       if (result) {
         setActionSuccess('User deleted successfully');
         setDeleteUserDialogOpen(false);

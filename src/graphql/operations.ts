@@ -497,6 +497,14 @@ export const CREATE_STUDENT = gql`
   }
 `;
 
+export const DELETE_STUDENT_RECORD = gql`
+  mutation DeleteStudentRecord($id: ID!) {
+    studentDestroy(filter: { id: $id }) {
+      success
+    }
+  }
+`;
+
 // ============================================================================
 // USER UPDATE WITH COACH CONNECTION
 // ============================================================================
@@ -998,8 +1006,8 @@ export const UPDATE_USER_WITH_COACH = gql`
 `;
 
 export const DELETE_USER = gql`
-  mutation DeleteUser($filter: UserFilter!) {
-    userDestroyByFilter(filter: $filter) {
+  mutation DeleteUser($id: ID!) {
+    userDelete(data: { id: $id }) {
       success
     }
   }
