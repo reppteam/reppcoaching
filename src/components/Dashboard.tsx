@@ -17,6 +17,7 @@ import { ProfitMarginCalculator } from "./ProfitMarginCalculator";
 import { AdminDashboard } from "./AdminDashboard";
 import { SuperAdminDashboard } from "./SuperAdminDashboard";
 import { CoachManagerDashboard } from "./CoachManagerDashboard";
+import { EnhancedCoachDashboard } from "./EnhancedCoachDashboard";
 import { SuperAdminUserPanel } from "./SuperAdminUserPanel";
 import { SuperAdminList } from "./SuperAdminList";
 import { UserManagement } from "./UserManagement";
@@ -144,7 +145,7 @@ export function Dashboard() {
       ];
     }
 
-    // Coach Manager: Clean UI with management features
+    // Coach Manager: Clean UI with management features + coach features
     if (userRole === "coach_manager") {
       return [
         ...baseItems,
@@ -152,6 +153,11 @@ export function Dashboard() {
           id: "coach-manager",
           label: "Coach Manager Panel",
           icon: ShieldCheck,
+        },
+        {
+          id: "coach-dashboard",
+          label: "Coach Dashboard",
+          icon: Shield,
         },
         { id: "leads", label: "All Leads", icon: Users },
         {
@@ -325,6 +331,8 @@ export function Dashboard() {
         return <UserManagement />;
       case "coach-manager":
         return <CoachManagerDashboard />;
+      case "coach-dashboard":
+        return <EnhancedCoachDashboard />;
       case "super-admin-panel":
         return <SuperAdminUserPanel />;
       case "super-admin-list":

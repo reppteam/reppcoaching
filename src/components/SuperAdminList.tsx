@@ -323,7 +323,7 @@ export function SuperAdminList() {
              <div className="space-y-4">
                {filteredSuperAdmins.map((admin: any) => (
                  <div key={admin.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors dark:border-gray-600 dark:hover:bg-gray-800">
-                   <div className="flex items-center space-x-4">
+                   <div className="flex items-center space-x-4 flex-1 min-w-0">
                      <div className="flex-shrink-0">
                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                          <Crown className="h-5 w-5 text-white" />
@@ -418,7 +418,7 @@ export function SuperAdminList() {
                        )}
                      </div>
                    </div>
-                   <div className="flex items-center space-x-2">
+                   <div className="flex items-center space-x-2 flex-shrink-0">
                      <Badge variant="gradient" className="flex items-center gap-1.5 dark:bg-primary dark:text-white">
                        <Crown className="h-3 w-3" />
                        Super Admin
@@ -432,7 +432,7 @@ export function SuperAdminList() {
                            variant="outline"
                            onClick={handleCancelEdit}
                            disabled={saving}
-                           className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+                           className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 h-8 w-8 p-0"
                          >
                            <X className="h-3 w-3" />
                          </Button>
@@ -440,7 +440,7 @@ export function SuperAdminList() {
                            size="sm"
                            onClick={() => handleSaveEdit(admin.id)}
                            disabled={saving}
-                           className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary"
+                           className="bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary h-8 w-8 p-0"
                          >
                            {saving ? (
                              <RefreshCw className="h-3 w-3 animate-spin" />
@@ -457,7 +457,7 @@ export function SuperAdminList() {
                            variant="outline"
                            onClick={() => handleEditUser(admin)}
                            title="Edit user details"
-                           className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
+                           className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 h-8 w-8 p-0"
                          >
                            <Edit2 className="h-3 w-3" />
                          </Button>

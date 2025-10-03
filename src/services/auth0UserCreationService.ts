@@ -115,8 +115,23 @@ class Auth0UserCreationService {
           await eightbaseService.createCoachDirect(coachData);
           roleSpecificRecordCreated = true;
           console.log('Coach record created successfully');
+        } else if (userData.role === 'coach_manager') {
+          // Create Coach record for coach manager (so they can have students assigned)
+          const coachData = {
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            email: userData.email,
+            bio: '',
+            user: {
+              connect: { id: createdUser.id }
+            }
+          };
+
+          await eightbaseService.createCoachDirect(coachData);
+          roleSpecificRecordCreated = true;
+          console.log('Coach record created successfully for coach manager');
         }
-        // For other roles (coach_manager, super_admin), only User table record is created
+        // For other roles (super_admin), only User table record is created
       } catch (roleError) {
         console.error('Failed to create role-specific record:', roleError);
         // Don't fail the entire operation if role-specific record creation fails

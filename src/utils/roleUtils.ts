@@ -54,8 +54,8 @@ export function getDashboardRoute(user: any): string {
     return '/coach-manager-dashboard';
   }
   
-  // Check for Coach roles
-  if (roles.includes('Coach') || roles.includes('coach') || roles.includes('admin')) {
+  // Check for Coach roles (including coach managers who can also be coaches)
+  if (roles.includes('Coach') || roles.includes('coach') || roles.includes('admin') || roles.includes('Coach Manager') || roles.includes('coach_manager')) {
     return '/coach-dashboard';
   }
   

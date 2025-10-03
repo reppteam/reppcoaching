@@ -30,7 +30,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
     
     // Map role variations
     const roleVariations: { [key: string]: string[] } = {
-      'Coach': ['Coach', 'coach', 'admin'],
+      'Coach': ['Coach', 'coach', 'admin', 'Coach Manager', 'coach_manager'],
       'Coach Manager': ['Coach Manager', 'coach_manager'],
       'Super Admin': ['Super Admin', 'SuperAdmin', 'Administrator', 'super_admin'],
       'Student': ['Student', 'user']

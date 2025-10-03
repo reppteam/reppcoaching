@@ -16,6 +16,7 @@ import {
   GET_USERS_WITH_CUSTOM_FIELDS
 } from '../graphql/8baseUser';
 import { STATIC_ROLES, getRoleByName } from '../config/staticRoles';
+import { eightbaseService } from './8baseService';
 
 export interface EightBaseUser {
   id: string;
@@ -375,6 +376,63 @@ class EightBaseUserService {
     } catch (error) {
       console.error('Error creating coach manager user:', error);
       throw new Error('Failed to create coach manager user');
+    }
+  }
+
+  // Create a coach manager user who is also a coach (can have students assigned)
+  async createCoachManagerWithCoachRecord(managerData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<{ user: EightBaseUser; coachRecord: any }> {
+    try {
+      console.log('=== COACH MANAGER WITH COACH RECORD CREATION ===');
+      console.log('Manager data:', managerData);
+
+      // Get the coach manager role ID from static roles
+      const managerRole = getRoleByName('coach_manager');
+      
+      if (!managerRole) {
+        throw new Error('Coach Manager role not found');
+      }
+
+      // Step 1: Create user with coach_manager role
+      const userInput: CreateUserInput = {
+        email: managerData.email,
+        firstName: managerData.firstName,
+        lastName: managerData.lastName,
+        roles: {
+          connect: { id: managerRole.id }
+        }
+      };
+
+      console.log('Creating user with Coach Manager role:', userInput);
+      const createdUser = await this.createUser(userInput);
+      console.log('User created successfully:', createdUser);
+
+      if (!createdUser) {
+        throw new Error('Failed to create user');
+      }
+
+      // Step 2: Create coach record and link to user
+      const coachData = {
+        firstName: managerData.firstName,
+        lastName: managerData.lastName,
+        email: managerData.email,
+        bio: '',
+        users: {
+          connect: { id: createdUser.id }
+        }
+      };
+
+      console.log('Creating Coach record for coach manager:', coachData);
+      const coachRecord = await eightbaseService.createCoachDirect(coachData);
+      console.log('Coach record created successfully:', coachRecord);
+
+      return { user: createdUser, coachRecord };
+    } catch (error) {
+      console.error('Error creating coach manager with coach record:', error);
+      throw new Error('Failed to create coach manager with coach record');
     }
   }
 

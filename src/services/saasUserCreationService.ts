@@ -54,6 +54,10 @@ class SaasUserCreationService {
       } else if (userData.role === 'coach') {
         coachRecord = await this.createCoachRecord(userData, userRecord?.id);
         console.log('Coach record created:', coachRecord);
+      } else if (userData.role === 'coach_manager') {
+        // Create Coach record for coach manager (so they can have students assigned)
+        coachRecord = await this.createCoachRecord(userData, userRecord?.id);
+        console.log('Coach record created for coach manager:', coachRecord);
       }
 
       // Step 4: Send verification email with password information

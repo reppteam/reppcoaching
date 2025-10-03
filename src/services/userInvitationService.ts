@@ -97,6 +97,37 @@ class UserInvitationService {
            // Don't fail the entire process if coach record creation fails
          }
          
+       } else if (invitationData.role === 'coach_manager') {
+         // Create coach manager with coach record (so they can have students assigned)
+         const managerInput = {
+           email: invitationData.email,
+           firstName: invitationData.firstName,
+           lastName: invitationData.lastName,
+           roles: {
+             connect: { id: invitationData.selectedRoleId }
+           }
+         };
+
+         createdUser = await eightbaseService.createUser(managerInput);
+         
+         // Create Coach record for coach manager (so they can have students assigned)
+         try {
+           const coachData = {
+             firstName: invitationData.firstName,
+             lastName: invitationData.lastName,
+             email: invitationData.email,
+             bio: '',
+             users: {
+               connect: { id: createdUser.id }
+             }
+           };
+           await eightbaseService.createCoachDirect(coachData);
+           console.log('Coach record created successfully for coach manager');
+         } catch (coachError) {
+           console.error('Failed to create coach record for coach manager:', coachError);
+           // Don't fail the entire process if coach record creation fails
+         }
+         
        } else if (invitationData.role === 'user') {
          // Create student with assigned coach (only if we have a valid coach ID)
          const studentInput: any = {
