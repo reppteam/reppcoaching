@@ -579,11 +579,7 @@ export const UPDATE_USER_WITH_COACH_CONNECTION = gql`
         count
         __typename
       }
-      studentNote {
-        id
-        _description
-        __typename
-      }
+      
       leadAId {
         items {
           id
@@ -605,15 +601,6 @@ export const UPDATE_USER_WITH_COACH_CONNECTION = gql`
       globalVariable {
         id
         _description
-        __typename
-      }
-      callLogAId {
-        items {
-          id
-          _description
-          __typename
-        }
-        count
         __typename
       }
       assignmentStudent {

@@ -98,6 +98,7 @@ export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [coaches, setCoaches] = useState<any[]>([]);
   const [coachManagers, setCoachManagers] = useState<User[]>([]);
+  const [allUsersFromUserTable, setAllUsersFromUserTable] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Dialog states
@@ -171,19 +172,24 @@ export function UserManagement() {
         eightbaseService.getAllStudents(),
         eightbaseService.getUsers(), // Get all users from User table
       ]);
-      console.log("Fetched coaches from Coach table:", fetchedCoaches);
-      console.log("Fetched students from Student table:", fetchedStudents);
-      console.log("Fetched all users from User table:", allUsersFromUserTable);
-
-      // Filter Coach Managers from User table
-      const fetchedCoachManagers = allUsersFromUserTable.filter(
-        (u) => u.role === "coach_manager"
-      );
-      console.log("Filtered Coach Managers:", fetchedCoachManagers);
+      // Filter Coach Managers from User table and enrich with student data
+      const fetchedCoachManagers = allUsersFromUserTable
+        .filter((u) => u.role === "coach_manager")
+        .map((coachManager: any) => {
+          // If this coach manager has a student assigned, include it directly
+          if (coachManager.student) {
+            return {
+              ...coachManager,
+              assignedStudent: coachManager.student
+            };
+          }
+          return coachManager;
+        });
 
       setCoaches(fetchedCoaches);
       setUsers(fetchedStudents); // Using users state to store students for compatibility
       setCoachManagers(fetchedCoachManagers);
+      setAllUsersFromUserTable(allUsersFromUserTable);
     } catch (error) {
       console.error("Failed to load users:", error);
     } finally {
@@ -226,11 +232,6 @@ export function UserManagement() {
         throw new Error("Coach role not found in static roles");
       }
 
-      console.log("=== COACH CREATION DEBUG ===");
-      console.log("All available roles:", STATIC_ROLES);
-      console.log("Found Coach role:", coachRole);
-      console.log("Using Coach role ID:", coachRole.id);
-      console.log("Coach role name:", coachRole.name);
 
       // Step 1: Create user directly with Coach role (bypassing complex transformation)
       const userInput = {
@@ -242,9 +243,7 @@ export function UserManagement() {
         },
       };
 
-      console.log("Creating user with Coach role:", userInput);
       const createdUser = await eightbaseService.createUserDirect(userInput);
-      console.log("User created successfully:", createdUser);
 
       if (!createdUser) {
         throw new Error("Failed to create user");
@@ -261,9 +260,7 @@ export function UserManagement() {
         },
       };
 
-      console.log("Step 2: Creating coach in Coach table:", coachData);
       const newCoach = await eightbaseService.createCoachDirect(coachData);
-      console.log("Coach created successfully:", newCoach);
 
       if (newCoach) {
         // Assign students if selected
@@ -309,7 +306,6 @@ export function UserManagement() {
         throw new Error("Student role not found in static roles");
       }
 
-      console.log("Using Student role ID:", studentRole.id);
 
       // Step 1: Create user directly in User table with Student role
       const userInput = {
@@ -321,9 +317,7 @@ export function UserManagement() {
         },
       };
 
-      console.log("Creating user with Student role:", userInput);
       const createdUser = await eightbaseService.createUser(userInput);
-      console.log("User created successfully:", createdUser);
 
       if (!createdUser) {
         throw new Error("Failed to create user");
@@ -349,11 +343,9 @@ export function UserManagement() {
         },
       };
 
-      console.log("Step 2: Creating student in Student table:", studentData);
       const newStudent = await eightbaseService.createStudentDirect(
         studentData
       );
-      console.log("Student created successfully:", newStudent);
 
       if (newStudent) {
         setCreatedUser(newStudent as any); // Type compatibility
@@ -383,12 +375,6 @@ export function UserManagement() {
 
       if (isCoachManager) {
         // For coach managers, the ID is already the User table ID
-        console.log(
-          "Deleting coach manager with User ID:",
-          userToDelete.id,
-          "Email:",
-          userToDelete.email
-        );
 
         await eightbaseService.deleteUser(userToDelete.id, userToDelete.email);
         setCoachManagers((prev) =>
@@ -412,14 +398,6 @@ export function UserManagement() {
           return;
         }
 
-        console.log(
-          "Deleting coach with Coach ID:",
-          userToDelete.id,
-          "User ID:",
-          userId,
-          "Email:",
-          userToDelete.email
-        );
 
         // First delete from Coach table, then from User table (deleteUser handles both)
         await eightbaseService.deleteUser(userId, userToDelete.email);
@@ -440,14 +418,6 @@ export function UserManagement() {
           return;
         }
 
-        console.log(
-          "Deleting student with Student ID:",
-          userToDelete.id,
-          "User ID:",
-          userId,
-          "Email:",
-          userToDelete.email
-        );
 
         // Use the updated delete user method with email for Auth0 deletion
         await eightbaseService.deleteUser(userId, userToDelete.email);
@@ -466,29 +436,50 @@ export function UserManagement() {
     if (!editingUser) return;
 
     try {
-      console.log("Updating user with direct Coach/Student table approach");
-      console.log("Editing user:", editingUser);
-      console.log("User data:", userData);
 
-      // Determine if it's a coach or student
+      // Determine if it's a coach, coach manager, or student
       const isCoach = coaches.some((c) => c.id === editingUser.id);
+      const isCoachManager = coachManagers.some((cm) => cm.id === editingUser.id);
 
-      if (isCoach) {
-        // Update coach using direct Coach table operations
-        const coachData = {
-          firstName: userData.firstName || editingUser.firstName,
-          lastName: userData.lastName || editingUser.lastName,
-          email: userData.email || editingUser.email,
-          bio: userData.bio || "",
-        };
+      if (isCoach || isCoachManager) {
+        if (isCoachManager) {
+          // Update coach manager using User table operations
+          const updateData = {
+            firstName: editingUser.firstName,
+            lastName: editingUser.lastName,
+            email: editingUser.email,
+          };
 
-        await eightbaseService.updateCoachDirect(editingUser.id, coachData);
+          // For coach managers, editingUser.id is already the User table ID
+          await eightbaseService.updateUser(editingUser.id, updateData);
+          setEditUserDialogOpen(false);
+          await loadUsers(); // Refresh data after update
+        } else {
+          // Update regular coach using direct Coach table operations
+          const coachData = {
+            firstName: userData.firstName || editingUser.firstName,
+            lastName: userData.lastName || editingUser.lastName,
+            email: userData.email || editingUser.email,
+            bio: userData.bio || "",
+          };
 
-        // Handle student assignment for coaches
+          await eightbaseService.updateCoachDirect(editingUser.id, coachData);
+          await loadUsers(); // Refresh data after update
+        }
+
+        // Handle student assignment for coaches and coach managers
         if (selectedStudentsForCoach.length > 0) {
           const studentToAssign = selectedStudentsForCoach[0];
-          const currentAssignedStudent = users.find(
-            (u) => u.assignedCoach?.id === editingUser.id
+          
+          // Get the correct coach ID for student assignment
+          let coachId = editingUser.id; // Default to the ID passed in
+          if (isCoachManager) {
+            // For coach managers, use the User table ID directly (not the coach record ID)
+            coachId = editingUser.id;
+          }
+          
+          const currentAssignedStudent = students.find(
+            (s) => s.coach?.id === coachId
           );
 
           // Disconnect current student if different
@@ -505,18 +496,26 @@ export function UserManagement() {
           if (studentToAssign !== currentAssignedStudent?.id) {
             await eightbaseService.assignStudentToCoach(
               studentToAssign,
-              editingUser.id
+              coachId
             );
+            await loadUsers(); // Refresh data after assignment
           }
         } else {
           // Disconnect all students if none selected
-          const currentAssignedStudent = users.find(
-            (u) => u.assignedCoach?.id === editingUser.id
+          let coachId = editingUser.id; // Default to the ID passed in
+          if (isCoachManager) {
+            // For coach managers, use the User table ID directly (not the coach record ID)
+            coachId = editingUser.id;
+          }
+          
+          const currentAssignedStudent = students.find(
+            (s) => s.coach?.id === coachId
           );
           if (currentAssignedStudent) {
             await eightbaseService.disconnectCoachFromStudent(
               currentAssignedStudent.id
             );
+            await loadUsers(); // Refresh data after disconnection
           }
         }
       } else {
@@ -540,17 +539,8 @@ export function UserManagement() {
         // Handle coach assignment directly in the student update
         if (editingUser.coach?.id) {
           const coachId = editingUser.coach.id;
-          console.log("Looking for coach with ID:", coachId);
-          console.log(
-            "Available coaches:",
-            coaches.map((c) => ({
-              id: c.id,
-              name: `${c.firstName} ${c.lastName}`,
-            }))
-          );
           const selectedCoach = coaches.find((c) => c.id === coachId);
           if (selectedCoach) {
-            console.log("Found coach for assignment:", selectedCoach);
             studentData.coach = {
               connect: { id: selectedCoach.id },
             };
@@ -565,18 +555,14 @@ export function UserManagement() {
           };
         }
 
-        console.log("Student data being sent to update:", studentData);
         await eightbaseService.updateStudentDirect(editingUser.id, studentData);
+        await loadUsers(); // Refresh data after student update
       }
-
-      // Refresh the data
-      await loadUsers();
 
       setEditUserDialogOpen(false);
       setEditingUser(null);
       setSelectedStudentsForCoach([]);
 
-      console.log("User update completed successfully");
     } catch (error) {
       console.error("Failed to update user:", error);
       // You can add a toast notification here for better UX
@@ -663,11 +649,27 @@ export function UserManagement() {
   const openEditUser = (userToEdit: any) => {
     setEditingUser(userToEdit);
 
-    // Initialize selected student if editing a coach (single assignment)
+    // Initialize selected student if editing a coach or coach manager (single assignment)
     const isCoach = coaches.some((c) => c.id === userToEdit.id);
-    if (isCoach) {
-      const assignedStudent = users.find((u) => u.coach?.id === userToEdit.id);
+    const isCoachManager = coachManagers.some((cm) => cm.id === userToEdit.id);
+    
+    if (isCoach || isCoachManager) {
+      let assignedStudent = null;
+      
+      if (isCoachManager) {
+        // For coach managers, check if they have an assignedStudent field
+        
+        if ((userToEdit as any).assignedStudent) {
+          assignedStudent = (userToEdit as any).assignedStudent;
+        }
+      } else {
+        // For regular coaches, find students assigned to them
+        const studentsAssignedToCoach = students.filter(s => s.coach?.id === userToEdit.id);
+        assignedStudent = studentsAssignedToCoach[0] || null; // Take first student if any
+      }
+      
       setSelectedStudentsForCoach(assignedStudent ? [assignedStudent.id] : []);
+
     } else {
       setSelectedStudentsForCoach([]);
     }
@@ -773,9 +775,6 @@ export function UserManagement() {
         )
       );
 
-      console.log(
-        `User ${!currentStatus ? "activated" : "deactivated"} successfully`
-      );
     } catch (error) {
       console.error("Error updating user status:", error);
       alert("Failed to update user status. Please try again.");
@@ -1179,6 +1178,7 @@ export function UserManagement() {
                         const managedCoaches = coaches.filter(
                           (c) => c.user?.id !== manager.id
                         );
+                        
 
                         return (
                           <div
@@ -1210,7 +1210,6 @@ export function UserManagement() {
                                 user={manager}
                                 onSuccess={(message) => {
                                   // You can add a toast notification here if needed
-                                  console.log("Success:", message);
                                 }}
                                 onError={(error) => {
                                   // You can add a toast notification here if needed
@@ -1305,7 +1304,6 @@ export function UserManagement() {
                                 user={coach}
                                 onSuccess={(message) => {
                                   // You can add a toast notification here if needed
-                                  console.log("Success:", message);
                                 }}
                                 onError={(error) => {
                                   // You can add a toast notification here if needed
@@ -1404,7 +1402,6 @@ export function UserManagement() {
                                 user={student}
                                 onSuccess={(message) => {
                                   // You can add a toast notification here if needed
-                                  console.log("Success:", message);
                                 }}
                                 onError={(error) => {
                                   // You can add a toast notification here if needed
@@ -1536,7 +1533,6 @@ export function UserManagement() {
                                   <UserActions
                                     user={admin}
                                     onSuccess={(message) => {
-                                      console.log("Success:", message);
                                     }}
                                     onError={(error) => {
                                       console.error("Error:", error);
@@ -2093,15 +2089,15 @@ export function UserManagement() {
                   <Label htmlFor="edit-role">Role</Label>
                   <Select
                     value={
-                      coaches.some((c) => c.id === editingUser.id)
+                      // Check if it's a coach manager first, then regular coach, then student
+                      coachManagers.some((cm) => cm.id === editingUser.id)
+                        ? "coach_manager"
+                        : coaches.some((c) => c.id === editingUser.id)
                         ? "coach"
                         : "student"
                     }
                     onValueChange={(value) => {
                       // Role is determined by which table the record is in
-                      console.log(
-                        "Role change not supported - determined by table structure"
-                      );
                     }}
                     disabled
                   >
@@ -2111,12 +2107,13 @@ export function UserManagement() {
                     <SelectContent>
                       <SelectItem value="student">Student</SelectItem>
                       <SelectItem value="coach">Coach</SelectItem>
+                      <SelectItem value="coach_manager">Coach Manager</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   {/* Show Assigned Coach for Students */}
-                  {!coaches.some((c) => c.id === editingUser.id) && (
+                  {!coaches.some((c) => c.id === editingUser.id) && !coachManagers.some((cm) => cm.id === editingUser.id) && (
                     <>
                       <Label htmlFor="edit-assigned-coach">
                         Assigned Coach
@@ -2161,8 +2158,8 @@ export function UserManagement() {
                     </>
                   )}
 
-                  {/* Show Assigned Students for Coaches */}
-                  {coaches.some((c) => c.id === editingUser.id) && (
+                  {/* Show Assigned Students for Coaches and Coach Managers */}
+                  {(coaches.some((c) => c.id === editingUser.id) || coachManagers.some((cm) => cm.id === editingUser.id)) && (
                     <>
                       <Label htmlFor="edit-assigned-students">
                         Assigned Students
@@ -2188,7 +2185,7 @@ export function UserManagement() {
                           <SelectItem value="none">
                             No student assigned
                           </SelectItem>
-                          {users.map((student) => (
+                          {students.map((student) => (
                             <SelectItem key={student.id} value={student.id}>
                               {student.firstName} {student.lastName} (
                               {student.email})
@@ -2200,13 +2197,13 @@ export function UserManagement() {
                         <p className="text-xs text-muted-foreground mt-1">
                           Currently assigned:{" "}
                           {
-                            users.find(
-                              (u) => u.id === selectedStudentsForCoach[0]
+                            students.find(
+                              (s) => s.id === selectedStudentsForCoach[0]
                             )?.firstName
                           }{" "}
                           {
-                            users.find(
-                              (u) => u.id === selectedStudentsForCoach[0]
+                            students.find(
+                              (s) => s.id === selectedStudentsForCoach[0]
                             )?.lastName
                           }
                         </p>

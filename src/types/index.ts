@@ -18,6 +18,22 @@ export interface User {
     lastName: string;
     email: string;
   } | null;
+  student?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    business_name?: string;
+    location?: string;
+    target_market?: string;
+    strengths?: string;
+    challenges?: string;
+    goals?: string;
+    preferred_contact_method?: string;
+    availability?: string;
+    notes?: string;
+  } | null;
   access_start: string;
   access_end: string;
   has_paid: boolean;

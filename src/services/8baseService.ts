@@ -122,8 +122,10 @@ const transformUser = (user: any): User => {
     created_at: user.createdAt,
     coaching_term_start: null, // Not available in new schema
     coaching_term_end: null, // Not available in new schema
-    is_active: user.is_active !== undefined ? user.is_active : true // Default to true
-  };
+    is_active: user.is_active !== undefined ? user.is_active : true, // Default to true
+    // Preserve the student field from the original user data
+    student: user.student || null
+  } as User;
 };
 
 const transformWeeklyReport = (report: any): WeeklyReport => ({
@@ -620,7 +622,7 @@ export const eightbaseService = {
         finalUpdates[key] = transformedUpdates[key];
       }
     });
-    
+    console.log('this is running 1');
     const data = await executeMutation(queries.UPDATE_USER, { 
       filter: { id }, 
       data: finalUpdates 
@@ -673,7 +675,7 @@ export const eightbaseService = {
     console.log('Final mutation data being sent:');
     console.log('- filter.id (user ID):', id);
     console.log('- dataObject:', dataObject);
-    
+    console.log('this is running 2');
     const data = await executeMutation(queries.UPDATE_USER_WITH_COACH_CONNECTION, { 
       filter: { id }, 
       data: dataObject 
@@ -805,13 +807,13 @@ export const eightbaseService = {
       console.log('- coachId:', coachId);
       
       const dataObject = {
-        coach: {
-          connect: { id: coachId }
+        student: {
+          connect: { id: studentId }
         }
       };
-      
+      console.log('this is running 3');
       const data = await executeMutation(queries.UPDATE_USER_WITH_COACH_CONNECTION, {
-        filter: { id: studentId },
+        filter: { id: coachId },
         data: dataObject
       });
       
@@ -3237,6 +3239,7 @@ export const eightbaseService = {
 
   // Disconnect coach from student by updating Student table record
   async disconnectCoachFromStudent(studentUserId: string): Promise<any> {
+    console.log('Disconnecting coach from student via Student table update');
     try {
       console.log('Disconnecting coach from student via Student table update');
       console.log('- Student User ID:', studentUserId);
