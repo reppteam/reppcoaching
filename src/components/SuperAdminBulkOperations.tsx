@@ -284,9 +284,15 @@ export function SuperAdminBulkOperations() {
     try {
       const selectedUsers = getSelectedItems('users');
       
+      // Get coach record ID from user ID
+      const coachRecordId = await eightbaseService.getCoachRecordIdByUserId(operationData.coachId);
+      if (!coachRecordId) {
+        throw new Error(`No coach record found for user ${operationData.coachId}`);
+      }
+      
       // Assign students to coach
       await Promise.all(selectedUsers.map(user => 
-        eightbaseService.assignStudentToCoach(user.id, operationData.coachId)
+        eightbaseService.assignStudentToCoach(user.id, coachRecordId)
       ));
 
       // Update operation status

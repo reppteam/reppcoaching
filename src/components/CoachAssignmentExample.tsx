@@ -36,8 +36,8 @@ export function CoachAssignmentExample() {
   };
 
   const handleDisconnectCoach = async () => {
-    if (!studentUserId) {
-      setError('Please provide Student User ID');
+    if (!studentUserId || !coachUserId) {
+      setError('Please provide both Student User ID and Coach User ID');
       return;
     }
 
@@ -46,7 +46,7 @@ export function CoachAssignmentExample() {
     setResult(null);
 
     try {
-      const updatedStudent = await disconnectCoachFromStudent(studentUserId);
+      const updatedStudent = await disconnectCoachFromStudent(studentUserId, coachUserId);
       setResult(updatedStudent);
       console.log('Coach disconnected successfully:', updatedStudent);
     } catch (err) {

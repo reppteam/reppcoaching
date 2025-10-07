@@ -572,6 +572,8 @@ export const eightbaseService = {
       if (updates.is_active !== undefined) simpleUpdates.is_active = updates.is_active;
       if (updates.has_paid !== undefined) simpleUpdates.has_paid = updates.has_paid;
       
+      // Student assignment is now handled separately through coach records
+      
       const data = await executeMutation(queries.UPDATE_USER_SIMPLE, { 
         filter: { id }, 
         data: simpleUpdates 
@@ -799,25 +801,28 @@ export const eightbaseService = {
     }
   },
 
-  async assignStudentToCoach(studentId: string, coachId: string | null): Promise<User> {
+  async assignStudentToCoach(studentId: string, coachId: string | null): Promise<any> {
     if (coachId) {
-      // Connect student to coach through User table
-      console.log('Connecting student to coach through User table');
+      // Connect student to coach through Coach table
+      console.log('Connecting student to coach through Coach table');
       console.log('- studentId:', studentId);
       console.log('- coachId:', coachId);
       
       const dataObject = {
-        student: {
+        students: {
           connect: { id: studentId }
         }
       };
       console.log('this is running 3');
-      const data = await executeMutation(queries.UPDATE_USER_WITH_COACH_CONNECTION, {
-        filter: { id: coachId },
+      console.log('- Final mutation data:');
+      console.log('  - filter.id (coach ID):', coachId);
+      console.log('  - dataObject:', dataObject);
+      const data = await executeMutation(queries.UPDATE_COACH, {
+        id: coachId,
         data: dataObject
       });
       
-      return transformUser(data.userUpdate);
+      return data.coachUpdate;
     } else {
       // Disconnect from current coach
       console.log('Disconnecting student from current coach');
@@ -921,6 +926,17 @@ export const eightbaseService = {
       return data.usersList.items.length > 0 ? data.usersList.items[0] : null;
     } catch (error) {
       console.error('Failed to get coach by user ID:', error);
+      return null;
+    }
+  },
+
+  async getCoachRecordIdByUserId(userId: string): Promise<string | null> {
+    try {
+      const data = await executeQuery(queries.GET_COACH_BY_USER_ID, { userId });
+      const coachRecord = data.coachesList?.items?.[0];
+      return coachRecord?.id || null;
+    } catch (error) {
+      console.error('Failed to get coach record ID by user ID:', error);
       return null;
     }
   },
@@ -2941,8 +2957,14 @@ export const eightbaseService = {
         const studentUserId = studentUserIds[i];
         
         try {
+          // Get coach record ID from user ID
+          const coachRecordId = await this.getCoachRecordIdByUserId(coachUserId);
+          if (!coachRecordId) {
+            throw new Error(`No coach record found for user ${coachUserId}`);
+          }
+          
           // Assign student to coach using existing method
-          const result = await this.assignStudentToCoach(studentUserId, coachUserId);
+          const result = await this.assignStudentToCoach(studentUserId, coachRecordId);
           
           results.successful.push({
             studentUserId: studentUserId,
@@ -3027,8 +3049,14 @@ export const eightbaseService = {
         const studentUserId = studentUserIds[i];
         
         try {
+          // Get coach record ID from user ID
+          const coachRecordId = await this.getCoachRecordIdByUserId(coachUserId);
+          if (!coachRecordId) {
+            throw new Error(`No coach record found for user ${coachUserId}`);
+          }
+          
           // Assign coach to student using existing method
-          const result = await this.assignStudentToCoach(studentUserId, coachUserId);
+          const result = await this.assignStudentToCoach(studentUserId, coachRecordId);
           
           results.successful.push({
             studentUserId: studentUserId,
@@ -3238,18 +3266,20 @@ export const eightbaseService = {
   },
 
   // Disconnect coach from student by updating Student table record
-  async disconnectCoachFromStudent(studentUserId: string): Promise<any> {
+  async disconnectCoachFromStudent(studentId: string, coachId: string): Promise<any> {
     console.log('Disconnecting coach from student via Student table update');
     try {
       console.log('Disconnecting coach from student via Student table update');
-      console.log('- Student User ID:', studentUserId);
+      console.log('- Student ID:', studentId);
+      console.log('- Coach ID:', coachId);
       
       const data = await executeMutation(queries.DISCONNECT_COACH_FROM_STUDENT, {
-        studentUserId
+        studentId,
+        coachId
       });
       
       console.log('Coach disconnected from student successfully:', data);
-      return data.studentUpdateByFilter;
+      return data.studentUpdate;
     } catch (error) {
       console.error('Failed to disconnect coach from student:', error);
       throw error;

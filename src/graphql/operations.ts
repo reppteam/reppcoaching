@@ -432,38 +432,35 @@ export const ASSIGN_COACH_TO_STUDENT = gql`
 `;
 
 export const DISCONNECT_COACH_FROM_STUDENT = gql`
-  mutation DisconnectCoachFromStudent($studentUserId: ID!) {
-    # Update the Student record to disconnect the coach
-    studentUpdateByFilter(
-      filter: { user: { id: { equals: $studentUserId } } }
+  mutation DisconnectCoachFromStudent($studentId: ID!, $coachId: ID!) {
+    __typename
+    studentUpdate(
+      filter: { id: $studentId }
       data: {
         coach: {
-          disconnect: true
+          disconnect: { id: $coachId }
         }
       }
     ) {
-      id
-      firstName
-      lastName
-      email
-      phone
-      business_name
       coach {
-        id
         firstName
+        id
         lastName
         email
         bio
+        users {
+          email
+          id
+          firstName
+          lastName
+        }
       }
-      user {
-        id
-        firstName
-        lastName
-        email
-      }
-      createdAt
-      updatedAt
-      __typename
+      id
+      lastName
+      firstName
+      email
+      phone
+      business_name
     }
   }
 `;
@@ -899,6 +896,7 @@ export const UPDATE_USER = gql`
 // Simple update query for basic user fields only
 export const UPDATE_USER_SIMPLE = gql`
   mutation UpdateUserSimple($data: UserUpdateInput!, $filter: UserKeyFilter) {
+    __typename
     userUpdate(data: $data, filter: $filter) {
       id
       email
@@ -912,8 +910,11 @@ export const UPDATE_USER_SIMPLE = gql`
         items {
           id
           name
+          __typename
         }
+        __typename
       }
+      __typename
     }
   }
 `;
@@ -1146,6 +1147,19 @@ export const GET_COACH_WITH_STUDENTS = gql`
         bio
         profileImage {
           downloadUrl
+        }
+        user {
+          id
+          firstName
+          lastName
+          email
+          status
+          roles {
+            items {
+              id
+              name
+            }
+          }
         }
         users {
           id

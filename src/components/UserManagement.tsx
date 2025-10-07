@@ -443,8 +443,8 @@ export function UserManagement() {
 
       if (isCoach || isCoachManager) {
         if (isCoachManager) {
-          // Update coach manager using User table operations
-          const updateData = {
+          // Update coach manager using User table operations (without student connection)
+          const updateData: any = {
             firstName: editingUser.firstName,
             lastName: editingUser.lastName,
             email: editingUser.email,
@@ -452,6 +452,62 @@ export function UserManagement() {
 
           // For coach managers, editingUser.id is already the User table ID
           await eightbaseService.updateUser(editingUser.id, updateData);
+          
+          // Handle student assignment through coach record only
+          // Find the coach record for this manager
+          // First try by user ID, then fallback to email matching
+          let managerCoachRecord = coaches.find(
+            (c) => c.user?.id === editingUser.id
+          );
+          
+          // If not found by user ID, try by email matching
+          if (!managerCoachRecord) {
+            managerCoachRecord = coaches.find(
+              (c) => c.email === editingUser.email
+            );
+          }
+          
+          if (managerCoachRecord) {
+            // Get current assigned student from coach record
+            const currentAssignedStudent = students.find(
+              (s) => s.coach?.id === managerCoachRecord.id
+            );
+            
+            // Check if student assignment has changed
+            const hasStudentAssignmentChanged = 
+              (selectedStudentsForCoach.length > 0 && currentAssignedStudent?.id !== selectedStudentsForCoach[0]) ||
+              (selectedStudentsForCoach.length === 0 && currentAssignedStudent);
+            
+            if (hasStudentAssignmentChanged) {
+              if (selectedStudentsForCoach.length > 0) {
+                // Assign new student
+                const studentToAssign = selectedStudentsForCoach[0];
+                const coachUpdateData = {
+                  students: {
+                    connect: { id: studentToAssign }
+                  }
+                };
+                
+                console.log('Updating coach record with student assignment:', coachUpdateData);
+                await eightbaseService.updateCoachDirect(managerCoachRecord.id, coachUpdateData);
+              } else {
+                // Disconnect current student
+                if (currentAssignedStudent) {
+                  const coachUpdateData = {
+                    students: {
+                      disconnect: { id: currentAssignedStudent.id }
+                    }
+                  };
+                  
+                  console.log('Disconnecting student from coach record:', coachUpdateData);
+                  await eightbaseService.updateCoachDirect(managerCoachRecord.id, coachUpdateData);
+                }
+              }
+            }
+          } else {
+            console.error('No coach record found for coach manager:', editingUser.id);
+          }
+          
           setEditUserDialogOpen(false);
           await loadUsers(); // Refresh data after update
         } else {
@@ -467,16 +523,12 @@ export function UserManagement() {
           await loadUsers(); // Refresh data after update
         }
 
-        // Handle student assignment for coaches and coach managers
-        if (selectedStudentsForCoach.length > 0) {
+        // Handle student assignment for regular coaches only (coach managers handled above)
+        if (selectedStudentsForCoach.length > 0 && !isCoachManager) {
           const studentToAssign = selectedStudentsForCoach[0];
           
           // Get the correct coach ID for student assignment
           let coachId = editingUser.id; // Default to the ID passed in
-          if (isCoachManager) {
-            // For coach managers, use the User table ID directly (not the coach record ID)
-            coachId = editingUser.id;
-          }
           
           const currentAssignedStudent = students.find(
             (s) => s.coach?.id === coachId
@@ -488,7 +540,8 @@ export function UserManagement() {
             currentAssignedStudent.id !== studentToAssign
           ) {
             await eightbaseService.disconnectCoachFromStudent(
-              currentAssignedStudent.id
+              currentAssignedStudent.id,
+              coachId
             );
           }
 
@@ -500,20 +553,17 @@ export function UserManagement() {
             );
             await loadUsers(); // Refresh data after assignment
           }
-        } else {
-          // Disconnect all students if none selected
+        } else if (!isCoachManager) {
+          // Disconnect all students if none selected (for regular coaches only)
           let coachId = editingUser.id; // Default to the ID passed in
-          if (isCoachManager) {
-            // For coach managers, use the User table ID directly (not the coach record ID)
-            coachId = editingUser.id;
-          }
           
           const currentAssignedStudent = students.find(
             (s) => s.coach?.id === coachId
           );
           if (currentAssignedStudent) {
             await eightbaseService.disconnectCoachFromStudent(
-              currentAssignedStudent.id
+              currentAssignedStudent.id,
+              coachId
             );
             await loadUsers(); // Refresh data after disconnection
           }
@@ -649,26 +699,40 @@ export function UserManagement() {
   const openEditUser = (userToEdit: any) => {
     setEditingUser(userToEdit);
 
-    // Initialize selected student if editing a coach or coach manager (single assignment)
+    // Initialize selected students if editing a coach or coach manager
     const isCoach = coaches.some((c) => c.id === userToEdit.id);
     const isCoachManager = coachManagers.some((cm) => cm.id === userToEdit.id);
     
     if (isCoach || isCoachManager) {
-      let assignedStudent = null;
+      let assignedStudentIds: string[] = [];
       
       if (isCoachManager) {
-        // For coach managers, check if they have an assignedStudent field
+        // For coach managers, get student data from coach table only
+        // First try by user ID, then fallback to email matching
+        let managerCoachRecord = coaches.find(
+          (c) => c.user?.id === userToEdit.id
+        );
         
-        if ((userToEdit as any).assignedStudent) {
-          assignedStudent = (userToEdit as any).assignedStudent;
+        // If not found by user ID, try by email matching
+        if (!managerCoachRecord) {
+          managerCoachRecord = coaches.find(
+            (c) => c.email === userToEdit.email
+          );
+        }
+        
+        if (managerCoachRecord) {
+          const assignedStudents = students.filter(
+            (s) => s.coach?.id === managerCoachRecord.id
+          );
+          assignedStudentIds = assignedStudents.map(s => s.id);
         }
       } else {
         // For regular coaches, find students assigned to them
         const studentsAssignedToCoach = students.filter(s => s.coach?.id === userToEdit.id);
-        assignedStudent = studentsAssignedToCoach[0] || null; // Take first student if any
+        assignedStudentIds = studentsAssignedToCoach.map(s => s.id);
       }
       
-      setSelectedStudentsForCoach(assignedStudent ? [assignedStudent.id] : []);
+      setSelectedStudentsForCoach(assignedStudentIds);
 
     } else {
       setSelectedStudentsForCoach([]);
@@ -1167,9 +1231,18 @@ export function UserManagement() {
                     <div className="space-y-3">
                       {coachManagers.map((manager) => {
                         // Find the coach record for this manager
-                        const managerCoachRecord = coaches.find(
+                        // First try by user ID, then fallback to email matching
+                        let managerCoachRecord = coaches.find(
                           (c) => c.user?.id === manager.id
                         );
+                        
+                        // If not found by user ID, try by email matching
+                        if (!managerCoachRecord) {
+                          managerCoachRecord = coaches.find(
+                            (c) => c.email === manager.email
+                          );
+                        }
+                        
                         // Find assigned students using the coach relationship
                         const assignedStudents = students.filter(
                           (s) => s.coach?.id === managerCoachRecord?.id
@@ -1196,10 +1269,6 @@ export function UserManagement() {
                               </div>
                               <div className="text-sm text-muted-foreground truncate">
                                 {manager.email}
-                              </div>
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {assignedStudents.length} students assigned as
-                                coach
                               </div>
                               <div className="text-xs text-muted-foreground">
                                 {managedCoaches.length} other coaches managed

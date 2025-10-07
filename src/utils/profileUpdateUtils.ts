@@ -118,13 +118,15 @@ export async function assignCoachToStudent(
 
 /**
  * Disconnects a coach from a student by updating the Student table record
- * @param studentUserId - The student's user ID
+ * @param studentId - The student's ID
+ * @param coachId - The coach's ID
  * @returns Promise with the updated student data
  */
 export async function disconnectCoachFromStudent(
-  studentUserId: string
+  studentId: string,
+  coachId: string
 ): Promise<any> {
-  return await eightbaseService.disconnectCoachFromStudent(studentUserId);
+  return await eightbaseService.disconnectCoachFromStudent(studentId, coachId);
 }
 
 /**
