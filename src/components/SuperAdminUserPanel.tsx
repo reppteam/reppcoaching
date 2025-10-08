@@ -204,7 +204,7 @@ export function SuperAdminUserPanel() {
       role: 'user', // All are students now
       is_active: user.is_active !== false,
       has_paid: user.has_paid || false,
-      assignedCoachId: user.coach?.id || ''
+      assignedCoachId: user.coach?.id || 'none'
     });
     setEditDialogOpen(true);
   };
@@ -255,7 +255,7 @@ export function SuperAdminUserPanel() {
         };
         
         // Handle coach assignment directly in the student update
-        if (editForm.assignedCoachId) {
+        if (editForm.assignedCoachId && editForm.assignedCoachId !== 'none') {
           const selectedCoach = coaches.find(c => c.id === editForm.assignedCoachId);
           if (selectedCoach) {
             console.log('Assigning coach in edit:', { studentId: editingUser.id, coachId: selectedCoach.id });
@@ -263,7 +263,7 @@ export function SuperAdminUserPanel() {
               connect: { id: selectedCoach.id }
             };
           }
-        } else if (!editForm.assignedCoachId && editingUser.coach?.id) {
+        } else if (editForm.assignedCoachId === 'none' && editingUser.coach?.id) {
           // Disconnect coach if no coach is selected
           console.log('Disconnecting coach in edit:', editingUser.id, 'coach ID:', editingUser.coach.id);
           studentData.coach = {
@@ -553,7 +553,7 @@ export function SuperAdminUserPanel() {
           </DialogContent>
         </Dialog>
           <Button 
-            variant="outline"
+            // variant="outline"
             onClick={() => setBulkAssignDialogOpen(true)}
           >
             <Shield className="h-4 w-4 mr-2" />
@@ -1017,7 +1017,7 @@ export function SuperAdminUserPanel() {
                     <SelectValue placeholder="Select coach" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Coach Assigned</SelectItem>
+                    <SelectItem value="none">No Coach Assigned</SelectItem>
                     {coaches.map(coach => (
                       <SelectItem key={coach.id} value={coach.id}>
                         {coach.firstName} {coach.lastName} ({coach.email})

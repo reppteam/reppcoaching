@@ -18,6 +18,7 @@ import { AdminDashboard } from "./AdminDashboard";
 import { SuperAdminDashboard } from "./SuperAdminDashboard";
 import { CoachManagerDashboard } from "./CoachManagerDashboard";
 import { EnhancedCoachDashboard } from "./EnhancedCoachDashboard";
+import { EnhancedStudentDashboard } from "./EnhancedStudentDashboard";
 import { SuperAdminUserPanel } from "./SuperAdminUserPanel";
 import { SuperAdminList } from "./SuperAdminList";
 import { UserManagement } from "./UserManagement";
@@ -257,54 +258,12 @@ export function Dashboard() {
           console.log("Rendering AdminDashboard")
           return <AdminDashboard />;
         } else {
-          console.log("Rendering Student Dashboard - user role:", userRole)
+          console.log("Rendering Enhanced Student Dashboard - user role:", userRole)
           return (
-            <div className="space-y-6">
-              {/* Welcome Section with Why */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-3">
-                  <div>
-                    <h1 className="text-2xl font-bold text-foreground">
-                      Welcome back,{" "}
-                      <span className="text-brand-blue">
-                        {user?.firstName} {user?.lastName}
-                      </span>
-                    </h1>
-                    <p className="text-muted-foreground mb-6">
-                      Track your real estate photography business progress
-                    </p>
-                  </div>
-                  
-                  {/* Why Section - Motivational */}
-                  <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start space-x-3">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-full">
-                          <Heart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-foreground mb-2">Remember Your Why</h3>
-                          <div className="text-sm text-muted-foreground">
-                            {user?.why || "Why did you start this business? What drives you to succeed? Keep your purpose front and center."}
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="mt-2"
-                            onClick={() => setEditProfileOpen(true)}
-                          >
-                            <Quote className="mr-2 h-4 w-4" />
-                            {user?.why ? 'Edit Your Why' : 'Set Your Why'}
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-              
-              <WeeklyReports />
-            </div>
+            <EnhancedStudentDashboard
+              onEditProfile={() => setEditProfileOpen(true)}
+              onNavigate={handleTabChange}
+            />
           );
         }
       case "goals":
