@@ -242,8 +242,21 @@ export function Dashboard() {
     return baseItems;
   };
 
-  const handleTabChange = (tabId: string) => {
+  const handleTabChange = async (tabId: string) => {
     setActiveTab(tabId);
+    
+    // Log navigation activity for Recent Activity feed (only for non-home pages)
+    if (user?.id && tabId !== 'home') {
+      try {
+        const { NotificationUtils } = await import('../utils/notificationUtils');
+        NotificationUtils.logActivity(user.id, 'login', { 
+          page: tabId,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error logging navigation activity:', error);
+      }
+    }
   };
   const renderTabContent = () => {
     switch (activeTab) {

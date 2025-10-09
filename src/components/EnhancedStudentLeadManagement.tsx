@@ -260,6 +260,15 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
       await loadData();
       setDialogOpen(false);
       resetForm();
+      
+      // Log activity for Recent Activity feed
+      if (user?.id) {
+        const { NotificationUtils } = await import('../utils/notificationUtils');
+        NotificationUtils.logActivity(user.id, 'lead_added', { 
+          leadName: formData.lead_name,
+          leadSource: formData.lead_source 
+        });
+      }
     } catch (error) {
       console.error('Failed to create lead:', error);
     }
@@ -520,6 +529,15 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
         // Reload data
         await loadData();
         alert(`Successfully imported ${leadsToCreate.length} leads in bulk!`);
+        
+        // Log activity for Recent Activity feed
+        if (user?.id) {
+          const { NotificationUtils } = await import('../utils/notificationUtils');
+          NotificationUtils.logActivity(user.id, 'lead_added', { 
+            bulkImport: true,
+            count: leadsToCreate.length 
+          });
+        }
       } catch (error) {
         console.error('Failed to import leads:', error);
         alert('Failed to import leads. Please check the file format.');

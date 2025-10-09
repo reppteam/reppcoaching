@@ -118,6 +118,14 @@ export const WeeklyReports: React.FC = () => {
       setReports([report, ...reports]);
       setAddingReport(false);
       resetForm();
+      
+      // Log activity for Recent Activity feed
+      const { NotificationUtils } = await import('../utils/notificationUtils');
+      NotificationUtils.logActivity(user.id, 'report_submitted', { 
+        revenue: formData.revenue,
+        netProfit: netProfit,
+        paidShoots: formData.paid_shoots 
+      });
     } catch (error) {
       console.error('Error creating report:', error);
     }

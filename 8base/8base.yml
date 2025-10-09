@@ -1,23 +1,14 @@
 settings:
   nodeVersion: 20
 functions:
-  resolver:
-    type: resolver
-    handler:
-      code: src/resolvers/resolver/handler.ts
-    schema: src/resolvers/resolver/schema.graphql
-  task:
+  checkStudentActivity:
     type: task
     handler:
-      code: src/tasks/task/handler.ts
-  webhook:
+      code: src/tasks/checkStudentActivity/handler.ts
+    schedule: rate(1 day)
+  sendNotifications:
     type: webhook
     handler:
-      code: src/webhooks/webhook/handler.ts
-    path: /webhook
+      code: src/functions/sendNotifications/handler.ts
+    path: /sendNotifications
     method: POST
-  trigger:
-    type: trigger.before
-    handler:
-      code: src/triggers/trigger/handler.ts
-    operation: Users.create

@@ -86,6 +86,13 @@ export const Goals: React.FC = () => {
       setGoals([goal, ...goals]);
       setAddingGoal(false);
       resetForm();
+      
+      // Log activity for Recent Activity feed
+      const { NotificationUtils } = await import('../utils/notificationUtils');
+      NotificationUtils.logActivity(user.id, 'goal_updated', { 
+        goalTitle: formData.title,
+        goalType: formData.goal_type 
+      });
     } catch (error) {
       console.error('Error creating goal:', error);
     }
@@ -102,6 +109,16 @@ export const Goals: React.FC = () => {
       setGoals(goals.map(g => g.id === goalId ? updatedGoal : g));
       setEditingGoal(null);
       resetForm();
+      
+      // Log activity for Recent Activity feed
+      if (user?.id) {
+        const { NotificationUtils } = await import('../utils/notificationUtils');
+        NotificationUtils.logActivity(user.id, 'goal_updated', { 
+          goalTitle: formData.title,
+          goalType: formData.goal_type,
+          isUpdate: true 
+        });
+      }
     } catch (error) {
       console.error('Error updating goal:', error);
     }

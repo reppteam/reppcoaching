@@ -117,7 +117,22 @@ export class NotificationUtils {
     try {
       const existingLogs = localStorage.getItem(`activity_log_${userId}`);
       const logs = existingLogs ? JSON.parse(existingLogs) : [];
-      logs.push(activityLog);
+      
+      // Check for duplicate entries (same activity type and metadata within 5 seconds)
+      const now = new Date().getTime();
+      const isDuplicate = logs.some((log: any) => {
+        const logTime = new Date(log.timestamp).getTime();
+        const timeDiff = now - logTime;
+        return (
+          log.activityType === activityType &&
+          JSON.stringify(log.metadata) === JSON.stringify(metadata) &&
+          timeDiff < 5000 // 5 seconds
+        );
+      });
+      
+      if (!isDuplicate) {
+        logs.push(activityLog);
+      }
 
       // Keep only last 100 entries
       const trimmedLogs = logs.slice(-100);

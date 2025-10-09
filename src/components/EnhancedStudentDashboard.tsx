@@ -46,9 +46,25 @@ export function EnhancedStudentDashboard({
     try {
       setLoading(true);
 
-      // Load notifications
+      // Load notifications from database (from automated task)
+      const storedNotifications = await notificationService.getStoredNotifications(user.id);
+      
+      // Load client-side generated notifications
       const userNotifications = await notificationService.checkUserActivity(user.id);
-      setNotifications(userNotifications);
+      
+      // Combine both (stored first, then client-generated)
+      const allNotifications = [...storedNotifications, ...userNotifications];
+      
+      // Remove duplicates by type
+      const uniqueNotifications = allNotifications.reduce((acc, notification) => {
+        const exists = acc.find(n => n.type === notification.type && n.title === notification.title);
+        if (!exists) {
+          acc.push(notification);
+        }
+        return acc;
+      }, [] as typeof allNotifications);
+      
+      setNotifications(uniqueNotifications);
 
       // Load stats
       const dashboardStats = await notificationService.getDashboardStats(user.id);
@@ -63,7 +79,13 @@ export function EnhancedStudentDashboard({
     }
   };
 
-  const handleDismissNotification = (id: string) => {
+  const handleDismissNotification = async (id: string) => {
+    // Mark as read in database (if it's a stored notification)
+    if (!id.includes('report-warning') && !id.includes('lead-warning') && !id.includes('milestone')) {
+      await notificationService.markNotificationAsRead(id);
+    }
+    
+    // Remove from UI
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
@@ -85,13 +107,13 @@ export function EnhancedStudentDashboard({
             log.activityType === 'lead_added' ? 'lead' as const :
             log.activityType === 'goal_updated' ? 'goal' as const :
             'milestone' as const,
-      title: getActivityTitle(log.activityType),
+      title: getActivityTitle(log.activityType, log.metadata),
       description: getActivityDescription(log.activityType, log.metadata),
       timestamp: new Date(log.timestamp),
     }));
   };
 
-  const getActivityTitle = (type: string) => {
+  const getActivityTitle = (type: string, metadata?: any) => {
     switch (type) {
       case 'report_submitted':
         return 'Weekly Report Submitted';
@@ -100,6 +122,17 @@ export function EnhancedStudentDashboard({
       case 'goal_updated':
         return 'Goal Updated';
       case 'login':
+        if (metadata?.page) {
+          const pageNames: { [key: string]: string } = {
+            'home': 'Dashboard',
+            'goals': 'Goals',
+            'reports': 'Weekly Reports',
+            'leads': 'Leads',
+            'calculator': 'Profit Calculator',
+            'pricing': 'Pricing'
+          };
+          return `Visited ${pageNames[metadata.page] || metadata.page}`;
+        }
         return 'Dashboard Accessed';
       default:
         return 'Activity';
@@ -113,6 +146,9 @@ export function EnhancedStudentDashboard({
           ? `Revenue: $${metadata.revenue}` 
           : 'Weekly progress tracked';
       case 'lead_added':
+        if (metadata?.bulkImport) {
+          return `Imported ${metadata.count} leads`;
+        }
         return metadata?.leadName 
           ? `Lead: ${metadata.leadName}` 
           : 'New potential client added';
@@ -121,6 +157,9 @@ export function EnhancedStudentDashboard({
           ? `Goal: ${metadata.goalTitle}` 
           : 'Goal progress updated';
       case 'login':
+        if (metadata?.page) {
+          return `Navigated to ${metadata.page} page`;
+        }
         return 'Checked dashboard';
       default:
         return 'Activity recorded';
@@ -234,15 +273,6 @@ export function EnhancedStudentDashboard({
         </div>
       )}
 
-      {/* Dashboard Stats */}
-      <div>
-        <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-          Your Progress
-        </h2>
-        <DashboardStats stats={stats} />
-      </div>
-
       {/* Quick Actions */}
       <div>
         <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -257,12 +287,24 @@ export function EnhancedStudentDashboard({
         />
       </div>
 
-      {/* Activity Feed and Weekly Reports */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
+      {/* Dashboard Stats */}
+      <div>
+        <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+          <TrendingUp className="h-5 w-5" />
+          Your Progress
+        </h2>
+        <DashboardStats stats={stats} />
+      </div>
+
+      {/* Recent Activity (moved to left) and Weekly Reports */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Recent Activity - Left Sidebar */}
+        <div className="lg:col-span-1 order-first">
           <ActivityFeed activities={getRecentActivities()} maxItems={5} />
         </div>
-        <div className="lg:col-span-2">
+        
+        {/* Weekly Reports - Main Content */}
+        <div className="lg:col-span-3">
           <WeeklyReports />
         </div>
       </div>
