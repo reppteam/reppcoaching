@@ -867,8 +867,8 @@ export function UserManagement() {
       setSelectedStudentsForCoach([]);
     }
 
-    // If current user is a coach editing a student, load notes
-    if (user && (user as any).role === "coach") {
+    // If current user is a coach or super_admin editing a student, load notes
+    if (user && ((user as any).role === "coach" || (user as any).role === "super_admin")) {
       await loadStudentNotes(userToEdit.id);
     }
 
@@ -2890,10 +2890,101 @@ export function UserManagement() {
                 </div>
               </div>
 
-              {/* Access dates and payment status are managed through User table relationship */}
-              {/* <div className="text-sm text-muted-foreground">
-                Access dates and payment status are managed through the User table relationship.
-              </div> */}
+              {/* Date and Status Fields - Only show for students */}
+              {!coaches.some((c) => c.id === editingUser.id) && !coachManagers.some((cm) => cm.id === editingUser.id) && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-coaching-term-start">Coaching Term Start</Label>
+                      <Input
+                        id="edit-coaching-term-start"
+                        type="date"
+                        value={(editingUser as StudentData).coaching_term_start || ""}
+                        onChange={(e) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            coaching_term_start: e.target.value || undefined 
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-coaching-term-end">Coaching Term End</Label>
+                      <Input
+                        id="edit-coaching-term-end"
+                        type="date"
+                        value={(editingUser as StudentData).coaching_term_end || ""}
+                        onChange={(e) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            coaching_term_end: e.target.value || undefined 
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-access-start">Access Start Date</Label>
+                      <Input
+                        id="edit-access-start"
+                        type="date"
+                        value={(editingUser as StudentData).access_start || ""}
+                        onChange={(e) =>
+                          setEditingUser({ 
+                            ...(editingUser as StudentData), 
+                            access_start: e.target.value || undefined 
+                          })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-access-end">Access End Date</Label>
+                      <Input
+                        id="edit-access-end"
+                        type="date"
+                        value={(editingUser as StudentData).access_end || ""}
+                        onChange={(e) =>
+                          setEditingUser({ 
+                            ...(editingUser as StudentData), 
+                            access_end: e.target.value || undefined 
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-has-paid"
+                        checked={(editingUser as StudentData).has_paid || false}
+                        onCheckedChange={(checked) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            has_paid: checked as boolean 
+                          })
+                        }
+                      />
+                      <Label htmlFor="edit-has-paid">Has Paid</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-is-active"
+                        checked={(editingUser as StudentData).is_active || false}
+                        onCheckedChange={(checked) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            is_active: checked as boolean 
+                          })
+                        }
+                      />
+                      <Label htmlFor="edit-is-active">Is Active</Label>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="flex justify-end space-x-2 pt-4">
                 <Button
