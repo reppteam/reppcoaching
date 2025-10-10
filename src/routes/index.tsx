@@ -101,17 +101,6 @@ export default function Router() {
       ),
     },
 
-    // Coach Dashboard (standalone)
-    {
-      path: "coach-dashboard",
-      element: (
-        <AuthGuard>
-          <ProtectedRoute requiredRole="Coach">
-            <EnhancedCoachDashboard />
-          </ProtectedRoute>
-        </AuthGuard>
-      ),
-    },
 
     // Main dashboard routes
     {

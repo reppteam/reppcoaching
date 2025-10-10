@@ -290,6 +290,7 @@ const transformCallLog = (callLog: any): CallLog => ({
   outcome: callLog.outcome,
   next_steps: callLog.next_steps,
   student_mood: callLog.student_mood,
+  recording_url: callLog.recording_url,
   created_at: callLog.createdAt,
   updated_at: callLog.updatedAt
 });
@@ -881,7 +882,7 @@ export const eightbaseService = {
   async getAllCoaches(): Promise<any[]> {
     try {
       const { data } = await apolloClient.query({
-        query: queries.GET_ALL_COACHES,
+        query: queries.GET_ALL_COACHES_WITH_COACH_TABLE_IDS,
         fetchPolicy: 'network-only'
       });
       
@@ -3124,7 +3125,7 @@ export const eightbaseService = {
   // Get all students
   async getAllStudents(): Promise<any> {
     try {
-      console.log('Fetching all students');
+      console.log('Fetching all students from Student table');
       
       const data = await executeQuery(queries.GET_ALL_STUDENTS);
       

@@ -37,12 +37,13 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
-  const [assignedStudents, setAssignedStudents] = useState<UserType[]>([]);
+  const [assignedStudents, setAssignedStudents] = useState<any[]>([]);
   const [addingCall, setAddingCall] = useState(false);
   const [editingCall, setEditingCall] = useState<string | null>(null);
   const [viewingCall, setViewingCall] = useState<CallLog | null>(null);
   const [filterStudent, setFilterStudent] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
+  const [coachRecordId, setCoachRecordId] = useState<string>(''); // Coach table ID
   const [formData, setFormData] = useState({
     student_id: '',
     call_date: '',
@@ -51,7 +52,8 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
     topics_discussed: [] as string[],
     outcome: '',
     next_steps: '',
-    student_mood: 'positive' as 'positive' | 'neutral' | 'frustrated' | 'motivated'
+    student_mood: 'positive' as 'positive' | 'neutral' | 'frustrated' | 'motivated',
+    recording_url: ''
   });
 
   const currentCoachId = coachId || user?.id;
@@ -68,13 +70,49 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
     try {
       setLoading(true);
       
-      // Load call logs for this coach
-      const logs = await eightbaseService.getCallLogs(undefined, currentCoachId);
-      setCallLogs(logs);
+      // Get all coaches and find the one that matches the current user
+      const coaches = await eightbaseService.getAllCoachesDirect();
+      console.log('All coaches:', coaches);
+      console.log('Current user:', user);
+      
+      const coachRecord = coaches.find(c => 
+        c.users?.id === user?.id || 
+        c.email === user?.email ||
+        c.id === user?.id
+      );
+      
+      console.log('Found coach record:', coachRecord);
+      
+      if (coachRecord) {
+        console.log('Coach Record ID (from Coach table):', coachRecord.id);
+        setCoachRecordId(coachRecord.id);
+        
+        // Load call logs using Coach table ID
+        const logs = await eightbaseService.getCallLogs(undefined, coachRecord.id);
+        setCallLogs(logs);
 
-      // Load assigned students
-      const students = await eightbaseService.getAssignedStudents(currentCoachId);
-      setAssignedStudents(students);
+        // Load assigned students using the same logic as UserManagement
+        const allStudents = await eightbaseService.getAllStudents();
+        console.log('All students:', allStudents);
+        
+        const assignedStudents = allStudents.filter((student: any) => 
+          student.coach?.id === coachRecord.id
+        );
+        console.log('Assigned students:', assignedStudents);
+        console.log('First student details:', assignedStudents[0]);
+        if (assignedStudents[0]) {
+          console.log('Student name fields:', {
+            firstName: assignedStudents[0].firstName,
+            lastName: assignedStudents[0].lastName,
+            userFirstName: assignedStudents[0].user?.firstName,
+            userLastName: assignedStudents[0].user?.lastName
+          });
+        }
+        setAssignedStudents(assignedStudents);
+      } else {
+        console.error('Coach record not found for user:', user?.email);
+        console.error('Available coaches:', coaches.map(c => ({ id: c.id, email: c.email, usersId: c.users?.id })));
+      }
     } catch (error) {
       console.error('Error loading call data:', error);
     } finally {
@@ -84,19 +122,24 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentCoachId) return;
+    if (!coachRecordId) {
+      console.error('No coach record ID available');
+      return;
+    }
 
     try {
+      console.log('Creating call log with Coach table ID:', coachRecordId);
       const callLog = await eightbaseService.createCallLog({
         student_id: formData.student_id,
-        coach_id: currentCoachId,
+        coach_id: coachRecordId, // Use Coach table ID, not User table ID
         call_date: formData.call_date,
         call_duration: formData.call_duration,
         call_type: formData.call_type,
         topics_discussed: formData.topics_discussed,
         outcome: formData.outcome,
         next_steps: formData.next_steps,
-        student_mood: formData.student_mood
+        student_mood: formData.student_mood,
+        recording_url: formData.recording_url
       });
 
       setCallLogs([callLog, ...callLogs]);
@@ -119,7 +162,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
   };
 
   const handleDelete = async (callId: string) => {
-    if (!confirm('Are you sure you want to delete this call log?')) return;
+    if (!window.confirm('Are you sure you want to delete this call log?')) return;
 
     try {
       await eightbaseService.deleteCallLog(callId);
@@ -138,7 +181,8 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
       topics_discussed: [],
       outcome: '',
       next_steps: '',
-      student_mood: 'positive'
+      student_mood: 'positive',
+      recording_url: ''
     });
   };
 
@@ -199,7 +243,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
                 Log Call
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Log Coaching Call</DialogTitle>
                 <DialogDescription>
@@ -217,7 +261,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
                       <SelectContent>
                         {assignedStudents.map((student) => (
                           <SelectItem key={student.id} value={student.id}>
-                            {student.firstName} {student.lastName}
+                            {student.user?.firstName || student.firstName} {student.user?.lastName || student.lastName}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -309,6 +353,20 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
                       <SelectItem value="frustrated">Frustrated</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="recording_url">Call Recording URL (Optional)</Label>
+                  <Input
+                    id="recording_url"
+                    type="url"
+                    placeholder="https://example.com/recording/..."
+                    value={formData.recording_url}
+                    onChange={(e) => setFormData({...formData, recording_url: e.target.value})}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Paste the URL to the call recording (e.g., Zoom, Loom, etc.)
+                  </p>
                 </div>
 
                 <div className="flex justify-end gap-2">
@@ -453,7 +511,8 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
                               topics_discussed: Array.isArray(call.topics_discussed) ? call.topics_discussed : [],
                               outcome: call.outcome,
                               next_steps: call.next_steps,
-                              student_mood: call.student_mood
+                              student_mood: call.student_mood,
+                              recording_url: call.recording_url || ''
                             });
                             setEditingCall(call.id);
                           }}
@@ -479,7 +538,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
 
       {/* Edit Call Dialog */}
       <Dialog open={!!editingCall} onOpenChange={() => setEditingCall(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Call Log</DialogTitle>
             <DialogDescription>
@@ -582,6 +641,20 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
               </Select>
             </div>
 
+            <div>
+              <Label htmlFor="edit_recording_url">Call Recording URL (Optional)</Label>
+              <Input
+                id="edit_recording_url"
+                type="url"
+                placeholder="https://example.com/recording/..."
+                value={formData.recording_url}
+                onChange={(e) => setFormData({...formData, recording_url: e.target.value})}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Paste the URL to the call recording (e.g., Zoom, Loom, etc.)
+              </p>
+            </div>
+
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setEditingCall(null)}>
                 Cancel
@@ -596,7 +669,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
 
       {/* View Call Dialog */}
       <Dialog open={!!viewingCall} onOpenChange={() => setViewingCall(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Call Details</DialogTitle>
             <DialogDescription>
@@ -661,6 +734,26 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
                   {viewingCall.student_mood}
                 </Badge>
               </div>
+
+              {/* Recording URL */}
+              {viewingCall.recording_url && (
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Call Recording</Label>
+                  <div className="mt-1">
+                    <a 
+                      href={viewingCall.recording_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline flex items-center gap-2"
+                    >
+                      🎥 Watch Recording
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Created Date */}
               <div>

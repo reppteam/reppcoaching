@@ -36,7 +36,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [assignedStudents, setAssignedStudents] = useState<UserType[]>([]);
+  const [assignedStudents, setAssignedStudents] = useState<any[]>([]);
   const [addingNote, setAddingNote] = useState(false);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
@@ -65,13 +65,39 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
     try {
       setLoading(true);
       
-      // Load notes for this coach
-      const coachNotes = await eightbaseService.getNotes('coach', currentCoachId, 'coach');
-      setNotes(coachNotes);
+      // Get all coaches and find the one that matches the current user
+      const coaches = await eightbaseService.getAllCoachesDirect();
+      console.log('All coaches:', coaches);
+      console.log('Current user:', user);
+      
+      const coachRecord = coaches.find(c => 
+        c.users?.id === user?.id || 
+        c.email === user?.email ||
+        c.id === user?.id
+      );
+      
+      console.log('Found coach record:', coachRecord);
+      
+      if (coachRecord) {
+        console.log('Coach Record ID (from Coach table):', coachRecord.id);
+        
+        // Load notes for this coach using Coach table ID
+        const coachNotes = await eightbaseService.getNotes('coach', coachRecord.id, 'coach');
+        setNotes(coachNotes);
 
-      // Load assigned students
-      const students = await eightbaseService.getAssignedStudents(currentCoachId);
-      setAssignedStudents(students);
+        // Load assigned students using the same logic as CoachCallLog
+        const allStudents = await eightbaseService.getAllStudents();
+        console.log('All students:', allStudents);
+        
+        const assignedStudents = allStudents.filter((student: any) => 
+          student.coach?.id === coachRecord.id
+        );
+        console.log('Assigned students:', assignedStudents);
+        setAssignedStudents(assignedStudents);
+      } else {
+        console.error('Coach record not found for user:', user?.email);
+        console.error('Available coaches:', coaches.map(c => ({ id: c.id, email: c.email, usersId: c.users?.id })));
+      }
     } catch (error) {
       console.error('Error loading notes data:', error);
     } finally {
@@ -115,7 +141,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
   };
 
   const handleDelete = async (noteId: string) => {
-    if (!confirm('Are you sure you want to delete this note?')) return;
+    if (!window.confirm('Are you sure you want to delete this note?')) return;
 
     try {
       await eightbaseService.deleteNote(noteId);
@@ -159,8 +185,8 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
   });
 
   const getStudentName = (targetId: string) => {
-    const student = assignedStudents.find(s => s.id === targetId);
-    return student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
+    const student = assignedStudents.find((s: any) => s.id === targetId);
+    return student ? `${student.user?.firstName || student.firstName} ${student.user?.lastName || student.lastName}` : 'Unknown Student';
   };
 
   if (loading) {
@@ -223,9 +249,9 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                         <SelectValue placeholder="Select target" />
                       </SelectTrigger>
                       <SelectContent>
-                        {assignedStudents.map((student) => (
+                        {assignedStudents.map((student: any) => (
                           <SelectItem key={student.id} value={student.id}>
-                            {student.firstName} {student.lastName}
+                            {student.user?.firstName || student.firstName} {student.user?.lastName || student.lastName}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -263,10 +289,13 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="public">Public (Visible to all coaches)</SelectItem>
-                      <SelectItem value="private">Private (Only you)</SelectItem>
+                      <SelectItem value="public">Public (Visible to Student)</SelectItem>
+                      <SelectItem value="private">Private (Coaches, Managers & Admins Only)</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Private notes are visible to all Coaches, Coach Managers, and Super Admins - not students
+                  </p>
                 </div>
 
                 <div className="flex justify-end gap-2">
@@ -454,9 +483,9 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {assignedStudents.map((student) => (
+                    {assignedStudents.map((student: any) => (
                       <SelectItem key={student.id} value={student.id}>
-                        {student.firstName} {student.lastName}
+                        {student.user?.firstName || student.firstName} {student.user?.lastName || student.lastName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -490,10 +519,13 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="public">Public (Visible to all coaches)</SelectItem>
-                  <SelectItem value="private">Private (Only you)</SelectItem>
+                  <SelectItem value="public">Public (Visible to Student)</SelectItem>
+                  <SelectItem value="private">Private (Coaches, Managers & Admins Only)</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Private notes are visible to all Coaches, Coach Managers, and Super Admins - not students
+              </p>
             </div>
 
             <div className="flex justify-end gap-2">

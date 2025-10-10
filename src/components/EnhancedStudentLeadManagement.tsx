@@ -846,7 +846,6 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
         {(!isCoachView || user?.role === 'coach') && (
           <div className="flex gap-2">
             <Button 
-              variant="outline" 
               onClick={handleImportLeads}
               className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
             >
@@ -854,7 +853,6 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
               Import from Monday
             </Button>
             <Button 
-              variant="outline" 
               onClick={handleExportLeads}
               className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
             >

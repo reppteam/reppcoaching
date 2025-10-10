@@ -385,6 +385,12 @@ input:focus, textarea:focus, select:focus {
   color: var(--foreground) !important;
 }
 
+/* Override for badges with white text */
+[role="dialog"] span.bg-blue-600,
+[data-radix-dialog-content] span.bg-blue-600 {
+  color: white !important;
+}
+
 /* Ensure form elements in modals are visible */
 [data-radix-dialog-content] input,
 [data-radix-dialog-content] textarea,

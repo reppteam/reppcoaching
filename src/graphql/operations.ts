@@ -103,7 +103,7 @@ export const UPDATE_COACH = gql`
 
 export const UPDATE_COACH_BY_USER_ID = gql`
   mutation UpdateCoachByUserId($userId: ID!, $data: CoachUpdateInput!) {
-    coachUpdate(filter: { user: { id: { equals: $userId } } }, data: $data) {
+    coachUpdate(filter: { users: { id: { equals: $userId } } }, data: $data) {
       id
       firstName
       lastName
@@ -112,7 +112,7 @@ export const UPDATE_COACH_BY_USER_ID = gql`
       profileImage {
         downloadUrl
       }
-      user {
+      users {
         id
         firstName
         lastName
@@ -219,11 +219,33 @@ export const GET_ALL_STUDENTS = gql`
         preferred_contact_method
         availability
         notes
+        access_start
+        access_end
+        coaching_term_start
+        coaching_term_end
+        average_order_value
+        current_goal
+        engagement_score
+        goal_progress
+        last_report_date
+        next_milestone
+        total_editing_cost
+        total_expenses
+        total_revenue
+        total_shoots
         user {
           id
           firstName
           lastName
           email
+          coaching_term_start
+          coaching_term_end
+          access_start
+          access_end
+          has_paid
+          is_active
+          createdAt
+          updatedAt
         }
         coach {
           id
@@ -1060,14 +1082,14 @@ export const GET_ALL_COACHES_WITH_COACH_TABLE_IDS = gql`
 
 export const GET_COACH_BY_USER_ID = gql`
   query GetCoachByUserId($userId: ID!) {
-    coachesList(filter: { user: { id: { equals: $userId } } }) {
+    coachesList(filter: { users: { id: { equals: $userId } } }) {
       items {
         id
         firstName
         lastName
         email
         bio
-        user {
+        users {
           id
           firstName
           lastName
@@ -1446,6 +1468,22 @@ export const UPDATE_STUDENT_PROFILE = gql`
       preferred_contact_method
       availability
       notes
+      access_start
+      access_end
+      coaching_term_start
+      coaching_term_end
+      average_order_value
+      current_goal
+      engagement_score
+      goal_progress
+      last_report_date
+      next_milestone
+      total_editing_cost
+      total_expenses
+      total_revenue
+      total_shoots
+      has_paid
+      is_active
       coach {
         id
         firstName
@@ -2410,6 +2448,7 @@ export const GET_CALL_LOGS_BY_FILTER = gql`
         outcome
         next_steps
         student_mood
+        recording_url
         student {
           id
           email
@@ -2441,6 +2480,7 @@ export const CREATE_CALL_LOG = gql`
       outcome
       next_steps
       student_mood
+      recording_url
       student {
         id
         email
@@ -2462,7 +2502,7 @@ export const CREATE_CALL_LOG = gql`
 
 export const UPDATE_CALL_LOG = gql`
   mutation UpdateCallLog($id: ID!, $data: CallLogUpdateInput!) {
-    callLogsUpdate(filter: { id: $id }, data: $data) {
+    callLogUpdate(filter: { id: $id }, data: $data) {
       id
       call_date
       call_duration
@@ -2471,6 +2511,7 @@ export const UPDATE_CALL_LOG = gql`
       outcome
       next_steps
       student_mood
+      recording_url
       student {
         id
         email
@@ -2492,7 +2533,7 @@ export const UPDATE_CALL_LOG = gql`
 
 export const DELETE_CALL_LOG = gql`
   mutation DeleteCallLog($id: ID!) {
-    callLogsDelete(filter: { id: $id }) {
+    callLogDelete(filter: { id: $id }) {
       success
     }
   }

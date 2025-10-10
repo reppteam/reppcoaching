@@ -26,6 +26,7 @@ interface CallData {
   topics: string;
   outcome: string;
   nextSteps: string;
+  recordingUrl?: string;
 }
 
 export function LogCallModal({ isOpen, onClose, students, onLogCall }: LogCallModalProps) {
@@ -37,7 +38,8 @@ export function LogCallModal({ isOpen, onClose, students, onLogCall }: LogCallMo
     studentMood: 'positive',
     topics: '',
     outcome: '',
-    nextSteps: ''
+    nextSteps: '',
+    recordingUrl: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -58,7 +60,8 @@ export function LogCallModal({ isOpen, onClose, students, onLogCall }: LogCallMo
         studentMood: 'positive',
         topics: '',
         outcome: '',
-        nextSteps: ''
+        nextSteps: '',
+        recordingUrl: ''
       });
       onClose();
     } catch (error) {
@@ -206,6 +209,20 @@ export function LogCallModal({ isOpen, onClose, students, onLogCall }: LogCallMo
                 rows={3}
                 className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Call Recording URL (Optional)</label>
+              <input 
+                type="url"
+                value={formData.recordingUrl}
+                onChange={(e) => handleInputChange('recordingUrl', e.target.value)}
+                placeholder="https://zoom.us/rec/share/..." 
+                className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Paste the URL to the call recording (e.g., Zoom, Loom, Google Meet)
+              </p>
             </div>
 
             {submitError && (

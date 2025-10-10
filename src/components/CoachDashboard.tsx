@@ -409,7 +409,7 @@ export const CoachDashboard: React.FC<CoachDashboardProps> = ({ coachId }) => {
                           <TableCell className="text-gray-900 dark:text-white">${report.revenue?.toLocaleString() || '0'}</TableCell>
                           <TableCell className="text-gray-900 dark:text-white">${report.net_profit?.toLocaleString() || '0'}</TableCell>
                           <TableCell>
-                            <Badge variant="default" className="bg-blue-600 text-white">Submitted</Badge>
+                            <Badge variant="default" className="bg-blue-600">Submitted</Badge>
                           </TableCell>
                         </TableRow>
                       );

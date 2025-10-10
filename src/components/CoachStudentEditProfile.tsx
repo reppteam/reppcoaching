@@ -488,7 +488,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">{student.email}</p>
               </div>
-              <Badge className="bg-blue-600 dark:bg-blue-500 text-white">Paid Student</Badge>
+              <Badge className="bg-blue-600">Paid Student</Badge>
             </div>
             <div className="flex items-center gap-2 text-black dark:text-white">
               <Button

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { eightbaseService } from "../services/8baseService";
-import { User } from "../types";
+import { User, Note } from "../types";
 import {
   Card,
   CardContent,
@@ -74,6 +74,7 @@ import {
   Users2,
 } from "lucide-react";
 import { UserActions } from "./UserActions";
+import { CoachStudentEditProfile } from "./CoachStudentEditProfile";
 
 interface CreateCoachFormData {
   firstName: string;
@@ -93,9 +94,74 @@ interface CreateStudentFormData {
   hasPaid: boolean;
 }
 
+interface StudentData {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  business_name?: string;
+  location?: string;
+  target_market?: string;
+  strengths?: string;
+  challenges?: string;
+  goals?: string;
+  preferred_contact_method?: string;
+  availability?: string;
+  notes?: string;
+  // Date and status fields
+  access_start?: string;
+  access_end?: string;
+  coaching_term_start?: string;
+  coaching_term_end?: string;
+  has_paid?: boolean;
+  is_active?: boolean;
+  // Additional fields
+  average_order_value?: number;
+  current_goal?: string;
+  engagement_score?: number;
+  goal_progress?: number;
+  last_report_date?: string;
+  next_milestone?: string;
+  total_editing_cost?: number;
+  total_expenses?: number;
+  total_revenue?: number;
+  total_shoots?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  coach?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    bio?: string;
+    users?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  } | null;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    coaching_term_start?: string;
+    coaching_term_end?: string;
+    access_start?: string;
+    access_end?: string;
+    has_paid?: boolean;
+    is_active?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+  } | null;
+}
+
 export function UserManagement() {
   const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
+  const [students, setStudents] = useState<StudentData[]>([]);
   const [coaches, setCoaches] = useState<any[]>([]);
   const [coachManagers, setCoachManagers] = useState<User[]>([]);
   const [allUsersFromUserTable, setAllUsersFromUserTable] = useState<any[]>([]);
@@ -147,14 +213,23 @@ export function UserManagement() {
     }
   );
 
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<StudentData | User | null>(null);
   const [createdUser, setCreatedUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  
+  // Student details modal state
+  const [studentDetailsModalOpen, setStudentDetailsModalOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [newTag, setNewTag] = useState("");
   const [selectedStudentsForCoach, setSelectedStudentsForCoach] = useState<
     string[]
   >([]);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  
+  // Notes state for coach edit dialog
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [newNote, setNewNote] = useState({ title: "", content: "" });
+  const [addingNote, setAddingNote] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -188,6 +263,7 @@ export function UserManagement() {
 
       setCoaches(fetchedCoaches);
       setUsers(fetchedStudents); // Using users state to store students for compatibility
+      setStudents(fetchedStudents); // Store students in dedicated state with proper typing
       setCoachManagers(fetchedCoachManagers);
       setAllUsersFromUserTable(allUsersFromUserTable);
     } catch (error) {
@@ -218,6 +294,12 @@ export function UserManagement() {
       hasPaid: false,
     });
     setNewTag("");
+  };
+
+  // Handle opening student details modal
+  const handleViewStudentDetails = (studentId: string) => {
+    setSelectedStudentId(studentId);
+    setStudentDetailsModalOpen(true);
   };
 
   const handleCreateCoach = async (e: React.FormEvent) => {
@@ -436,6 +518,53 @@ export function UserManagement() {
     if (!editingUser) return;
 
     try {
+      // If current user is a coach editing a student, use simplified logic
+      if (user && (user as any).role === "coach") {
+        const studentDataObj = editingUser as StudentData;
+        
+        // Update all fields in a single student mutation
+        const studentId = studentDataObj.id;
+        const studentData = {
+          firstName: editingUser.firstName,
+          lastName: editingUser.lastName,
+          email: editingUser.email,
+          phone: studentDataObj.phone || null,
+          goals: studentDataObj.goals || null,
+          business_name: studentDataObj.business_name || null,
+          location: studentDataObj.location || null,
+          target_market: studentDataObj.target_market || null,
+          strengths: studentDataObj.strengths || null,
+          challenges: studentDataObj.challenges || null,
+          preferred_contact_method: studentDataObj.preferred_contact_method || null,
+          availability: studentDataObj.availability || null,
+          notes: studentDataObj.notes || null,
+          // Date and status fields
+          coaching_term_start: studentDataObj.coaching_term_start || null,
+          coaching_term_end: studentDataObj.coaching_term_end || null,
+          access_start: studentDataObj.access_start || null,
+          access_end: studentDataObj.access_end || null,
+          has_paid: studentDataObj.has_paid || false,
+          is_active: studentDataObj.is_active !== undefined ? studentDataObj.is_active : true,
+          // Additional fields with default values
+          average_order_value: 0,
+          current_goal: null,
+          engagement_score: 0,
+          goal_progress: 0,
+          last_report_date: null,
+          next_milestone: null,
+          total_editing_cost: 0,
+          total_expenses: 0,
+          total_revenue: 0,
+          total_shoots: 0,
+        };
+
+        await eightbaseService.updateStudentDirect(studentId, studentData);
+
+        setEditUserDialogOpen(false);
+        setEditingUser(null);
+        await loadUsers(); // Refresh data after update
+        return;
+      }
 
       // Determine if it's a coach, coach manager, or student
       const isCoach = coaches.some((c) => c.id === editingUser.id);
@@ -457,7 +586,7 @@ export function UserManagement() {
           // Find the coach record for this manager
           // First try by user ID, then fallback to email matching
           let managerCoachRecord = coaches.find(
-            (c) => c.user?.id === editingUser.id
+            (c) => c.users?.id === editingUser.id
           );
           
           // If not found by user ID, try by email matching
@@ -696,7 +825,7 @@ export function UserManagement() {
     }
   };
 
-  const openEditUser = (userToEdit: any) => {
+  const openEditUser = async (userToEdit: any) => {
     setEditingUser(userToEdit);
 
     // Initialize selected students if editing a coach or coach manager
@@ -710,7 +839,7 @@ export function UserManagement() {
         // For coach managers, get student data from coach table only
         // First try by user ID, then fallback to email matching
         let managerCoachRecord = coaches.find(
-          (c) => c.user?.id === userToEdit.id
+          (c) => c.users?.id === userToEdit.id
         );
         
         // If not found by user ID, try by email matching
@@ -722,13 +851,13 @@ export function UserManagement() {
         
         if (managerCoachRecord) {
           const assignedStudents = students.filter(
-            (s) => s.coach?.id === managerCoachRecord.id
+            (s) => s.coach?.id === managerCoachRecord.coach?.id
           );
           assignedStudentIds = assignedStudents.map(s => s.id);
         }
       } else {
         // For regular coaches, find students assigned to them
-        const studentsAssignedToCoach = students.filter(s => s.coach?.id === userToEdit.id);
+        const studentsAssignedToCoach = students.filter(s => s.coach?.id === userToEdit.coach?.id);
         assignedStudentIds = studentsAssignedToCoach.map(s => s.id);
       }
       
@@ -738,7 +867,55 @@ export function UserManagement() {
       setSelectedStudentsForCoach([]);
     }
 
+    // If current user is a coach editing a student, load notes
+    if (user && (user as any).role === "coach") {
+      await loadStudentNotes(userToEdit.id);
+    }
+
     setEditUserDialogOpen(true);
+  };
+
+  // Load notes for a student
+  const loadStudentNotes = async (studentId: string) => {
+    try {
+      const notesData = await eightbaseService.getNotes('student', studentId, user?.role || 'coach');
+      setNotes(notesData || []);
+    } catch (error) {
+      console.error('Failed to load notes:', error);
+      setNotes([]);
+    }
+  };
+
+  // Add a new note for a student
+  const addStudentNote = async () => {
+    if (!editingUser || !newNote.title.trim() || !newNote.content.trim()) {
+      return;
+    }
+
+    try {
+      const noteData = {
+        title: newNote.title.trim(),
+        content: newNote.content.trim(),
+        target_type: 'student',
+        target_id: editingUser.id,
+        user_id: user?.id || '',
+        visibility: 'private' as const,
+        created_by: user?.id || '',
+        created_by_name: `${user?.firstName} ${user?.lastName}`,
+      };
+
+      await eightbaseService.createNote(noteData);
+      
+      // Reload notes
+      await loadStudentNotes(editingUser.id);
+      
+      // Reset form
+      setNewNote({ title: "", content: "" });
+      setAddingNote(false);
+    } catch (error) {
+      console.error('Failed to add note:', error);
+      alert('Failed to add note. Please try again.');
+    }
   };
 
   const openDeleteConfirm = (userToDelete: any) => {
@@ -848,7 +1025,45 @@ export function UserManagement() {
   };
 
   // Filter users based on role permissions
-  const students = users; // All users are now students from Student table
+  // students state now contains properly typed student data
+  
+  // Find the coach record for the current user if they are a coach
+  const currentUserCoachRecord = user && (user as any).role === "coach"
+    ? coaches.find(c => 
+        c.users?.id === user?.id || 
+        c.email === user?.email ||
+        c.id === user?.id
+      )
+    : null;
+
+  // Debug logging for coach lookup
+  if (user && (user as any).role === "coach") {
+    console.log("=== COACH LOOKUP DEBUG ===");
+    console.log("Current user:", user);
+    console.log("All coaches:", coaches);
+    console.log("Current user coach record:", currentUserCoachRecord);
+    console.log("Looking for coach with ID:", user?.id, "or email:", user?.email);
+    console.log("Coach matching logic:");
+    coaches.forEach(c => {
+      const matchesUserId = c.users?.id === user?.id;
+      const matchesEmail = c.email === user?.email;
+      const matchesId = c.id === user?.id;
+      console.log(`Coach ${c.id}:`, {
+        coachId: c.id,
+        coachEmail: c.email,
+        matchesUserId,
+        matchesEmail,
+        matchesId,
+        hasUsers: !!c.users,
+        usersId: c.users?.id,
+        usersEmail: c.users?.email
+      });
+    });
+  }
+
+
+  
+  
   const availableStudents = students.filter(
     (s) =>
       !s.coach || user?.role === "super_admin" || user?.role === "coach_manager"
@@ -873,6 +1088,390 @@ export function UserManagement() {
     );
   }
 
+  // For coaches, show a simplified view
+  if (user && (user as any).role === "coach") {
+    const assignedStudents = students.filter(
+      (student) =>
+        currentUserCoachRecord &&
+        student.coach?.id === currentUserCoachRecord.id
+    );
+
+    // Debug assigned students filtering
+    console.log("=== ASSIGNED STUDENTS FILTERING DEBUG ===");
+    console.log("Current user coach record:", currentUserCoachRecord);
+    console.log("Current user coach record ID:", currentUserCoachRecord?.id);
+    console.log("Total students:", students.length);
+    console.log("Students with coach data:");
+    students.forEach(student => {
+      console.log(`Student ${student.id} (${student.firstName} ${student.lastName}):`, {
+        studentCoachId: student.coach?.id,
+        studentCoachName: student.coach?.firstName,
+        matches: student.coach?.id === currentUserCoachRecord?.id
+      });
+    });
+    console.log("Assigned students count:", assignedStudents.length);
+    console.log("Assigned students:", assignedStudents.map(s => ({
+      id: s.id,
+      name: `${s.firstName} ${s.lastName}`,
+      email: s.email || s.user?.email
+    })));
+
+
+    return (
+      <div className="space-y-6">
+        {/* Simplified Header for Coaches */}
+        <div>
+          <h2 className="flex items-center gap-2 text-black dark:text-white">
+            <GraduationCap className="h-6 w-6 text-brand-blue" />
+            My Assigned Students
+          </h2>
+          <p className="text-muted-foreground">
+            Students assigned to you for coaching
+          </p>
+        </div>
+
+        {/* Simple Student List for Coaches */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-black dark:text-white">
+              <GraduationCap className="h-5 w-5" />
+              Students ({assignedStudents.length})
+            </CardTitle>
+            <CardDescription>
+              Your assigned students
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {assignedStudents.length === 0 ? (
+              <div className="text-center py-8">
+                <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No students assigned to you yet</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {assignedStudents.map((student) => (
+                  <div
+                    key={student.id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-black dark:text-white">
+                        {student.firstName} {student.lastName}
+                      </div>
+                      <div className="text-sm text-muted-foreground truncate">
+                        {student.email || student.user?.email || "No email"}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Coach: {student.coach?.firstName || "Unassigned"}{student.coach?.lastName || "Unassigned"}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditUser(student)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Enhanced Edit Dialog for Coaches */}
+        <Dialog
+          open={editUserDialogOpen}
+          onOpenChange={(open) => {
+            setEditUserDialogOpen(open);
+            if (!open) {
+              setEditingUser(null);
+              setNotes([]);
+              setNewNote({ title: "", content: "" });
+              setAddingNote(false);
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
+                <Edit className="h-5 w-5" />
+                Edit Student - {editingUser ? `${editingUser.firstName} ${editingUser.lastName}` : ""}
+              </DialogTitle>
+              <DialogDescription>
+                Update student information, dates, and manage notes
+              </DialogDescription>
+            </DialogHeader>
+            {editingUser && (
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-black dark:text-white">Basic Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-firstName">First Name</Label>
+                      <Input
+                        id="edit-firstName"
+                        value={editingUser.firstName || ""}
+                        onChange={(e) =>
+                          setEditingUser({ ...editingUser, firstName: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-lastName">Last Name</Label>
+                      <Input
+                        id="edit-lastName"
+                        value={editingUser.lastName || ""}
+                        onChange={(e) =>
+                          setEditingUser({ ...editingUser, lastName: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-email">Email Address</Label>
+                    <Input
+                      id="edit-email"
+                      type="email"
+                      value={editingUser.email || ""}
+                      onChange={(e) =>
+                        setEditingUser({ ...editingUser, email: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-phone">Phone</Label>
+                    <Input
+                      id="edit-phone"
+                      value={(editingUser as StudentData).phone || ""}
+                      onChange={(e) =>
+                        setEditingUser({ 
+                          ...editingUser, 
+                          phone: e.target.value 
+                        } as any)
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Dates and Status */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-black dark:text-white">Dates & Status</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-coaching-start">Coaching Start Date</Label>
+                      <Input
+                        id="edit-coaching-start"
+                        type="date"
+                        value={(editingUser as StudentData).coaching_term_start || ""}
+                        onChange={(e) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            coaching_term_start: e.target.value 
+                          } as any)
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-coaching-end">Coaching End Date</Label>
+                      <Input
+                        id="edit-coaching-end"
+                        type="date"
+                        value={(editingUser as StudentData).coaching_term_end || ""}
+                        onChange={(e) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            coaching_term_end: e.target.value 
+                          } as any)
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-access-start">Access Start Date</Label>
+                      <Input
+                        id="edit-access-start"
+                        type="date"
+                        value={(editingUser as StudentData).access_start || ""}
+                        onChange={(e) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            access_start: e.target.value 
+                          } as any)
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-access-end">Access End Date</Label>
+                      <Input
+                        id="edit-access-end"
+                        type="date"
+                        value={(editingUser as StudentData).access_end || ""}
+                        onChange={(e) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            access_end: e.target.value 
+                          } as any)
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-has-paid"
+                        checked={(editingUser as StudentData).has_paid || false}
+                        onCheckedChange={(checked) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            has_paid: checked as boolean 
+                          } as any)
+                        }
+                      />
+                      <Label htmlFor="edit-has-paid">Paid Account</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-is-active"
+                        checked={(editingUser as StudentData).is_active !== undefined ? (editingUser as StudentData).is_active : true}
+                        onCheckedChange={(checked) =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            is_active: checked as boolean 
+                          } as any)
+                        }
+                      />
+                      <Label htmlFor="edit-is-active">Active</Label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Goals */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-black dark:text-white">Goals</h3>
+                  <div>
+                    <Label htmlFor="edit-goals">Goals & Objectives</Label>
+                    <Textarea
+                      id="edit-goals"
+                      value={(editingUser as StudentData).goals || ""}
+                      onChange={(e) =>
+                        setEditingUser({ 
+                          ...editingUser, 
+                          goals: e.target.value 
+                        } as any)
+                      }
+                      rows={3}
+                      placeholder="What does this student want to achieve?"
+                    />
+                  </div>
+                </div>
+
+                {/* Notes Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-black dark:text-white">Notes</h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setAddingNote(true)}
+                    >
+                      Add Note
+                    </Button>
+                  </div>
+
+                  {/* Add Note Form */}
+                  {addingNote && (
+                    <div className="border rounded-lg p-4 space-y-3">
+                      <h4 className="font-medium">Add New Note</h4>
+                      <div>
+                        <Label htmlFor="note-title">Title</Label>
+                        <Input
+                          id="note-title"
+                          value={newNote.title}
+                          onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
+                          placeholder="Note title"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="note-content">Content</Label>
+                        <Textarea
+                          id="note-content"
+                          value={newNote.content}
+                          onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
+                          placeholder="Note content"
+                          rows={3}
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setAddingNote(false);
+                            setNewNote({ title: "", content: "" });
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={addStudentNote}
+                          disabled={!newNote.title.trim() || !newNote.content.trim()}
+                        >
+                          Add Note
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Existing Notes */}
+                  <div className="space-y-3">
+                    {notes.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-4">No notes yet</p>
+                    ) : (
+                      notes.map((note) => (
+                        <div key={note.id} className="border rounded-lg p-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-medium text-black dark:text-white">{note.title}</h4>
+                              <p className="text-sm text-muted-foreground mt-1">{note.content}</p>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Created: {new Date(note.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Save/Cancel Buttons */}
+                <div className="flex justify-end space-x-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditUserDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => handleEditUser(editingUser)}
+                    disabled={!editingUser.firstName || !editingUser.lastName || !editingUser.email}
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -893,7 +1492,7 @@ export function UserManagement() {
                   ? "gradient"
                   : user?.role === "coach_manager"
                   ? "info"
-                  : user?.role === "coach"
+                  : user && (user as any).role === "coach"
                   ? "success"
                   : "outline"
               }
@@ -1168,7 +1767,7 @@ export function UserManagement() {
           )} */}
 
           {/* Show restrictions for coaches */}
-          {user?.role === "coach" && (
+          {user && (user as any).role === "coach" && (
             <div className="text-right">
               <div className="text-xs text-muted-foreground mb-1">
                 Coach Access
@@ -1233,7 +1832,7 @@ export function UserManagement() {
                         // Find the coach record for this manager
                         // First try by user ID, then fallback to email matching
                         let managerCoachRecord = coaches.find(
-                          (c) => c.user?.id === manager.id
+                          (c) => c.users?.id === manager.id
                         );
                         
                         // If not found by user ID, try by email matching
@@ -1249,7 +1848,7 @@ export function UserManagement() {
                         );
                         // Count managed coaches (other coaches, not including themselves)
                         const managedCoaches = coaches.filter(
-                          (c) => c.user?.id !== manager.id
+                          (c) => c.users?.id !== manager.id
                         );
                         
 
@@ -1335,7 +1934,7 @@ export function UserManagement() {
                       {coaches.map((coach) => {
                         // Find assigned students using the coach relationship
                         const assignedStudents = students.filter(
-                          (s) => s.coach?.id === coach.id
+                          (s) => s.coach?.id === coach.coach?.id
                         );
                         // Check if this coach is also a coach manager
                         const isCoachManager = coachManagers.some(
@@ -1413,7 +2012,7 @@ export function UserManagement() {
                   Students ({students.length})
                 </CardTitle>
                 <CardDescription>
-                  {user?.role === "coach"
+                  {user && (user as any).role === "coach"
                     ? "Students assigned to you"
                     : user?.role === "coach_manager"
                     ? "Students you can manage"
@@ -1433,11 +2032,12 @@ export function UserManagement() {
                         (student) =>
                           user?.role === "super_admin" ||
                           user?.role === "coach_manager" ||
-                          (user?.role === "coach" &&
-                            student.coach?.id === user?.id)
+                          (user && (user as any).role === "coach" &&
+                            currentUserCoachRecord &&
+                            student.coach?.id === currentUserCoachRecord.coach?.id)
                       )
                       .map((student) => {
-                        // Use the coach field directly from the student data
+                        // Use the coach field from the nested student data
                         const coach = student.coach;
                         return (
                           <div
@@ -1468,7 +2068,7 @@ export function UserManagement() {
                             </div>
                             <div className="flex items-center space-x-1 justify-end flex-shrink-0">
                               <UserActions
-                                user={student}
+                                user={student as any}
                                 onSuccess={(message) => {
                                   // You can add a toast notification here if needed
                                 }}
@@ -1477,6 +2077,14 @@ export function UserManagement() {
                                   console.error("Error:", error);
                                 }}
                               />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleViewStudentDetails(student.id)}
+                                title="View Student Details"
+                              >
+                                <Settings className="h-3 w-3" />
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -2145,10 +2753,10 @@ export function UserManagement() {
                   <Input
                     id="edit-email"
                     type="email"
-                    value={editingUser.email}
-                    onChange={(e) =>
-                      setEditingUser({ ...editingUser, email: e.target.value })
-                    }
+                      value={editingUser.email || (editingUser as StudentData).user?.email || ""}
+                      onChange={(e) =>
+                        setEditingUser({ ...editingUser, email: e.target.value })
+                      }
                   />
                 </div>
               </div>
@@ -2312,6 +2920,18 @@ export function UserManagement() {
         onOpenChange={setAddUserModalOpen}
         onUserCreated={handleUserCreated}
       />
+
+      {/* Student Details Modal for Super Admin */}
+      {selectedStudentId && (
+        <CoachStudentEditProfile
+          studentId={selectedStudentId}
+          isOpen={studentDetailsModalOpen}
+          onClose={() => {
+            setStudentDetailsModalOpen(false);
+            setSelectedStudentId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

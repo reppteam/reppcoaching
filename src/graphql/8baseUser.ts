@@ -573,7 +573,7 @@ export const CREATE_COACH_WITH_PROFILE = gql`
 // NEW: Get Students with Profiles
 export const GET_STUDENTS_WITH_PROFILES = gql`
   query GetStudentsWithProfiles {
-    usersList(filter: { roles: { items: { name: { equals: "student" } } } }) {
+    usersList(filter: { roles: { some: { name: { equals: "student" } } } }) {
       items {
         id
         firstName
@@ -606,6 +606,18 @@ export const GET_STUDENTS_WITH_PROFILES = gql`
           notes
           createdAt
           updatedAt
+          coach {
+            id
+            firstName
+            lastName
+            email
+            users {
+              id
+              firstName
+              lastName
+              email
+            }
+          }
         }
       }
     }
@@ -615,7 +627,7 @@ export const GET_STUDENTS_WITH_PROFILES = gql`
 // NEW: Get Coaches with Profiles
 export const GET_COACHES_WITH_PROFILES = gql`
   query GetCoachesWithProfiles {
-    usersList(filter: { roles: { items: { name: { equals: "admin" } } } }) {
+    usersList(filter: { roles: { some: { name: { equals: "admin" } } } }) {
       items {
         id
         firstName

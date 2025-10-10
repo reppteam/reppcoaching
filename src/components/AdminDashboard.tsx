@@ -41,6 +41,7 @@ export function AdminDashboard() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [callLogs, setCallLogs] = useState<CallLog[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -78,12 +79,13 @@ export function AdminDashboard() {
     
     setLoading(true);
     try {
-      const [usersData, reportsData, goalsData, leadsData, callLogsData] = await Promise.all([
+      const [usersData, reportsData, goalsData, leadsData, callLogsData, studentsData] = await Promise.all([
         eightbaseService.getAllUsersWithDetails(),
         eightbaseService.getWeeklyReportsByCoach(authState.user.id),
         eightbaseService.getGoalsByCoach(authState.user.id),
         eightbaseService.getLeadsByCoach(authState.user.id),
-        eightbaseService.getCallLogs(undefined, authState.user.id)
+        eightbaseService.getCallLogs(undefined, authState.user.id),
+        eightbaseService.getAllStudents()
       ]);
       
       setUsers(usersData);
@@ -91,6 +93,7 @@ export function AdminDashboard() {
       setGoals(goalsData);
       setLeads(leadsData);
       setCallLogs(callLogsData);
+      setStudents(studentsData);
     } catch (error) {
       console.error('Failed to load admin data:', error);
     } finally {
@@ -155,10 +158,19 @@ export function AdminDashboard() {
     );
   }
 
-  // Calculate metrics
-  const assignedStudents = users.filter(u => u.role === 'user' && u.assigned_admin_id === authState.user?.id);
-  const activeStudents = assignedStudents.filter(s => s.is_active !== false);
-  const paidStudents = assignedStudents.filter(s => s.has_paid);
+  // Calculate metrics - get students from Student table instead of User table
+
+  // For Coach Managers, get students assigned to their managed coaches
+  const assignedStudents = authState.user?.role === 'coach_manager' 
+    ? students.filter((student: any) => {
+        // Get all coaches managed by this coach manager
+        const managedCoaches = users.filter(u => u.role === 'coach' && u.assigned_admin_id === authState.user?.id);
+        return managedCoaches.some(coach => student.coach?.id === coach.id);
+      })
+    : students.filter((student: any) => student.user?.assigned_admin_id === authState.user?.id);
+  
+  const activeStudents = assignedStudents.filter((s: any) => s.is_active !== false);
+  const paidStudents = assignedStudents.filter((s: any) => s.has_paid);
   const totalRevenue = reports.reduce((sum, report) => sum + report.revenue, 0);
   const totalLeads = leads.length;
 
@@ -271,7 +283,7 @@ export function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {assignedStudents.map(student => {
+                  {assignedStudents.map((student: any) => {
                     const studentReports = reports.filter(r => r.user_id === student.id);
                     const studentLeads = leads.filter(l => l.user_id === student.id);
                     const studentGoals = goals.filter(g => g.user_id === student.id);
@@ -493,7 +505,7 @@ export function AdminDashboard() {
                   <SelectValue placeholder="Select student" />
                 </SelectTrigger>
                 <SelectContent>
-                  {assignedStudents.map(student => (
+                  {assignedStudents.map((student: any) => (
                     <SelectItem key={student.id} value={student.id}>
                       {student.firstName} {student.lastName}
                     </SelectItem>
@@ -614,7 +626,7 @@ export function AdminDashboard() {
                   <SelectValue placeholder="Select target" />
                 </SelectTrigger>
                 <SelectContent>
-                  {noteForm.target_type === 'student' && assignedStudents.map(student => (
+                  {noteForm.target_type === 'student' && assignedStudents.map((student: any) => (
                     <SelectItem key={student.id} value={student.id}>
                       {student.firstName} {student.lastName}
                     </SelectItem>

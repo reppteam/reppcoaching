@@ -949,7 +949,7 @@ export function Leads() {
             {/* Filter Controls */}
             <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="relative">
+                <Button className="relative">
                   <Filter className="mr-2 h-4 w-4" />
                   Filters
                   {activeFiltersCount > 0 && (
@@ -1133,7 +1133,7 @@ export function Leads() {
 
                   {/* Clear Filters */}
                   {activeFiltersCount > 0 && (
-                    <Button variant="outline" onClick={clearFilters} className="w-full">
+                    <Button  onClick={clearFilters} className="w-full">
                       Clear All Filters
                     </Button>
                   )}
@@ -1145,7 +1145,7 @@ export function Leads() {
             <div className="flex items-center space-x-2">
               <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button  size="sm">
                     <Upload className="mr-2 h-4 w-4" />
                     Import
                   </Button>
@@ -1267,7 +1267,7 @@ export function Leads() {
                 </DialogContent>
               </Dialog>
 
-              <Button variant="outline" size="sm" onClick={exportLeads}>
+              <Button size="sm" onClick={exportLeads}>
                 <Download className="mr-2 h-4 w-4" />
                 Export
               </Button>
@@ -1448,14 +1448,14 @@ export function Leads() {
                                   <Badge 
                                     key={tag.type} 
                                     variant="secondary" 
-                                    className={`text-xs ${config.color}`}
+                                    className={`text-xs ${config.color} text-white`}
                                   >
                                     {config.icon} {config.label}
                                   </Badge>
                                 );
                               })}
                                 {lead.engagementTag.length > 3 && (
-                                <Badge variant="secondary" className="text-xs">
+                                <Badge variant="secondary" className="text-xs text-black dark:text-white">
                                   +{lead.engagementTag.length - 3}
                                 </Badge>
                               )}

@@ -32,8 +32,10 @@ import {
   Crown,
   ShieldCheck,
   Users2,
+  Eye,
 } from 'lucide-react';
 import { UserActions } from './UserActions';
+import { CoachStudentEditProfile } from './CoachStudentEditProfile';
 
 interface AssignCoachForm {
   studentId: string;
@@ -77,6 +79,10 @@ export function SuperAdminUserPanel() {
   // Delete confirmation dialog states
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<{ id: string; name: string } | null>(null);
+  
+  // Student details modal states
+  const [viewingStudentDetails, setViewingStudentDetails] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
   // Create user dialog states
   const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
@@ -744,6 +750,18 @@ export function SuperAdminUserPanel() {
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedStudentId(user.id);
+                          setViewingStudentDetails(true);
+                        }}
+                        title="View Student Details"
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View Details
+                      </Button>
                       <UserActions 
                         user={user} 
                         onSuccess={(message) => {
@@ -1077,6 +1095,18 @@ export function SuperAdminUserPanel() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Student Details Modal */}
+      {selectedStudentId && (
+        <CoachStudentEditProfile
+          studentId={selectedStudentId}
+          isOpen={viewingStudentDetails}
+          onClose={() => {
+            setViewingStudentDetails(false);
+            setSelectedStudentId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 /**
  * 8base Task: Check Student Activity and Send Notifications
- * Schedule: Runs daily at 9:00 AM
+ * Schedule: Runs daily at 11:59 PM
  * Purpose: Send automated notifications to students who need reminders
  */
 
@@ -196,8 +196,8 @@ export default async (event: any, ctx: any): Promise<TaskResult> => {
         console.log(`  📧 Creating ${notifications.length} notification(s)...`);
         for (const notification of notifications) {
           try {
-            // Skip email for now - uncomment when email is configured
-            // await sendEmailNotification(ctx, student, notification);
+            // Send email notification
+            await sendEmailNotification(ctx, student, notification);
             
             // Create in-app notification record
             await createNotificationRecord(ctx, student.id, notification);

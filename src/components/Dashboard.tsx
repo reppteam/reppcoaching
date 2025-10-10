@@ -23,6 +23,8 @@ import { SuperAdminUserPanel } from "./SuperAdminUserPanel";
 import { SuperAdminList } from "./SuperAdminList";
 import { UserManagement } from "./UserManagement";
 import { StudentProfile } from "./StudentProfile";
+import { CoachCallLog } from "./CoachCallLog";
+import { CoachNotes } from "./CoachNotes";
 import { RolePermissionsManager } from "./RolePermissionsManager";
 import { RoleImplementationStatus } from "./RoleImplementationStatus";
 import { SubscriptionInfo } from "./SubscriptionInfo";
@@ -48,6 +50,7 @@ import {
   Calculator,
   Shield,
   Crown,
+  Phone,
   GraduationCap,
   ShieldCheck,
   BarChart3,
@@ -143,6 +146,16 @@ export function Dashboard() {
           label: "My Assigned Students",
           icon: GraduationCap,
         },
+        {
+          id: "coach-calls",
+          label: "Call Logs",
+          icon: Phone,
+        },
+        {
+          id: "coach-notes",
+          label: "Notes",
+          icon: FileText,
+        },
       ];
     }
 
@@ -162,6 +175,16 @@ export function Dashboard() {
         },
         { id: "leads", label: "All Leads", icon: Users },
         {
+          id: "coach-calls",
+          label: "Call Logs",
+          icon: Phone,
+        },
+        {
+          id: "coach-notes",
+          label: "Notes",
+          icon: FileText,
+        },
+        {
           id: "coach-pricing",
           label: "Pricing Management",
           icon: DollarSign,
@@ -177,11 +200,6 @@ export function Dashboard() {
           label: "User Management",
           icon: Users,
         },
-        {
-          id: "super-admin-list",
-          label: "Super Admin List",
-          icon: Crown,
-        },
       ];
     }
 
@@ -193,11 +211,6 @@ export function Dashboard() {
           id: "super-admin-panel",
           label: "Super Admin Panel",
           icon: Crown,
-        },
-        {
-          id: "super-admin-list",
-          label: "Super Admin List",
-          icon: UserCircle2,
         },
         {
           id: "coach-manager",
@@ -301,6 +314,10 @@ export function Dashboard() {
         return <KPIDashboard />;
       case "user-management":
         return <UserManagement />;
+      case "coach-calls":
+        return <CoachCallLog />;
+      case "coach-notes":
+        return <CoachNotes />;
       case "coach-manager":
         return <CoachManagerDashboard />;
       case "coach-dashboard":

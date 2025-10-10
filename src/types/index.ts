@@ -275,6 +275,7 @@ export interface CallLog {
   outcome: string;
   next_steps: string;
   student_mood: 'positive' | 'neutral' | 'frustrated' | 'motivated';
+  recording_url?: string; // URL to call recording
   created_at: string;
   updated_at: string;
 }

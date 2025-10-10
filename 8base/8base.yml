@@ -5,7 +5,7 @@ functions:
     type: task
     handler:
       code: src/tasks/checkStudentActivity/handler.ts
-    schedule: rate(1 day)
+    schedule: cron(59 23 * * ? *)
   sendNotifications:
     type: webhook
     handler:
