@@ -44,6 +44,21 @@ export function AdminDashboard() {
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [coachTableId, setCoachTableId] = useState<string>('');
+
+  // Helper function to determine if KPI tab should be shown
+  const shouldShowKPITab = (user: any) => {
+    // Show KPI for coach_manager and super_admin roles
+    // Hide KPI for coach role only
+    return user?.role === 'coach_manager' || user?.role === 'super_admin';
+  };
+
+  // Reset active tab if user doesn't have permission for KPIs
+  useEffect(() => {
+    if (activeTab === 'kpis' && !shouldShowKPITab(authState?.user)) {
+      setActiveTab('overview');
+    }
+  }, [activeTab, authState?.user]);
 
   // Call log state
   const [callLogDialogOpen, setCallLogDialogOpen] = useState(false);
@@ -79,6 +94,17 @@ export function AdminDashboard() {
     
     setLoading(true);
     try {
+      // Get coach table ID if user is a coach or coach manager
+      if (authState.user.role === 'coach' || authState.user.role === 'coach_manager') {
+        try {
+          const coachTableId = await eightbaseService.getCoachRecordIdByUserId(authState.user.id);
+          setCoachTableId(coachTableId || '');
+          console.log('AdminDashboard - Coach table ID for note creation:', coachTableId);
+        } catch (error) {
+          console.error('Error getting coach record ID:', error);
+        }
+      }
+      
       const [usersData, reportsData, goalsData, leadsData, callLogsData, studentsData] = await Promise.all([
         eightbaseService.getAllUsersWithDetails(),
         eightbaseService.getWeeklyReportsByCoach(authState.user.id),
@@ -127,10 +153,18 @@ export function AdminDashboard() {
 
   const handleCreateNote = async () => {
     try {
+      if (!coachTableId && (authState.user!.role === 'coach' || authState.user!.role === 'coach_manager')) {
+        console.error('No coach table ID found for note creation');
+        return;
+      }
+
+      console.log('AdminDashboard - Creating note with coach table ID:', coachTableId);
+      console.log('AdminDashboard - Creating note with student table ID:', noteForm.target_id);
+      
       await eightbaseService.createNote({
         ...noteForm,
-        user_id: authState.user!.id,
-        created_by: authState.user!.id,
+        user_id: coachTableId || authState.user!.id, // Use coach table ID if available, fallback to user ID
+        created_by: coachTableId || authState.user!.id, // Use coach table ID if available, fallback to user ID
         created_by_name: `${authState.user!.firstName} ${authState.user!.lastName}`,
         visibility: noteForm.visibility as 'public' | 'private'
       });
@@ -264,10 +298,12 @@ export function AdminDashboard() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className={`grid w-full ${shouldShowKPITab(authState?.user) ? 'grid-cols-4' : 'grid-cols-3'}`}>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="students">Students</TabsTrigger>
-          <TabsTrigger value="kpis">KPIs</TabsTrigger>
+          {shouldShowKPITab(authState?.user) && (
+            <TabsTrigger value="kpis">KPIs</TabsTrigger>
+          )}
           <TabsTrigger value="tools">Tools</TabsTrigger>
         </TabsList>
 
@@ -397,9 +433,11 @@ export function AdminDashboard() {
         </TabsContent>
 
         {/* KPIs Tab */}
-        <TabsContent value="kpis" className="space-y-6">
-          <KPIDashboard showCoachSummary={true} />
-        </TabsContent>
+        {shouldShowKPITab(authState?.user) && (
+          <TabsContent value="kpis" className="space-y-6">
+            <KPIDashboard showCoachSummary={true} />
+          </TabsContent>
+        )}
 
         {/* Tools Tab */}
         <TabsContent value="tools" className="space-y-6">

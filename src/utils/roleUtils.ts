@@ -68,6 +68,52 @@ export function getDashboardRoute(user: any): string {
   return '/home';
 }
 
+// Helper function to check if user has both coach and coach_manager roles
+export function hasCoachAndCoachManagerRoles(user: any): boolean {
+  // First check if user has coach_manager role (which typically includes coach capabilities)
+  // In the current system, coach_manager role gives access to KPIs
+  if (user?.role === 'coach_manager' || user?.role === 'super_admin') {
+    return true;
+  }
+  
+  // For backward compatibility, also check the roles array if available
+  const roles = getUserRoles(user);
+  
+  // Check for both coach and coach_manager roles
+  const hasCoach = roles.some(role => 
+    role.toLowerCase() === 'coach'
+  );
+  
+  const hasCoachManager = roles.some(role => 
+    role.toLowerCase() === 'coach manager' || 
+    role.toLowerCase() === 'coach_manager'
+  );
+  
+  return hasCoach && hasCoachManager;
+}
+
+// Helper function to check if user has only coach role (not coach_manager)
+export function hasOnlyCoachRole(user: any): boolean {
+  // Check the primary role field first
+  if (user?.role === 'coach') {
+    return true;
+  }
+  
+  // For backward compatibility, also check the roles array if available
+  const roles = getUserRoles(user);
+  
+  const hasCoach = roles.some(role => 
+    role.toLowerCase() === 'coach'
+  );
+  
+  const hasCoachManager = roles.some(role => 
+    role.toLowerCase() === 'coach manager' || 
+    role.toLowerCase() === 'coach_manager'
+  );
+  
+  return hasCoach && !hasCoachManager;
+}
+
 // Helper function to get user's primary role (highest priority)
 export function getPrimaryRole(user: any): string {
   // First check the direct role field (most reliable)

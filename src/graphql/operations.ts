@@ -1540,15 +1540,23 @@ export const GET_WEEKLY_REPORTS_BY_FILTER = gql`
         editing_cost
         net_profit
         status
-        weekly_Report {
+        createdBy {
           id
-          _description
-          __typename
+          firstName
+          lastName
+          email
         }
         student {
           id
-          _description
-          __typename
+          firstName
+          lastName
+          email
+        }
+        weekly_Report {
+          id
+          firstName
+          lastName
+          email
         }
         _description
         __typename
@@ -2648,7 +2656,7 @@ export const UPDATE_NOTE = gql`
         firstName
         lastName
         email
-        user {
+        users {
           id
           email
           firstName

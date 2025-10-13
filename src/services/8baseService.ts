@@ -130,7 +130,7 @@ const transformUser = (user: any): User => {
 
 const transformWeeklyReport = (report: any): WeeklyReport => ({
   id: report.id,
-  user_id: report.student?.id,
+  user_id: report.student?.id || report.createdBy?.id || report.weekly_Report?.id,
   start_date: report.start_date,
   end_date: report.end_date,
   new_clients: report.new_clients,
@@ -144,7 +144,11 @@ const transformWeeklyReport = (report: any): WeeklyReport => ({
   net_profit: report.net_profit,
   status: report.status,
   created_at: report.createdAt,
-  updated_at: report.updatedAt
+  updated_at: report.updatedAt,
+  user: report.student || report.createdBy || report.weekly_Report,
+  createdBy: report.createdBy,
+  student: report.student,
+  weekly_Report: report.weekly_Report
 });
 
 const transformLead = (lead: any): Lead => ({
@@ -292,7 +296,9 @@ const transformCallLog = (callLog: any): CallLog => ({
   student_mood: callLog.student_mood,
   recording_url: callLog.recording_url,
   created_at: callLog.createdAt,
-  updated_at: callLog.updatedAt
+  updated_at: callLog.updatedAt,
+  student: callLog.student,
+  coach: callLog.coach
 });
 
 const transformProduct = (product: any): Product => ({
@@ -314,18 +320,41 @@ const transformSubitem = (subitem: any): Subitem => ({
   updated_at: subitem.updatedAt
 });
 
-const transformNote = (note: any): Note => ({
-  id: note.id,
-  title: note.title || '',
-  target_type: note.targetType || note.target_type,
-  target_id: note.targetId || note.target_id,
-  user_id: note.userId || note.user_id,
-  content: note.content,
-  visibility: note.visibility || 'public',
-  created_at: note.createdAt || note.created_at,
-  created_by: note.createdBy || note.created_by,
-  created_by_name: note.createdByName || note.created_by_name
-});
+const transformNote = (note: any): Note => {
+  // Extract student information from the nested studentNote object
+  const studentName = note.studentNote 
+    ? `${note.studentNote.firstName || ''} ${note.studentNote.lastName || ''}`.trim()
+    : '';
+  
+  // Extract coach information from the nested coach object
+  const coachName = note.coach
+    ? `${note.coach.firstName || ''} ${note.coach.lastName || ''}`.trim()
+    : '';
+
+  // Debug: Log the date fields to see what's available
+  console.log('transformNote - note.createdAt:', note.createdAt);
+  console.log('transformNote - note.created_at:', note.created_at);
+  console.log('transformNote - note.updatedAt:', note.updatedAt);
+  console.log('transformNote - note.updated_at:', note.updated_at);
+
+  return {
+    id: note.id,
+    title: note.title || '',
+    target_type: note.targetType || note.target_type || 'student',
+    target_id: note.studentNote?.id || note.targetId || note.target_id || '',
+    user_id: note.coach?.id || note.userId || note.user_id || '',
+    content: note.content,
+    visibility: note.visibility || 'public',
+    created_at: note.createdAt || note.created_at || note.updatedAt || note.updated_at || new Date().toISOString(),
+    created_by: note.coach?.id || note.createdBy || note.created_by || '',
+    created_by_name: coachName || note.createdByName || note.created_by_name || '',
+    // Add student name for easy access in the UI
+    student_name: studentName,
+    // Store the full student and coach objects for reference
+    studentNote: note.studentNote,
+    coach: note.coach
+  };
+};
 
 // 8base Service API
 export const eightbaseService = {
@@ -1690,16 +1719,24 @@ export const eightbaseService = {
 
   // Notes
   async getNotes(targetType: string, targetId: string, userRole?: string, coachId?: string): Promise<Note[]> {
-    // Query notes where studentNote relationship points to the student
-    const data = await executeQuery(queries.GET_NOTES_BY_FILTER, {
-      filter: { 
-        studentNote: { 
-          user: { 
-            id: { equals: targetId } 
-          } 
-        } 
-      }
-    });
+    let filter: any = {};
+    
+    // Build filter based on target type
+    if (targetType === 'student') {
+      // targetId should be the student table ID, not the user ID
+      filter.studentNote = {
+        id: { equals: targetId }
+      };
+    } else if (targetType === 'coach' && coachId) {
+      // Filter by coach table ID
+      filter.coach = {
+        id: { equals: coachId }
+      };
+    }
+    
+    console.log('getNotes filter:', JSON.stringify(filter, null, 2));
+    
+    const data = await executeQuery(queries.GET_NOTES_BY_FILTER, { filter });
     
     let notes = data.notesList.items;
     

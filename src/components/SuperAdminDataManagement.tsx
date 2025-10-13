@@ -91,31 +91,34 @@ export function SuperAdminDataManagement() {
     setState(prev => ({ ...prev, loading: true }));
     try {
       const [
-        users, weeklyReports, goals, leads, notes, 
-        products, subitems, callLogs, messageTemplates
+        // users, 
+        weeklyReports, goals, leads, notes, 
+        // products, subitems, 
+        callLogs
+        // , messageTemplates
       ] = await Promise.all([
-        eightbaseService.getAllUsersWithDetails(),
+        // eightbaseService.getAllUsersWithDetails(),
         eightbaseService.getAllWeeklyReports(),
         eightbaseService.getAllGoals(),
         eightbaseService.getAllLeads(),
         eightbaseService.getAllNotes(),
-        eightbaseService.getAllProducts(),
-        eightbaseService.getAllSubitems(),
+        // eightbaseService.getAllProducts(),
+        // eightbaseService.getAllSubitems(),
         eightbaseService.getAllCallLogs(),
-        eightbaseService.getMessageTemplates() // Using backward compatibility method
+        // eightbaseService.getMessageTemplates() // Using backward compatibility method
       ]);
 
       setState(prev => ({
         ...prev,
-        users,
+        // users: users,
         weeklyReports,
         goals,
         leads,
         notes,
-        products,
-        subitems,
+        // products,
+        // subitems,
         callLogs,
-        messageTemplates,
+        // messageTemplates,
         loading: false
       }));
     } catch (error) {
@@ -468,20 +471,20 @@ export function SuperAdminDataManagement() {
 
       {/* Main Content Tabs */}
       <Tabs value={state.selectedTab} onValueChange={(value) => setState(prev => ({ ...prev, selectedTab: value }))}>
-        <TabsList className="grid w-full grid-cols-9">
-          <TabsTrigger value="users">Users</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          {/* <TabsTrigger value="users">Users</TabsTrigger> */}
           <TabsTrigger value="weeklyReports">Reports</TabsTrigger>
           <TabsTrigger value="goals">Goals</TabsTrigger>
           <TabsTrigger value="leads">Leads</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
-          <TabsTrigger value="products">Products</TabsTrigger>
-          <TabsTrigger value="subitems">Subitems</TabsTrigger>
+          {/* <TabsTrigger value="products">Products</TabsTrigger> */}
+          {/* <TabsTrigger value="subitems">Subitems</TabsTrigger> */}
           <TabsTrigger value="callLogs">Call Logs</TabsTrigger>
-          <TabsTrigger value="messageTemplates">Templates</TabsTrigger>
+          {/* <TabsTrigger value="messageTemplates">Templates</TabsTrigger> */}
         </TabsList>
 
         {/* Users Tab */}
-        <TabsContent value="users" className="space-y-4">
+        {/* <TabsContent value="users" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">User Management</h3>
             <Button onClick={() => openCreateDialog('user')}>
@@ -531,7 +534,7 @@ export function SuperAdminDataManagement() {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
 
         {/* Weekly Reports Tab */}
         <TabsContent value="weeklyReports" className="space-y-4">
@@ -552,27 +555,21 @@ export function SuperAdminDataManagement() {
                     <TableHead>Period</TableHead>
                     <TableHead>Revenue</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {getFilteredData(state.weeklyReports, 'weeklyReports').map((report) => (
                     <TableRow key={report.id}>
-                      <TableCell>{report.user_id}</TableCell>
+                      <TableCell>
+                        {(() => {
+                          const user = report.user || report.createdBy || report.student || report.weekly_Report;
+                          return user ? `${user.firstName} ${user.lastName}` : 'Unknown User';
+                        })()}
+                      </TableCell>
                       <TableCell>{report.start_date} - {report.end_date}</TableCell>
                       <TableCell>${report.revenue}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{report.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => openEditDialog(report, 'edit')}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openDeleteDialog(report)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -601,7 +598,6 @@ export function SuperAdminDataManagement() {
                     <TableHead>Type</TableHead>
                     <TableHead>Progress</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -614,16 +610,6 @@ export function SuperAdminDataManagement() {
                       <TableCell>{goal.current_value}/{goal.target_value}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{goal.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => openEditDialog(goal, 'edit')}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openDeleteDialog(goal)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -652,7 +638,6 @@ export function SuperAdminDataManagement() {
                     <TableHead>Email</TableHead>
                     <TableHead>Source</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -663,16 +648,6 @@ export function SuperAdminDataManagement() {
                       <TableCell>{lead.lead_source}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{lead.status || 'New'}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => openEditDialog(lead, 'edit')}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openDeleteDialog(lead)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -700,7 +675,6 @@ export function SuperAdminDataManagement() {
                     <TableHead>Content</TableHead>
                     <TableHead>Target Type</TableHead>
                     <TableHead>Visibility</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -711,16 +685,6 @@ export function SuperAdminDataManagement() {
                       <TableCell>
                         <Badge variant="outline">{note.visibility}</Badge>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => openEditDialog(note, 'edit')}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openDeleteDialog(note)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -730,7 +694,7 @@ export function SuperAdminDataManagement() {
         </TabsContent>
 
         {/* Products Tab */}
-        <TabsContent value="products" className="space-y-4">
+        {/* <TabsContent value="products" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Products</h3>
             <Button onClick={() => openCreateDialog('product')}>
@@ -774,10 +738,10 @@ export function SuperAdminDataManagement() {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
 
         {/* Subitems Tab */}
-        <TabsContent value="subitems" className="space-y-4">
+        {/* <TabsContent value="subitems" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Subitems</h3>
             <Button onClick={() => openCreateDialog('subitem')}>
@@ -819,7 +783,7 @@ export function SuperAdminDataManagement() {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
 
         {/* Call Logs Tab */}
         <TabsContent value="callLogs" className="space-y-4">
@@ -838,27 +802,31 @@ export function SuperAdminDataManagement() {
                   <TableRow>
                     <TableHead>Student</TableHead>
                     <TableHead>Coach</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Duration</TableHead>
                     <TableHead>Outcome</TableHead>
                     <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {getFilteredData(state.callLogs, 'callLogs').map((callLog) => (
                     <TableRow key={callLog.id}>
-                      <TableCell>{callLog.student_id}</TableCell>
-                      <TableCell>{callLog.coach_id}</TableCell>
-                      <TableCell>{callLog.outcome}</TableCell>
-                      <TableCell>{callLog.call_date}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => openEditDialog(callLog, 'edit')}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openDeleteDialog(callLog)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
+                        {callLog.student?.firstName + ' ' + callLog.student?.lastName || 'Unknown Student'}
+                      </TableCell>
+                      <TableCell>
+                        {callLog.coach?.firstName + ' ' + callLog.coach?.lastName || 'Unknown Coach'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{callLog.call_type}</Badge>
+                      </TableCell>
+                      <TableCell>{callLog.call_duration} min</TableCell>
+                      <TableCell className="max-w-xs truncate">{callLog.outcome}</TableCell>
+                      <TableCell>
+                        {(() => {
+                          const date = new Date(callLog.call_date);
+                          return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
+                        })()}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -869,7 +837,7 @@ export function SuperAdminDataManagement() {
         </TabsContent>
 
         {/* Message Templates Tab */}
-        <TabsContent value="messageTemplates" className="space-y-4">
+        {/* <TabsContent value="messageTemplates" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Message Templates</h3>
             <Button onClick={() => openCreateDialog('messageTemplate')}>
@@ -919,7 +887,7 @@ export function SuperAdminDataManagement() {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
 
       {/* Edit/Create Dialog */}

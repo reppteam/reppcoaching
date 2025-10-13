@@ -56,6 +56,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
   const [editingProfile, setEditingProfile] = useState(false);
   const [addingCall, setAddingCall] = useState(false);
   const [addingNote, setAddingNote] = useState(false);
+  const [coachTableId, setCoachTableId] = useState<string>('');
 
   // Form states
   const [profileForm, setProfileForm] = useState({
@@ -93,6 +94,18 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
   const loadStudentData = async () => {
     try {
       setLoading(true);
+      
+      // Get coach table ID if current user is a coach
+      if (currentUser?.role === 'coach' || currentUser?.role === 'coach_manager') {
+        try {
+          const fetchedCoachTableId = await eightbaseService.getCoachRecordIdByUserId(currentUser.id);
+          setCoachTableId(fetchedCoachTableId || '');
+          console.log('Coach table ID for note creation:', fetchedCoachTableId);
+        } catch (error) {
+          console.error('Error getting coach record ID:', error);
+        }
+      }
+      
       const [profileData, callLogsData, notesData] = await Promise.all([
         eightbaseService.getStudentProfile(student.id),
         eightbaseService.getCallLogs(student.id),
@@ -165,14 +178,22 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
 
   const handleAddNote = async () => {
     try {
+      if (!coachTableId && (currentUser?.role === 'coach' || currentUser?.role === 'coach_manager')) {
+        console.error('No coach table ID found for note creation');
+        return;
+      }
+
+      console.log('Creating note with coach table ID:', coachTableId);
+      console.log('Creating note with student table ID:', student.id);
+      
       const newNote = await eightbaseService.createNote({
         target_type: 'student',
-        target_id: student.id,
-        user_id: currentUser?.id || '',
+        target_id: student.id, // This should be the student table ID
+        user_id: coachTableId || currentUser?.id || '', // Use coach table ID if available, fallback to user ID
         title: noteForm.title,
         content: noteForm.content,
         visibility: noteForm.visibility,
-        created_by: currentUser?.id || '',
+        created_by: coachTableId || currentUser?.id || '', // Use coach table ID if available, fallback to user ID
         created_by_name: currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : ''
       });
 

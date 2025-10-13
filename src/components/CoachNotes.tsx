@@ -43,6 +43,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTarget, setFilterTarget] = useState<string>('all');
   const [filterVisibility, setFilterVisibility] = useState<string>('all');
+  const [coachTableId, setCoachTableId] = useState<string>('');
   const [formData, setFormData] = useState({
     target_type: 'student' as 'student' | 'call',
     target_id: '',
@@ -80,9 +81,11 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
       
       if (coachRecord) {
         console.log('Coach Record ID (from Coach table):', coachRecord.id);
+        setCoachTableId(coachRecord.id); // Store the coach table ID
         
         // Load notes for this coach using Coach table ID
-        const coachNotes = await eightbaseService.getNotes('coach', coachRecord.id, 'coach');
+        // Pass coachRecord.id as the 4th parameter (coachId) for filtering
+        const coachNotes = await eightbaseService.getNotes('coach', coachRecord.id, 'coach', coachRecord.id);
         setNotes(coachNotes);
 
         // Load assigned students using the same logic as CoachCallLog
@@ -107,17 +110,23 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentCoachId) return;
+    if (!coachTableId) {
+      console.error('No coach table ID found');
+      return;
+    }
 
     try {
+      console.log('Creating note with coach table ID:', coachTableId);
+      console.log('Creating note with student table ID:', formData.target_id);
+      
       const note = await eightbaseService.createNote({
         target_type: formData.target_type,
-        target_id: formData.target_id,
-        user_id: currentCoachId,
+        target_id: formData.target_id, // This should be the student table ID
+        user_id: coachTableId, // This should be the coach table ID
         title: formData.title,
         content: formData.content,
         visibility: formData.visibility,
-        created_by: currentCoachId,
+        created_by: coachTableId, // Use coach table ID here too
         created_by_name: `${user?.firstName || 'Coach'} ${user?.lastName || 'Name'}`
       });
 
@@ -293,9 +302,9 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                       <SelectItem value="private">Private (Coaches, Managers & Admins Only)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  {/* <p className="text-xs text-muted-foreground mt-1">
                     Private notes are visible to all Coaches, Coach Managers, and Super Admins - not students
-                  </p>
+                  </p> */}
                 </div>
 
                 <div className="flex justify-end gap-2">
@@ -384,8 +393,10 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{getStudentName(note.target_id)}</p>
-                      <p className="text-sm text-muted-foreground">ID: {note.target_id}</p>
+                      <p className="font-medium">
+                        {note.student_name || note.studentNote?.firstName + ' ' + note.studentNote?.lastName || getStudentName(note.target_id)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{note.studentNote?.email || ''}</p>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -404,10 +415,18 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium">
-                          {new Date(note.created_at).toLocaleDateString()}
+                          {(() => {
+                            console.log('CoachNotes - note.createdAt:', note.createdAt);
+                            const date = new Date(note.createdAt || note.created_at);
+                            console.log('CoachNotes - parsed date:', date);
+                            return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
+                          })()}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(note.created_at).toLocaleTimeString()}
+                          {(() => {
+                            const date = new Date(note.createdAt || note.created_at);
+                            return isNaN(date.getTime()) ? 'Invalid Time' : date.toLocaleTimeString();
+                          })()}
                         </p>
                       </div>
                     </div>
@@ -523,9 +542,9 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                   <SelectItem value="private">Private (Coaches, Managers & Admins Only)</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground mt-1">
+              {/* <p className="text-xs text-muted-foreground mt-1">
                 Private notes are visible to all Coaches, Coach Managers, and Super Admins - not students
-              </p>
+              </p> */}
             </div>
 
             <div className="flex justify-end gap-2">
@@ -583,7 +602,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
               <div>
                 <Label className="text-sm font-medium text-muted-foreground">Note Content</Label>
                 <div className="mt-2 p-4 bg-gray-50 rounded-lg">
-                  <p className="whitespace-pre-wrap">{viewingNote.content}</p>
+                  <p className="break-all">{viewingNote.content}</p>
                 </div>
               </div>
 
@@ -593,7 +612,10 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                 <div className="flex items-center gap-2 text-black dark:text-white mt-1">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm">
-                    {new Date(viewingNote.created_at).toLocaleString()}
+                    {(() => {
+                      const date = new Date(viewingNote.createdAt || viewingNote.created_at);
+                      return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString();
+                    })()}
                   </p>
                 </div>
               </div>

@@ -21,10 +21,13 @@ import { EnhancedCoachDashboard } from "./EnhancedCoachDashboard";
 import { EnhancedStudentDashboard } from "./EnhancedStudentDashboard";
 import { SuperAdminUserPanel } from "./SuperAdminUserPanel";
 import { SuperAdminList } from "./SuperAdminList";
+import { SuperAdminDataManagement } from "./SuperAdminDataManagement";
 import { UserManagement } from "./UserManagement";
 import { StudentProfile } from "./StudentProfile";
 import { CoachCallLog } from "./CoachCallLog";
 import { CoachNotes } from "./CoachNotes";
+import { StudentCallLog } from "./StudentCallLog";
+import { StudentNotes } from "./StudentNotes";
 import { RolePermissionsManager } from "./RolePermissionsManager";
 import { RoleImplementationStatus } from "./RoleImplementationStatus";
 import { SubscriptionInfo } from "./SubscriptionInfo";
@@ -62,6 +65,7 @@ import {
   Quote,
   User as UserIcon,
   UserCircle2,
+  Database,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -127,6 +131,16 @@ export function Dashboard() {
           id: "calculator",
           label: "Profit Calculator",
           icon: Calculator,
+        },
+        {
+          id: "student-calls",
+          label: "My Call Logs",
+          icon: Phone,
+        },
+        {
+          id: "student-notes",
+          label: "My Notes",
+          icon: FileText,
         },
       ];
     }
@@ -224,15 +238,20 @@ export function Dashboard() {
           icon: DollarSign,
         },
         { id: "kpis", label: "KPI Dashboard", icon: BarChart3 },
-        {
-          id: "calculator",
-          label: "Profit Calculator",
-          icon: Calculator,
-        },
+        // {
+        //   id: "calculator",
+        //   label: "Profit Calculator",
+        //   icon: Calculator,
+        // },
         {
           id: "user-management",
           label: "User Management",
           icon: Users,
+        },
+        {
+          id: "data-management",
+          label: "Data Management",
+          icon: Database,
         },
         // {
         //   id: "role-permissions",
@@ -308,16 +327,22 @@ export function Dashboard() {
         } else {
           return <Leads />;
         }
-      case "calculator":
-        return <ProfitMarginCalculator />;
+      // case "calculator":
+      //   return <ProfitMarginCalculator />;
       case "kpis":
         return <KPIDashboard />;
       case "user-management":
         return <UserManagement />;
+      case "data-management":
+        return <SuperAdminDataManagement />;
       case "coach-calls":
         return <CoachCallLog />;
       case "coach-notes":
         return <CoachNotes />;
+      case "student-calls":
+        return <StudentCallLog />;
+      case "student-notes":
+        return <StudentNotes />;
       case "coach-manager":
         return <CoachManagerDashboard />;
       case "coach-dashboard":

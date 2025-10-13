@@ -70,6 +70,30 @@ export interface WeeklyReport {
   status: 'active' | 'completed';
   created_at: string;
   updated_at: string;
+  user?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  createdBy?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  student?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  weekly_Report?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export interface Goal {
@@ -197,8 +221,34 @@ export interface Note {
   content: string;
   visibility: 'public' | 'private';
   created_at: string;
+  createdAt?: string; // API field name
   created_by: string;
   created_by_name: string;
+  student_name?: string; // Student's full name extracted from studentNote
+  studentNote?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    user?: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+    };
+  };
+  coach?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    users?: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+    };
+  };
 }
 
 // Enhanced MessageTemplate system for multiple variations using ScriptComponents
@@ -278,6 +328,19 @@ export interface CallLog {
   recording_url?: string; // URL to call recording
   created_at: string;
   updated_at: string;
+  student?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  coach?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    bio?: string;
+  };
 }
 
 // Profit Margin Calculator Types
