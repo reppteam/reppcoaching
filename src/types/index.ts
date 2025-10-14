@@ -11,12 +11,14 @@ export interface User {
     firstName: string;
     lastName: string;
     email: string;
+    coachType?: 'LAUNCH' | 'FRWRD';
   } | null;
   coach?: {
     id: string;
     firstName: string;
     lastName: string;
     email: string;
+    coachType?: 'LAUNCH' | 'FRWRD';
   } | null;
   student?: {
     id: string;

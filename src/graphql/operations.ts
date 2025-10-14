@@ -69,6 +69,7 @@ export const CREATE_COACH = gql`
       lastName
       email
       bio
+      coachType
       profileImage {
         downloadUrl
       }
@@ -92,6 +93,7 @@ export const UPDATE_COACH = gql`
       lastName
       email
       bio
+      coachType
       profileImage {
         downloadUrl
       }
@@ -109,6 +111,7 @@ export const UPDATE_COACH_BY_USER_ID = gql`
       lastName
       email
       bio
+      coachType
       profileImage {
         downloadUrl
       }
@@ -1089,6 +1092,7 @@ export const GET_COACH_BY_USER_ID = gql`
         lastName
         email
         bio
+        coachType
         users {
           id
           firstName
@@ -1112,6 +1116,7 @@ export const GET_ALL_COACHES_DIRECT = gql`
         lastName
         email
         bio
+        coachType
         createdAt
         updatedAt
         users {
@@ -1119,6 +1124,12 @@ export const GET_ALL_COACHES_DIRECT = gql`
           firstName
           lastName
           email
+          roles {
+            items {
+              id
+              name
+            }
+          }
         }
       }
     }
@@ -1134,6 +1145,7 @@ export const GET_COACH_BY_EMAIL = gql`
         lastName
         email
         bio
+        coachType
         profileImage {
           downloadUrl
         }
@@ -1167,6 +1179,7 @@ export const GET_COACH_WITH_STUDENTS = gql`
         lastName
         email
         bio
+        coachType
         profileImage {
           downloadUrl
         }

@@ -83,6 +83,7 @@ export const GET_ALL_8BASE_USERS = gql`
           lastName
           email
           bio
+          coachType
           profileImage {
             downloadUrl
           }

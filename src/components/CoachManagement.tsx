@@ -9,6 +9,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { 
@@ -39,6 +40,7 @@ interface Coach {
   lastName: string;
   email: string;
   bio: string;
+  coachType?: 'LAUNCH' | 'FRWRD';
   profileImage?: {
     downloadUrl: string;
   };
@@ -88,6 +90,7 @@ interface CoachFormData {
   lastName: string;
   email: string;
   bio: string;
+  coachType: 'LAUNCH' | 'FRWRD';
 }
 
 export function CoachManagement() {
@@ -109,7 +112,8 @@ export function CoachManagement() {
     firstName: '',
     lastName: '',
     email: '',
-    bio: ''
+    bio: '',
+    coachType: 'LAUNCH'
   });
 
   useEffect(() => {
@@ -153,7 +157,8 @@ export function CoachManagement() {
       firstName: coach.firstName,
       lastName: coach.lastName,
       email: coach.email,
-      bio: coach.bio
+      bio: coach.bio,
+      coachType: coach.coachType || 'LAUNCH'
     });
     setEditDialogOpen(true);
   };
@@ -184,7 +189,8 @@ export function CoachManagement() {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        bio: formData.bio
+        bio: formData.bio,
+        coachType: formData.coachType
       });
 
       setEditDialogOpen(false);
@@ -317,8 +323,18 @@ export function CoachManagement() {
                         </div>
                       )}
                       <div>
-                        <div className="font-medium">
-                          {coach.firstName} {coach.lastName}
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium">
+                            {coach.firstName} {coach.lastName}
+                          </div>
+                          {coach.coachType && (
+                            <Badge
+                              variant={coach.coachType === 'LAUNCH' ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {coach.coachType}
+                            </Badge>
+                          )}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {coach.bio ? coach.bio.substring(0, 50) + '...' : 'No bio'}
@@ -428,6 +444,23 @@ export function CoachManagement() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
+            </div>
+            <div>
+              <Label htmlFor="coachType">Coach Type</Label>
+              <Select
+                value={formData.coachType}
+                onValueChange={(value: 'LAUNCH' | 'FRWRD') =>
+                  setFormData({ ...formData, coachType: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select coach type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="LAUNCH">LAUNCH</SelectItem>
+                  <SelectItem value="FRWRD">FRWRD</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="bio">Bio</Label>

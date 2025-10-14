@@ -75,12 +75,14 @@ import {
 } from "lucide-react";
 import { UserActions } from "./UserActions";
 import { CoachStudentEditProfile } from "./CoachStudentEditProfile";
+import { testStudentService } from "../services/testStudentService";
 
 interface CreateCoachFormData {
   firstName: string;
   lastName: string;
   email: string;
   assignedStudents: string[];
+  coachType: 'LAUNCH' | 'FRWRD';
 }
 
 interface CreateStudentFormData {
@@ -179,6 +181,10 @@ export function UserManagement() {
   const [deleteConfirmDialogOpen, setDeleteConfirmDialogOpen] = useState(false);
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
 
+  // Test student creation states
+  const [testStudentLoading, setTestStudentLoading] = useState(false);
+  const [testStudentResults, setTestStudentResults] = useState<any>(null);
+
   // Create user dialog states (same as SuperAdminUserPanel)
   const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
   const [createUserLoading, setCreateUserLoading] = useState(false);
@@ -198,6 +204,7 @@ export function UserManagement() {
     lastName: "",
     email: "",
     assignedStudents: [],
+    coachType: 'LAUNCH',
   });
 
   const [studentFormData, setStudentFormData] = useState<CreateStudentFormData>(
@@ -247,21 +254,33 @@ export function UserManagement() {
         eightbaseService.getAllStudents(),
         eightbaseService.getUsers(), // Get all users from User table
       ]);
-      // Filter Coach Managers from User table and enrich with student data
-      const fetchedCoachManagers = allUsersFromUserTable
-        .filter((u) => u.role === "coach_manager")
+      // Filter Coach Managers from Coach table (they are stored there with coach_manager role)
+      const fetchedCoachManagers = fetchedCoaches
+        .filter((coach: any) => {
+          // Check if this coach has a user with coach_manager role
+          return coach.users?.roles?.items?.some((role: any) => role.name === "coach_manager");
+        })
         .map((coachManager: any) => {
-          // If this coach manager has a student assigned, include it directly
-          if (coachManager.student) {
-            return {
-              ...coachManager,
-              assignedStudent: coachManager.student
-            };
-          }
-          return coachManager;
+          // Coach managers are stored in the coach table, so they already have student relationships
+          return {
+            ...coachManager,
+            // Keep the coach table ID for proper student relationships
+            id: coachManager.id, // This is the coach table ID
+            userTableId: coachManager.users?.id, // Store user table ID separately
+            firstName: coachManager.firstName,
+            lastName: coachManager.lastName,
+            email: coachManager.email,
+            role: "coach_manager"
+          };
         });
 
-      setCoaches(fetchedCoaches);
+      // Filter out coach managers from regular coaches list
+      const regularCoaches = fetchedCoaches.filter((coach: any) => {
+        // Exclude coaches that have coach_manager role
+        return !coach.users?.roles?.items?.some((role: any) => role.name === "coach_manager");
+      });
+      
+      setCoaches(regularCoaches);
       setUsers(fetchedStudents); // Using users state to store students for compatibility
       setStudents(fetchedStudents); // Store students in dedicated state with proper typing
       setCoachManagers(fetchedCoachManagers);
@@ -279,6 +298,7 @@ export function UserManagement() {
       lastName: "",
       email: "",
       assignedStudents: [],
+      coachType: 'LAUNCH',
     });
   };
 
@@ -337,6 +357,7 @@ export function UserManagement() {
         lastName: coachFormData.lastName,
         email: coachFormData.email,
         bio: "",
+        coachType: coachFormData.coachType,
         users: {
           connect: { id: createdUser.id },
         },
@@ -577,26 +598,25 @@ export function UserManagement() {
             firstName: editingUser.firstName,
             lastName: editingUser.lastName,
             email: editingUser.email,
+            coachType: userData.coachType || (editingUser as any).coachType || 'LAUNCH',
           };
 
-          // For coach managers, editingUser.id is already the User table ID
-          await eightbaseService.updateUser(editingUser.id, updateData);
+          // For coach managers, we need to use the user table ID for user updates
+          const userTableId = (editingUser as any).userTableId || editingUser.id;
+          await eightbaseService.updateUser(userTableId, updateData);
           
           // Handle student assignment through coach record only
-          // Find the coach record for this manager
-          // First try by user ID, then fallback to email matching
-          let managerCoachRecord = coaches.find(
-            (c) => c.users?.id === editingUser.id
+          // Find the coach record for this manager from coachManagers array
+          const managerCoachRecord = coachManagers.find(
+            (cm) => cm.id === editingUser.id
           );
           
-          // If not found by user ID, try by email matching
-          if (!managerCoachRecord) {
-            managerCoachRecord = coaches.find(
-              (c) => c.email === editingUser.email
-            );
-          }
-          
           if (managerCoachRecord) {
+            // Update the coach record with coachType
+            await eightbaseService.updateCoachDirect(managerCoachRecord.id, {
+              coachType: userData.coachType || (editingUser as any).coachType || 'LAUNCH',
+            });
+            
             // Get current assigned student from coach record
             const currentAssignedStudent = students.find(
               (s) => s.coach?.id === managerCoachRecord.id
@@ -646,6 +666,7 @@ export function UserManagement() {
             lastName: userData.lastName || editingUser.lastName,
             email: userData.email || editingUser.email,
             bio: userData.bio || "",
+            coachType: userData.coachType || (editingUser as any).coachType || 'LAUNCH',
           };
 
           await eightbaseService.updateCoachDirect(editingUser.id, coachData);
@@ -753,6 +774,38 @@ export function UserManagement() {
     loadUsers();
   };
 
+  const handleCreateTestStudents = async () => {
+    setTestStudentLoading(true);
+    setTestStudentResults(null);
+    
+    try {
+      console.log('Creating test students for all coaches...');
+      
+      // First, update coaches with tags if they don't have them
+      const tagUpdateResult = await testStudentService.updateCoachesWithTags();
+      console.log('Tag update result:', tagUpdateResult);
+      
+      // Then create test students
+      const result = await testStudentService.createTestStudentsForAllCoaches();
+      console.log('Test student creation result:', result);
+      
+      setTestStudentResults(result);
+      
+      // Reload users to show the new data
+      await loadUsers();
+      
+    } catch (error) {
+      console.error('Error creating test students:', error);
+      setTestStudentResults({
+        success: false,
+        message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        results: []
+      });
+    } finally {
+      setTestStudentLoading(false);
+    }
+  };
+
   const handleCreateUser = async () => {
     setCreateUserLoading(true);
     try {
@@ -836,28 +889,21 @@ export function UserManagement() {
       let assignedStudentIds: string[] = [];
       
       if (isCoachManager) {
-        // For coach managers, get student data from coach table only
-        // First try by user ID, then fallback to email matching
-        let managerCoachRecord = coaches.find(
-          (c) => c.users?.id === userToEdit.id
+        // For coach managers, they are already in the coachManagers array with proper coach data
+        const managerCoachRecord = coachManagers.find(
+          (cm) => cm.id === userToEdit.id
         );
         
-        // If not found by user ID, try by email matching
-        if (!managerCoachRecord) {
-          managerCoachRecord = coaches.find(
-            (c) => c.email === userToEdit.email
-          );
-        }
-        
         if (managerCoachRecord) {
+          // Coach managers are stored in coach table, so use their coach ID directly
           const assignedStudents = students.filter(
-            (s) => s.coach?.id === managerCoachRecord.coach?.id
+            (s) => s.coach?.id === managerCoachRecord.id
           );
           assignedStudentIds = assignedStudents.map(s => s.id);
         }
       } else {
         // For regular coaches, find students assigned to them
-        const studentsAssignedToCoach = students.filter(s => s.coach?.id === userToEdit.coach?.id);
+        const studentsAssignedToCoach = students.filter(s => s.coach?.id === userToEdit.id);
         assignedStudentIds = studentsAssignedToCoach.map(s => s.id);
       }
       
@@ -1243,6 +1289,31 @@ export function UserManagement() {
                       }
                     />
                   </div>
+                  
+                  {/* Coach Type Field - Only show for coaches and coach managers */}
+                  {(coaches.some((c) => c.id === editingUser.id) || coachManagers.some((cm) => cm.id === editingUser.id)) && (
+                    <div>
+                      <Label htmlFor="edit-coachType">Coach Type</Label>
+                      <Select
+                        value={(editingUser as any).coachType || 'LAUNCH'}
+                        onValueChange={(value: 'LAUNCH' | 'FRWRD') =>
+                          setEditingUser({ 
+                            ...editingUser, 
+                            coachType: value 
+                          } as any)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select coach type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="LAUNCH">LAUNCH</SelectItem>
+                          <SelectItem value="FRWRD">FRWRD</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  
                   <div>
                     <Label htmlFor="edit-phone">Phone</Label>
                     <Input
@@ -1523,7 +1594,7 @@ export function UserManagement() {
                   Create User
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create New User</DialogTitle>
                   <DialogDescription>
@@ -1715,6 +1786,18 @@ export function UserManagement() {
             </Dialog>
           )}
 
+          {/* Create Test Students Button - Super Admin Only */}
+          {user?.role === "super_admin" && (
+            <Button
+              variant="outline"
+              onClick={handleCreateTestStudents}
+              disabled={testStudentLoading}
+            >
+              <GraduationCap className="h-4 w-4 mr-2" />
+              {testStudentLoading ? "Creating..." : "Create Test Students"}
+            </Button>
+          )}
+
           {/* Legacy Add User Modal (keeping for compatibility) */}
           {/* {(user?.role === 'super_admin' || user?.role === 'coach_manager') && (
             <Button variant="outline" onClick={() => setAddUserModalOpen(true)}>
@@ -1829,26 +1912,14 @@ export function UserManagement() {
                   ) : (
                     <div className="space-y-3">
                       {coachManagers.map((manager) => {
-                        // Find the coach record for this manager
-                        // First try by user ID, then fallback to email matching
-                        let managerCoachRecord = coaches.find(
-                          (c) => c.users?.id === manager.id
-                        );
-                        
-                        // If not found by user ID, try by email matching
-                        if (!managerCoachRecord) {
-                          managerCoachRecord = coaches.find(
-                            (c) => c.email === manager.email
-                          );
-                        }
-                        
-                        // Find assigned students using the coach relationship
+                        // Coach managers are now properly loaded from coach table
+                        // Find assigned students using the coach relationship directly
                         const assignedStudents = students.filter(
-                          (s) => s.coach?.id === managerCoachRecord?.id
+                          (s) => s.coach?.id === manager.id
                         );
                         // Count managed coaches (other coaches, not including themselves)
                         const managedCoaches = coaches.filter(
-                          (c) => c.users?.id !== manager.id
+                          (c) => c.id !== manager.id
                         );
                         
 
@@ -1932,15 +2003,10 @@ export function UserManagement() {
                   ) : (
                     <div className="space-y-3">
                       {coaches.map((coach) => {
-                        // Find assigned students using the coach relationship
+                        // Find assigned students using the coach relationship directly
                         const assignedStudents = students.filter(
-                          (s) => s.coach?.id === coach.coach?.id
+                          (s) => s.coach?.id === coach.id
                         );
-                        // Check if this coach is also a coach manager
-                        const isCoachManager = coachManagers.some(
-                          (manager) => manager.id === coach.user?.id
-                        );
-
                         return (
                           <div
                             key={coach.id}
@@ -1951,12 +2017,12 @@ export function UserManagement() {
                                 <div className="font-medium truncate">
                                   {coach.firstName} {coach.lastName}
                                 </div>
-                                {isCoachManager && (
+                                {coach.coachType && (
                                   <Badge
-                                    variant="outline"
+                                    variant={coach.coachType === 'LAUNCH' ? 'default' : 'secondary'}
                                     className="text-xs flex-shrink-0"
                                   >
-                                    Coach Manager
+                                    {coach.coachType}
                                   </Badge>
                                 )}
                               </div>
@@ -2351,6 +2417,28 @@ export function UserManagement() {
                   required
                 />
               </div>
+              <div>
+                <Label htmlFor="coach-type" className="text-foreground">
+                  Coach Type *
+                </Label>
+                <Select
+                  value={coachFormData.coachType}
+                  onValueChange={(value: 'LAUNCH' | 'FRWRD') =>
+                    setCoachFormData((prev) => ({
+                      ...prev,
+                      coachType: value,
+                    }))
+                  }
+                >
+                  <SelectTrigger className="bg-background border-border text-foreground">
+                    <SelectValue placeholder="Select coach type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LAUNCH">LAUNCH</SelectItem>
+                    <SelectItem value="FRWRD">FRWRD</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {availableStudents.length > 0 && (
@@ -2717,7 +2805,7 @@ export function UserManagement() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-black dark:text-white">
               <Edit className="h-5 w-5" />
@@ -2731,7 +2819,7 @@ export function UserManagement() {
             </DialogDescription>
           </DialogHeader>
           {editingUser && (
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-y-auto max-h-[calc(90vh-120px)] pr-2">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="edit-name">Full Name</Label>
@@ -2760,6 +2848,30 @@ export function UserManagement() {
                   />
                 </div>
               </div>
+
+              {/* Coach Type Field - Only show for coaches and coach managers */}
+              {(coaches.some((c) => c.id === editingUser.id) || coachManagers.some((cm) => cm.id === editingUser.id)) && (
+                <div>
+                  <Label htmlFor="edit-coachType">Coach Type</Label>
+                  <Select
+                    value={(editingUser as any).coachType || 'LAUNCH'}
+                    onValueChange={(value: 'LAUNCH' | 'FRWRD') =>
+                      setEditingUser({ 
+                        ...editingUser, 
+                        coachType: value 
+                      } as any)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select coach type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="LAUNCH">LAUNCH</SelectItem>
+                      <SelectItem value="FRWRD">FRWRD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -2821,7 +2933,7 @@ export function UserManagement() {
                         <SelectTrigger>
                           <SelectValue placeholder="Select coach" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-[300px] overflow-y-auto">
                           <SelectItem value="none">
                             No coach assigned
                           </SelectItem>
@@ -2858,20 +2970,21 @@ export function UserManagement() {
                         <SelectTrigger>
                           <SelectValue placeholder="Select student" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-[300px] overflow-y-auto">
                           <SelectItem value="none">
                             No student assigned
                           </SelectItem>
                           {students.map((student) => (
-                            <SelectItem key={student.id} value={student.id}>
-                              {student.firstName} {student.lastName} (
-                              {student.email})
+                            <SelectItem key={student.id} value={student.id} className="truncate">
+                              <span className="truncate">
+                                {student.firstName} {student.lastName}
+                              </span>
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       {selectedStudentsForCoach.length > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-1 truncate">
                           Currently assigned:{" "}
                           {
                             students.find(
@@ -2986,7 +3099,7 @@ export function UserManagement() {
                 </>
               )}
 
-              <div className="flex justify-end space-x-2 pt-4">
+              <div className="flex justify-end space-x-2 pt-4 border-t mt-4">
                 <Button
                   variant="outline"
                   onClick={() => setEditUserDialogOpen(false)}
@@ -3023,6 +3136,62 @@ export function UserManagement() {
           }}
         />
       )}
+
+      {/* Test Student Creation Results Dialog */}
+      <Dialog open={!!testStudentResults} onOpenChange={() => setTestStudentResults(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Test Student Creation Results</DialogTitle>
+            <DialogDescription>
+              {testStudentResults?.success ? 'Successfully created test students!' : 'Some errors occurred during creation.'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {testStudentResults && (
+            <div className="space-y-4">
+              <div className={`p-4 rounded-lg ${testStudentResults.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                <p className={`font-medium ${testStudentResults.success ? 'text-green-800' : 'text-red-800'}`}>
+                  {testStudentResults.message}
+                </p>
+              </div>
+              
+              {testStudentResults.results && testStudentResults.results.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-medium">Detailed Results:</h4>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {testStudentResults.results.map((result: any, index: number) => (
+                      <div key={index} className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h5 className="font-medium">{result.coachName}</h5>
+                          <Badge variant={result.studentsCreated > 0 ? 'default' : 'secondary'}>
+                            {result.studentsCreated} student{result.studentsCreated !== 1 ? 's' : ''} created
+                          </Badge>
+                        </div>
+                        {result.errors && result.errors.length > 0 && (
+                          <div className="text-sm text-red-600">
+                            <p className="font-medium">Errors:</p>
+                            <ul className="list-disc list-inside">
+                              {result.errors.map((error: string, errorIndex: number) => (
+                                <li key={errorIndex}>{error}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex justify-end">
+                <Button onClick={() => setTestStudentResults(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
