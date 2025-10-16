@@ -9,6 +9,7 @@ import { notificationService, Notification } from '../services/notificationServi
 import { NotificationUtils } from '../utils/notificationUtils';
 import { Heart, Quote, Bell, TrendingUp, Calendar } from 'lucide-react';
 import { WeeklyReports } from './WeeklyReports';
+import { eightbaseService } from '../services/8baseService';
 
 interface EnhancedStudentDashboardProps {
   onEditProfile?: () => void;
@@ -33,23 +34,42 @@ export function EnhancedStudentDashboard({
   });
   const [loading, setLoading] = useState(true);
   const [showAllNotifications, setShowAllNotifications] = useState(false);
+  const [studentId, setStudentId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && studentId) {
       loadDashboardData();
     }
+  }, [user?.id, studentId]);
+
+  // Convert User ID to Student ID
+  useEffect(() => {
+    const getStudentId = async () => {
+      if (user?.id) {
+        try {
+          const realStudentId = await eightbaseService.getStudentIdFromUserId(user.id);
+          console.log('EnhancedStudentDashboard - User ID:', user.id, 'Student ID:', realStudentId);
+          setStudentId(realStudentId);
+        } catch (error) {
+          console.error('Error getting student ID:', error);
+          setStudentId(null);
+        }
+      }
+    };
+    
+    getStudentId();
   }, [user?.id]);
 
   const loadDashboardData = async () => {
-    if (!user?.id) return;
+    if (!user?.id || !studentId) return;
 
     try {
       setLoading(true);
 
-      // Load notifications from database (from automated task)
+      // Load notifications from database (from automated task) - use User ID for notifications
       const storedNotifications = await notificationService.getStoredNotifications(user.id);
       
-      // Load client-side generated notifications
+      // Load client-side generated notifications - use User ID for notifications
       const userNotifications = await notificationService.checkUserActivity(user.id);
       
       // Combine both (stored first, then client-generated)
@@ -66,11 +86,11 @@ export function EnhancedStudentDashboard({
       
       setNotifications(uniqueNotifications);
 
-      // Load stats
-      const dashboardStats = await notificationService.getDashboardStats(user.id);
+      // Load stats - use Student ID for business data
+      const dashboardStats = await notificationService.getDashboardStats(studentId);
       setStats(dashboardStats);
 
-      // Log activity
+      // Log activity - use User ID for activity logging
       NotificationUtils.logActivity(user.id, 'login');
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -311,4 +331,5 @@ export function EnhancedStudentDashboard({
     </div>
   );
 }
+
 

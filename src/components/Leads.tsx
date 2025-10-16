@@ -679,8 +679,16 @@ export function Leads() {
       const leadsToCreate: Omit<Lead, 'id' | 'created_at' | 'updated_at'>[] = [];
       const errors: string[] = [];
 
+      // Get the Student ID from User ID for student users (once for all leads)
+      const studentId = await eightbaseService.getStudentIdFromUserId(user.id);
+      if (!studentId) {
+        console.error('No student record found for user:', user.id);
+        alert('Student profile not found. Please contact support.');
+        return;
+      }
+
       // Parse only selected leads
-      Array.from(selectedImportLeads).forEach(index => {
+      for (const index of Array.from(selectedImportLeads)) {
         const i = index + 1; // +1 because index 0 is headers
         try {
           // Parse CSV line properly handling quoted fields
@@ -708,9 +716,9 @@ export function Leads() {
           console.log('Parsed values:', values);
           console.log('Headers:', headers);
           console.log('Name index:', headers.indexOf('name'));
-          
+
           const leadData: Omit<Lead, 'id' | 'created_at' | 'updated_at'> = {
-            user_id: user.id,
+            student_id: studentId,
             lead_name: values[headers.indexOf('name')] || '',
             email: values[headers.indexOf('email')] || '',
             phone: values[headers.indexOf('phone')] || '',
@@ -737,7 +745,7 @@ export function Leads() {
         } catch (error) {
           errors.push(`Row ${i}: Failed to parse - ${error}`);
         }
-      });
+      }
 
       // Create all leads in bulk
       let importedCount = 0;

@@ -63,6 +63,11 @@ import {
   Key,
   Loader2,
   ExternalLink,
+  Bell,
+  Send,
+  TrendingUp,
+  Camera,
+  FileText,
 } from "lucide-react";
 
 export function CoachManagerDashboard() {
@@ -92,6 +97,20 @@ export function CoachManagerDashboard() {
   const [editEmail, setEditEmail] = useState('');
   const [editIsActive, setEditIsActive] = useState(true);
 
+  // Notification system states
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [notificationForm, setNotificationForm] = useState({
+    studentId: '',
+    title: '',
+    message: '',
+    priority: 'medium' as 'high' | 'medium' | 'low'
+  });
+  const [sendingNotification, setSendingNotification] = useState(false);
+
+  // Goals state
+  const [goals, setGoals] = useState<any[]>([]);
+  const [goalsLoading, setGoalsLoading] = useState(false);
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -120,6 +139,19 @@ export function CoachManagerDashboard() {
       }, {} as Record<string, UserBlockingStatus>);
       
       setBlockingStatuses(statusMap);
+
+      // Load goals for coach manager
+      if (user?.id) {
+        try {
+          setGoalsLoading(true);
+          const coachGoals = await eightbaseService.getGoalsByCoach(user.id);
+          setGoals(coachGoals);
+        } catch (error) {
+          console.error('Error loading goals:', error);
+        } finally {
+          setGoalsLoading(false);
+        }
+      }
     } catch (error) {
       console.error("Failed to load users:", error);
     } finally {
@@ -302,6 +334,107 @@ export function CoachManagerDashboard() {
     }
   };
 
+  // Notification system functions
+  const handleSendNotification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user?.id) {
+      alert('Coach Manager information not found. Please refresh the page and try again.');
+      return;
+    }
+
+    if (!notificationForm.studentId) {
+      alert('Please select a student to send the message to.');
+      return;
+    }
+
+    if (!notificationForm.title.trim()) {
+      alert('Please enter a title for your message.');
+      return;
+    }
+
+    if (!notificationForm.message.trim()) {
+      alert('Please enter a message.');
+      return;
+    }
+
+    if (notificationForm.message.trim().length < 10) {
+      alert('Message must be at least 10 characters long.');
+      return;
+    }
+
+    if (notificationForm.message.trim().length > 500) {
+      alert('Message must be 500 characters or less.');
+      return;
+    }
+
+    try {
+      setSendingNotification(true);
+      
+      // Verify coach-student relationship first
+      const student = students.find(s => s.id === notificationForm.studentId);
+      if (!student) {
+        alert('You can only send messages to your assigned students.');
+        return;
+      }
+
+      // Try to get the student ID from the user ID
+      // If that fails, use the user ID directly (they might be the same)
+      let studentId = await eightbaseService.getStudentIdFromUserId(notificationForm.studentId);
+      if (!studentId) {
+        console.log('🔍 No separate student record found, using user ID directly');
+        studentId = notificationForm.studentId; // Fallback to user ID
+      }
+
+      // Create the notification
+      console.log('🚀 Creating personalized notification:', {
+        studentId: studentId,
+        title: notificationForm.title.trim(),
+        message: notificationForm.message.trim(),
+        priority: notificationForm.priority,
+        type: 'COACH_MESSAGE',
+        coachId: user.id
+      });
+
+      const notification = await eightbaseService.createPersonalizedNotification({
+        studentId: studentId,
+        title: notificationForm.title.trim(),
+        message: notificationForm.message.trim(),
+        priority: notificationForm.priority,
+        type: 'COACH_MESSAGE',
+        coachId: user.id
+      });
+
+      console.log('✅ Notification created successfully:', notification);
+
+      // Reset form and close modal
+      setNotificationForm({
+        studentId: '',
+        title: '',
+        message: '',
+        priority: 'medium'
+      });
+      setShowNotificationModal(false);
+
+      alert(`Message sent successfully to ${student.firstName} ${student.lastName}!`);
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setSendingNotification(false);
+    }
+  };
+
+  const openNotificationModal = (student: User) => {
+    setNotificationForm({
+      studentId: student.id,
+      title: '',
+      message: '',
+      priority: 'medium'
+    });
+    setShowNotificationModal(true);
+  };
+
   // Filter users to show only Coach and Coach Manager roles
   const coachAndManagerUsers = users.filter(user => {
     const userRoles = user.role;
@@ -328,17 +461,10 @@ export function CoachManagerDashboard() {
 
   const students = users.filter((u) => u.role === "user");
   const coaches = coachAndManagerUsers.filter((u) => {
-    const userRoles = u.roles?.items || [];
-    return userRoles.some((role: any) => role.name === "Coach");
+    return u.role === "coach";
   });
   const coachManagers = coachAndManagerUsers.filter((u) => {
-    const userRoles = u.roles?.items || [];
-    return userRoles.some(
-      (role: any) =>
-        role.name === "coach_manager" ||
-        role.name === "Coach Manager" ||
-        role.name === "Administrator"
-    );
+    return u.role === "coach_manager";
   });
   const superAdmins = users.filter((u) => u.role === "super_admin");
 
@@ -600,6 +726,157 @@ export function CoachManagerDashboard() {
         </CardContent>
       </Card>
 
+      {/* Student Management Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Student Management</CardTitle>
+          <CardDescription>
+            Manage students and send personalized notifications
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Total Students: {students.length}
+            </div>
+            
+            {students.length > 0 ? (
+              <div className="space-y-2">
+                {students.slice(0, 10).map((student) => (
+                  <div key={student.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium">
+                        {student.firstName} {student.lastName}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {student.email}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openNotificationModal(student)}
+                        className="h-8 px-3"
+                      >
+                        <Bell className="h-4 w-4 mr-1" />
+                        Send Message
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {students.length > 10 && (
+                  <div className="text-sm text-muted-foreground text-center py-2">
+                    Showing first 10 of {students.length} students
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No students found
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Goals Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-blue-600" />
+            Student Goals
+          </CardTitle>
+          <CardDescription>
+            Track and monitor your assigned students' goals and progress
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {goalsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-gray-600">Loading goals...</span>
+            </div>
+          ) : goals.length > 0 ? (
+            <div className="space-y-4">
+              {goals.slice(0, 10).map((goal) => {
+                const student = students.find(s => s.id === goal.user_id);
+                const progressPercentage = goal.target_value > 0 ? Math.round((goal.current_value / goal.target_value) * 100) : 0;
+                
+                return (
+                  <div key={goal.id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          {goal.goal_type === 'revenue' && <TrendingUp className="h-4 w-4 text-green-600" />}
+                          {goal.goal_type === 'clients' && <Users className="h-4 w-4 text-blue-600" />}
+                          {goal.goal_type === 'shoots' && <Camera className="h-4 w-4 text-purple-600" />}
+                          {goal.goal_type === 'text' && <FileText className="h-4 w-4 text-orange-600" />}
+                          {goal.goal_type === 'other' && <Target className="h-4 w-4 text-gray-600" />}
+                          <span className="font-medium text-gray-900 dark:text-white">{goal.title}</span>
+                        </div>
+                        <Badge 
+                          variant={goal.priority === 'high' ? 'destructive' : goal.priority === 'medium' ? 'default' : 'secondary'}
+                          className={goal.priority === 'medium' ? 'bg-orange-100 text-orange-800' : ''}
+                        >
+                          {goal.priority}
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {student ? `${student.firstName} ${student.lastName}` : 'Unknown Student'}
+                      </div>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <div className="flex justify-between text-sm text-gray-600 mb-1">
+                        <span>Progress</span>
+                        <span>{progressPercentage}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center text-sm">
+                      <div className="flex gap-4 text-gray-600">
+                        <span>Current: {goal.goal_type === 'revenue' ? '$' : ''}{goal.current_value?.toLocaleString() || '0'}</span>
+                        <span>Target: {goal.goal_type === 'revenue' ? '$' : ''}{goal.target_value?.toLocaleString() || '0'}</span>
+                      </div>
+                      <Badge 
+                        variant={goal.status === 'completed' ? 'default' : 'secondary'}
+                        className={goal.status === 'completed' ? 'bg-green-100 text-green-800' : ''}
+                      >
+                        {goal.status}
+                      </Badge>
+                    </div>
+                    
+                    {goal.description && (
+                      <div className="mt-2 text-sm text-gray-600">
+                        {goal.description}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {goals.length > 10 && (
+                <div className="text-center py-4 text-gray-500 text-sm">
+                  Showing first 10 of {goals.length} goals
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium mb-2">No goals found</p>
+              <p className="text-sm">Your assigned students haven't set any goals yet.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Success/Error Messages */}
       {actionSuccess && (
         <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded z-50">
@@ -856,6 +1133,147 @@ export function CoachManagerDashboard() {
                   </>
                 )}
               </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Message Modal */}
+      <Dialog open={showNotificationModal} onOpenChange={setShowNotificationModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Bell className="h-5 w-5 text-blue-600" />
+              Send Message to Student
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Send a personalized notification to a student. The message will appear in their notification list and dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleSendNotification}>
+            <div className="space-y-4">
+              {/* Student Selection */}
+              <div>
+                <Label htmlFor="student-select" className="text-sm font-medium">Student *</Label>
+                <Select 
+                  value={notificationForm.studentId} 
+                  onValueChange={(value) => setNotificationForm({...notificationForm, studentId: value})}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select a student to send message to" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {students.map((student) => (
+                      <SelectItem key={student.id} value={student.id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{student.firstName} {student.lastName}</span>
+                          <span className="text-xs text-muted-foreground">{student.email}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">Select the student you want to send a message to</p>
+              </div>
+
+              {/* Title */}
+              <div>
+                <Label htmlFor="notification-title" className="text-sm font-medium">Title *</Label>
+                <Input
+                  id="notification-title"
+                  value={notificationForm.title}
+                  onChange={(e) => setNotificationForm({...notificationForm, title: e.target.value})}
+                  placeholder="e.g., Weekly Check-in, Important Update, etc."
+                  className="bg-background border-border text-foreground mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">A clear, descriptive title for your message</p>
+              </div>
+
+              {/* Message */}
+              <div>
+                <Label htmlFor="notification-message" className="text-sm font-medium">Message *</Label>
+                <textarea
+                  id="notification-message"
+                  value={notificationForm.message}
+                  onChange={(e) => setNotificationForm({...notificationForm, message: e.target.value})}
+                  placeholder="Write your personalized message to the student. Be encouraging and specific about what you'd like them to focus on..."
+                  className="w-full min-h-[120px] p-3 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground resize-none mt-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  maxLength={500}
+                />
+                <div className={`text-xs mt-1 ${notificationForm.message.length > 500 ? 'text-red-500' : notificationForm.message.length < 10 ? 'text-orange-500' : 'text-muted-foreground'}`}>
+                  {notificationForm.message.length}/500 characters
+                  {notificationForm.message.length < 10 && notificationForm.message.length > 0 && (
+                    <span className="ml-2">(Minimum 10 characters required)</span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">This message will be delivered instantly to the student's notification center</p>
+              </div>
+
+              {/* Priority */}
+              <div>
+                <Label htmlFor="notification-priority" className="text-sm font-medium">Priority</Label>
+                <Select 
+                  value={notificationForm.priority} 
+                  onValueChange={(value: 'high' | 'medium' | 'low') => setNotificationForm({...notificationForm, priority: value})}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span>Low - General information</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="medium">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                        <span>Medium - Important update</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="high">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                        <span>High - Urgent attention needed</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">Higher priority messages will be more prominent in the student's notification list</p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-6 border-t border-border">
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  onClick={() => setShowNotificationModal(false)}
+                  disabled={sendingNotification}
+                  className="px-6"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={sendingNotification || !notificationForm.studentId || !notificationForm.title.trim() || !notificationForm.message.trim() || notificationForm.message.trim().length < 10}
+                  className="bg-blue-600 hover:bg-blue-700 px-6"
+                >
+                  {sendingNotification ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Message
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </form>
         </DialogContent>

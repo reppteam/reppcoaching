@@ -90,27 +90,16 @@ export const WeeklyReports: React.FC = () => {
     try {
       const netProfit = formData.revenue - formData.expenses - formData.editing_cost;
       
-      // Get the actual student profile ID from the student table
-      let studentId: string | undefined;
-      
-      try {
-        // Try to find the student profile for this user
-        const studentProfile = await eightbaseService.getStudentProfileByUserId(user.id);
-        if (studentProfile?.id && studentProfile.id !== user.id) {
-          studentId = studentProfile.id;
-          console.log('Found student profile ID:', studentId);
-        } else {
-          console.log('No separate student profile found, using user ID for both connections');
-          studentId = user.id;
-        }
-      } catch (error) {
-        console.log('Error fetching student profile, using user ID for both connections:', error);
-        studentId = user.id;
+      // Get the Student ID from User ID for student users
+      const studentId = await eightbaseService.getStudentIdFromUserId(user.id);
+      if (!studentId) {
+        console.error('No student record found for user:', user.id);
+        alert('Student profile not found. Please contact support.');
+        return;
       }
       
       const report = await eightbaseService.createWeeklyReport({
-        user_id: user.id,
-        student_id: studentId, // Use actual student profile ID if available
+        student_id: studentId,
         ...formData,
         net_profit: netProfit
       });

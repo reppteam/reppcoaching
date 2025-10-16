@@ -1,36 +1,8 @@
 import { setApolloClient } from './8baseService';
 import * as queries from '../graphql/operations';
 import { ApolloClient } from '@apollo/client';
+import type { GlobalVariables, Product, Subitem } from '../types';
 
-// Types for the profit calculator
-export interface GlobalVariables {
-  id: string;
-  user_id: string;
-  hourly_pay: number;
-  cost_per_photo: number;
-  target_profit_margin: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Product {
-  id: string;
-  user_id: string;
-  name: string;
-  price: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Subitem {
-  id: string;
-  product_id: string;
-  type: 'fixed' | 'photo' | 'labor';
-  label: string;
-  value: number;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface ProductWithCalculations extends Product {
   subitems: Subitem[];
@@ -42,6 +14,7 @@ export interface ProductWithCalculations extends Product {
 
 export class ProfitCalculatorService {
   private userId: string;
+  private studentId: string | null = null;
   private apolloClient: ApolloClient<any> | null = null;
 
   constructor(userId: string) {
@@ -50,6 +23,36 @@ export class ProfitCalculatorService {
 
   setApolloClient(client: ApolloClient<any>) {
     this.apolloClient = client;
+  }
+
+  // Convert User ID to Student ID
+  private async getStudentId(): Promise<string | null> {
+    if (this.studentId) {
+      return this.studentId;
+    }
+
+    if (!this.apolloClient) {
+      console.error('Apollo client not set');
+      return null;
+    }
+
+    try {
+      const data = await this.executeQuery(queries.GET_STUDENT_BY_USER_ID, { userId: this.userId });
+      console.log('🔍 ProfitCalculator - Student query response for user:', this.userId, data);
+      
+      if (data.studentsList?.items && data.studentsList.items.length > 0) {
+        const student = data.studentsList.items[0];
+        console.log('🔍 ProfitCalculator - Found student ID:', student.id, 'for user ID:', this.userId);
+        this.studentId = student.id;
+        return student.id;
+      }
+      
+      console.log('🔍 ProfitCalculator - No student found for user ID:', this.userId);
+      return null;
+    } catch (error) {
+      console.error('🔍 ProfitCalculator - Error getting student ID from user ID:', error);
+      return null;
+    }
   }
 
   private async executeQuery(query: any, variables?: any) {
@@ -91,8 +94,14 @@ export class ProfitCalculatorService {
   // Global Variables Management
   async getGlobalVariables(): Promise<GlobalVariables | null> {
     try {
+      const studentId = await this.getStudentId();
+      if (!studentId) {
+        console.error('No student record found for user:', this.userId);
+        return null;
+      }
+
       const data = await this.executeQuery(queries.GET_GLOBAL_VARIABLES_BY_FILTER, {
-        filter: { user: { id: { equals: this.userId } } }
+        filter: { student: { id: { equals: studentId } } }
       });
       
       if (data.globalVariablesList?.items && data.globalVariablesList.items.length > 0) {
@@ -107,12 +116,17 @@ export class ProfitCalculatorService {
 
   async createGlobalVariables(variables: Partial<GlobalVariables>): Promise<GlobalVariables> {
     try {
+      const studentId = await this.getStudentId();
+      if (!studentId) {
+        throw new Error('No student record found for user');
+      }
+
       const data = await this.executeMutation(queries.CREATE_GLOBAL_VARIABLES, {
         data: {
           hourly_pay: variables.hourly_pay || 50,
           cost_per_photo: variables.cost_per_photo || 1.25,
           target_profit_margin: variables.target_profit_margin || 40,
-          user: { connect: { id: this.userId } }
+          student: { connect: { id: studentId } }
         }
       });
       
@@ -149,8 +163,14 @@ export class ProfitCalculatorService {
   // Products Management
   async getProducts(): Promise<Product[]> {
     try {
+      const studentId = await this.getStudentId();
+      if (!studentId) {
+        console.error('No student record found for user:', this.userId);
+        return [];
+      }
+
       const data = await this.executeQuery(queries.GET_PRODUCTS_BY_FILTER, {
-        filter: { user: { id: { equals: this.userId } } }
+        filter: { student: { id: { equals: studentId } } }
       });
       
       if (data.productsList?.items) {
@@ -163,12 +183,17 @@ export class ProfitCalculatorService {
     }
   }
 
-  async createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'user_id'>, subitemId?: string): Promise<Product> {
+  async createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'student_id'>, subitemId?: string): Promise<Product> {
     try {
+      const studentId = await this.getStudentId();
+      if (!studentId) {
+        throw new Error('No student record found for user');
+      }
+
       const mutationData: any = {
         name: product.name,
         price: product.price,
-        user: { connect: { id: this.userId } }
+        student: { connect: { id: studentId } }
       };
 
       // Optionally connect a subitem if provided
@@ -388,7 +413,7 @@ export class ProfitCalculatorService {
   private transformGlobalVariables(data: any): GlobalVariables {
     return {
       id: data.id,
-      user_id: data.user?.id || this.userId,
+      student_id: data.student?.id || this.studentId || '',
       hourly_pay: data.hourly_pay || 50,
       cost_per_photo: data.cost_per_photo || 1.25,
       target_profit_margin: data.target_profit_margin || 40,
@@ -400,7 +425,7 @@ export class ProfitCalculatorService {
   private transformProduct(data: any): Product {
     return {
       id: data.id,
-      user_id: data.user?.id || this.userId,
+      student_id: data.student?.id || this.studentId || '',
       name: data.name,
       price: data.price,
       created_at: data.createdAt || new Date().toISOString(),

@@ -22,11 +22,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useAuth } from '../hooks/useAuth';
 import { useApolloClient } from '@apollo/client';
 import ProfitCalculatorService, { 
-  GlobalVariables, 
-  Product, 
-  Subitem, 
   ProductWithCalculations 
 } from '../services/profitCalculatorService';
+import type { GlobalVariables, Product, Subitem } from '../types';
 
 interface ProfitCalculatorProps {
   studentId?: string; // Optional prop to show specific student's calculator

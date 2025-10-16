@@ -431,7 +431,7 @@ export function CoachStudentEditProfile({ studentId, isOpen, onClose, activeTab 
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
         priority: priority as any,
         status: 'active',
-        user_id: student?.user?.id || studentId
+        student_id: studentId
       });
 
       // Refetch goals to get updated data

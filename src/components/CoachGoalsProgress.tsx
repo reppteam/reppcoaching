@@ -58,7 +58,7 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterStudent, setFilterStudent] = useState<string>('all');
   const [formData, setFormData] = useState({
-    user_id: '',
+    student_id: '',
     title: '',
     description: '',
     target_value: 0,
@@ -105,7 +105,7 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
                          (filterStatus === 'completed' && goal.status === 'completed') ||
                          (filterStatus === 'in_progress' && goal.status === 'active');
     
-    const matchesStudent = filterStudent === 'all' || goal.user_id === filterStudent;
+    const matchesStudent = filterStudent === 'all' || goal.student_id === filterStudent;
 
     return matchesSearch && matchesStatus && matchesStudent;
   });
@@ -172,13 +172,16 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
       if (editingGoal) {
         await eightbaseService.updateGoal(editingGoal, formData);
       } else {
-        await eightbaseService.createGoal(formData);
+        await eightbaseService.createGoal({
+          ...formData,
+          student_id: formData.student_id || user?.id || ''
+        });
       }
       
       setAddingGoal(false);
       setEditingGoal(null);
       setFormData({
-        user_id: '',
+        student_id: '',
         title: '',
         description: '',
         target_value: 0,
@@ -398,7 +401,7 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
                   </TableCell>
                   <TableCell>
                                          <div className="text-sm font-medium">
-                       {getStudentName(goal.user_id)}
+                        {getStudentName(goal.student_id)}
                      </div>
                   </TableCell>
                   <TableCell>
@@ -437,7 +440,7 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
                         size="sm"
                         onClick={() => {
                                                      setFormData({
-                             user_id: goal.user_id,
+                              student_id: goal.student_id,
                              title: goal.title,
                              description: goal.description,
                              target_value: goal.target_value,
@@ -474,7 +477,7 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
           setAddingGoal(false);
           setEditingGoal(null);
           setFormData({
-            user_id: '',
+            student_id: '',
             title: '',
             description: '',
             target_value: 0,
@@ -498,7 +501,7 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
           <form onSubmit={handleSubmit} className="space-y-4">
                          <div>
                <Label htmlFor="student">Student</Label>
-               <Select value={formData.user_id} onValueChange={(value) => setFormData({...formData, user_id: value})}>
+                <Select value={formData.student_id} onValueChange={(value) => setFormData({...formData, student_id: value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select student" />
                 </SelectTrigger>
@@ -620,7 +623,7 @@ export const CoachGoalsProgress: React.FC<CoachGoalsProgressProps> = ({ coachId 
             <div className="space-y-4">
                              <div>
                  <Label className="text-sm font-medium">Student</Label>
-                 <p>{getStudentName(viewingGoal.user_id)}</p>
+                  <p>{getStudentName(viewingGoal.student_id)}</p>
                </div>
               <div>
                 <Label className="text-sm font-medium">Description</Label>

@@ -34,6 +34,7 @@ export const Goals: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [addingGoal, setAddingGoal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<string | null>(null);
+  const [assignedStudents, setAssignedStudents] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -63,9 +64,24 @@ export const Goals: React.FC = () => {
   const loadGoals = async () => {
     try {
       setLoading(true);
-      const userId = user?.role === 'user' ? user.id : undefined;
-      const data = await eightbaseService.getGoals(userId);
-      setGoals(data);
+      
+      if (user?.role === 'user') {
+        // For students, load their own goals
+        const data = await eightbaseService.getGoals(user.id);
+        setGoals(data);
+      } else if (user?.role === 'coach' || user?.role === 'coach_manager') {
+        // For coaches and coach managers, load goals from assigned students
+        const [goalsData, studentsData] = await Promise.all([
+          eightbaseService.getGoalsByCoach(user.id),
+          eightbaseService.getAssignedStudents(user.id)
+        ]);
+        setGoals(goalsData);
+        setAssignedStudents(studentsData);
+      } else {
+        // For other roles, load all goals (admin view)
+        const data = await eightbaseService.getGoals();
+        setGoals(data);
+      }
     } catch (error) {
       console.error('Error loading goals:', error);
     } finally {
@@ -78,8 +94,16 @@ export const Goals: React.FC = () => {
     if (!user?.id) return;
 
     try {
+      // Get the Student ID from User ID for student users
+      const studentId = await eightbaseService.getStudentIdFromUserId(user.id);
+      if (!studentId) {
+        console.error('No student record found for user:', user.id);
+        alert('Student profile not found. Please contact support.');
+        return;
+      }
+
       const goal = await eightbaseService.createGoal({
-        user_id: user.id,
+        student_id: studentId,
         ...formData
       });
 
@@ -539,13 +563,18 @@ export const Goals: React.FC = () => {
           <Card key={goal.id} className="relative">
             <CardHeader>
               <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-2 text-black dark:text-white">
-                {getGoalIcon(goal.goal_type)}
-                <div>
-                  <CardTitle className="text-lg text-foreground">{goal.title}</CardTitle>
-                  <CardDescription className="text-muted-foreground">{goal.description}</CardDescription>
+                <div className="flex items-center gap-2 text-black dark:text-white">
+                  {getGoalIcon(goal.goal_type)}
+                  <div>
+                    <CardTitle className="text-lg text-foreground">{goal.title}</CardTitle>
+                    <CardDescription className="text-muted-foreground">{goal.description}</CardDescription>
+                    {(user?.role === 'coach' || user?.role === 'coach_manager') && goal.student_id && (
+                      <div className="text-xs text-blue-600 mt-1">
+                        Student: {assignedStudents.find(s => s.id === goal.student_id)?.firstName} {assignedStudents.find(s => s.id === goal.student_id)?.lastName || 'Unknown Student'}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
                 <div className="flex items-center gap-1">
                   {getStatusBadge(goal.status)}
                   <div className={`text-xs font-medium ${getPriorityColor(goal.priority)}`}>
@@ -578,7 +607,7 @@ export const Goals: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex items-center gap-2 text-black dark:text-white text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 <span>Due: {new Date(goal.deadline).toLocaleDateString()}</span>
               </div>

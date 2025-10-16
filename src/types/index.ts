@@ -57,7 +57,7 @@ export interface User {
 
 export interface WeeklyReport {
   id: string;
-  user_id: string;
+  student_id: string;
   start_date: string;
   end_date: string;
   new_clients: number;
@@ -100,7 +100,7 @@ export interface WeeklyReport {
 
 export interface Goal {
   id: string;
-  user_id: string;
+  student_id: string;
   title: string;
   description: string;
   target_value: number;
@@ -137,7 +137,7 @@ export interface CoachPricingItem {
 
 export interface Pricing {
   id: string;
-  user_id: string;
+  student_id: string;
   service_name: string;
   your_price: number;
   competitor_price: number;
@@ -151,7 +151,7 @@ export interface Pricing {
 // Enhanced Lead interface with email and phone fields
 export interface Lead {
   id: string;
-  user_id: string;
+  student_id: string;
   lead_name: string;
   email?: string;
   phone?: string;
@@ -219,7 +219,7 @@ export interface Note {
   title: string;
   target_type: string;
   target_id: string;
-  user_id: string;
+  student_id: string;
   content: string;
   visibility: 'public' | 'private';
   created_at: string;
@@ -300,7 +300,7 @@ export interface TemplateVariationSet {
 
 export interface StudentProfile {
   id: string;
-  user_id: string;
+  student_id: string;
   business_name?: string;
   location?: string;
   target_market?: string;
@@ -348,7 +348,7 @@ export interface CallLog {
 // Profit Margin Calculator Types
 export interface GlobalVariables {
   id: string;
-  user_id: string;
+  student_id: string;
   hourly_pay: number;
   cost_per_photo: number;
   target_profit_margin: number; // Percentage (e.g., 40 for 40%)
@@ -358,7 +358,7 @@ export interface GlobalVariables {
 
 export interface Product {
   id: string;
-  user_id?: string;
+  student_id?: string;
   name: string;
   price: number;
   created_at: string;
@@ -498,4 +498,39 @@ export interface StudentActivitySummary {
   performance_score: number; // 0-100 based on benchmarks
   status: 'excellent' | 'good' | 'needs_attention' | 'inactive';
   alerts: string[]; // Performance alerts
+}
+
+// Notification Types for Personalized Coach Messages
+export interface PersonalizedNotification {
+  id: string;
+  studentId: string;
+  coachId: string;
+  title: string;
+  message: string;
+  type: 'COACH_MESSAGE' | 'NO_REPORT_7_DAYS' | 'NO_LEADS_7_DAYS' | 'NO_COACH_CALL_14_DAYS' | 'STAY_FOCUSED';
+  priority: 'high' | 'medium' | 'low';
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+  student?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  coach?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
+export interface CreatePersonalizedNotificationInput {
+  studentId: string;
+  coachId: string;
+  title: string;
+  message: string;
+  type: 'COACH_MESSAGE';
+  priority: 'high' | 'medium' | 'low';
 }

@@ -1565,12 +1565,6 @@ export const GET_WEEKLY_REPORTS_BY_FILTER = gql`
           lastName
           email
         }
-        weekly_Report {
-          id
-          firstName
-          lastName
-          email
-        }
         _description
         __typename
       }
@@ -1594,11 +1588,6 @@ export const CREATE_WEEKLY_REPORT = gql`
       editing_cost
       net_profit
       status
-      weekly_Report {
-        id
-        _description
-        __typename
-      }
       student {
         id
         _description
@@ -1843,11 +1832,6 @@ export const CREATE_GOAL = gql`
         _description
         __typename
       }
-      goal {
-        id
-        _description
-        __typename
-      }
       _description
       __typename
     }
@@ -1876,11 +1860,6 @@ export const UPDATE_GOAL = gql`
         actual_revenue
         aov
         student {
-          id
-          _description
-          __typename
-        }
-        goal {
           id
           _description
           __typename
@@ -2132,7 +2111,7 @@ export const GET_LEADS_BY_FILTER = gql`
         date_of_last_followup
         next_followup_date
         status
-        user {
+        student {
           id
           email
           firstName
@@ -2167,8 +2146,8 @@ export const GET_LEADS_BY_FILTER = gql`
 `;
 
 export const GET_STUDENT_LEADS = gql`
-  query GetStudentLeads($userId: ID!) {
-    leadsList(filter: { user: { id: { equals: $userId } } }) {
+  query GetStudentLeads($studentId: ID!) {
+    leadsList(filter: { student: { id: { equals: $studentId } } }) {
       items {
         id
         lead_name
@@ -2182,7 +2161,7 @@ export const GET_STUDENT_LEADS = gql`
         date_of_last_followup
         next_followup_date
         status
-        user {
+        student {
           id
           email
           firstName
@@ -2786,7 +2765,7 @@ export const GET_GLOBAL_VARIABLES_BY_FILTER = gql`
         hourly_pay
         cost_per_photo
         target_profit_margin
-        user {
+        student {
           id
           email
           firstName
@@ -3188,6 +3167,46 @@ export const GET_USER_ACTIVITY_LOG = gql`
         totalActivities
         activityTypes
         lastActivity
+      }
+    }
+  }
+`;
+
+// ============================================================================
+// COACH QUERIES
+// ============================================================================
+
+export const GET_COACH_BY_ID = gql`
+  query GetCoachById($id: ID!) {
+    coach(id: $id) {
+      id
+      firstName
+      lastName
+      email
+      user {
+        id
+        firstName
+        lastName
+        email
+      }
+    }
+  }
+`;
+
+export const GET_STUDENTS_BY_COACH = gql`
+  query GetStudentsByCoach($coachId: ID!) {
+    studentsList(filter: { coach: { id: { equals: $coachId } } }) {
+      items {
+        id
+        firstName
+        lastName
+        email
+        has_paid
+        coach {
+          id
+          firstName
+          lastName
+        }
       }
     }
   }

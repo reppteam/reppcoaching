@@ -122,7 +122,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
       const note = await eightbaseService.createNote({
         target_type: formData.target_type,
         target_id: formData.target_id, // This should be the student table ID
-        user_id: coachTableId, // This should be the coach table ID
+        student_id: coachTableId, // This should be the coach table ID
         title: formData.title,
         content: formData.content,
         visibility: formData.visibility,
@@ -195,7 +195,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
 
   const getStudentName = (targetId: string) => {
     const student = assignedStudents.find((s: any) => s.id === targetId);
-    return student ? `${student.user?.firstName || student.firstName} ${student.user?.lastName || student.lastName}` : 'Unknown Student';
+    return student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
   };
 
   if (loading) {
@@ -260,7 +260,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                       <SelectContent>
                         {assignedStudents.map((student: any) => (
                           <SelectItem key={student.id} value={student.id}>
-                            {student.user?.firstName || student.firstName} {student.user?.lastName || student.lastName}
+                            {student.firstName} {student.lastName}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -504,7 +504,7 @@ export const CoachNotes: React.FC<CoachNotesProps> = ({ coachId }) => {
                   <SelectContent>
                     {assignedStudents.map((student: any) => (
                       <SelectItem key={student.id} value={student.id}>
-                        {student.user?.firstName || student.firstName} {student.user?.lastName || student.lastName}
+                        {student.firstName} {student.lastName}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -72,6 +72,8 @@ import {
   Crown,
   ShieldCheck,
   Users2,
+  Bell,
+  Send,
 } from "lucide-react";
 import { UserActions } from "./UserActions";
 import { CoachStudentEditProfile } from "./CoachStudentEditProfile";
@@ -237,6 +239,16 @@ export function UserManagement() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState({ title: "", content: "" });
   const [addingNote, setAddingNote] = useState(false);
+
+  // Notification state for coaches
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [notificationForm, setNotificationForm] = useState({
+    studentId: '',
+    title: '',
+    message: '',
+    priority: 'medium' as 'high' | 'medium' | 'low'
+  });
+  const [sendingNotification, setSendingNotification] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -944,7 +956,7 @@ export function UserManagement() {
         content: newNote.content.trim(),
         target_type: 'student',
         target_id: editingUser.id,
-        user_id: user?.id || '',
+        student_id: user?.id || '',
         visibility: 'private' as const,
         created_by: user?.id || '',
         created_by_name: `${user?.firstName} ${user?.lastName}`,
@@ -962,6 +974,107 @@ export function UserManagement() {
       console.error('Failed to add note:', error);
       alert('Failed to add note. Please try again.');
     }
+  };
+
+  // Notification functions for coaches
+  const handleSendNotification = async () => {
+    // Enhanced validation
+    if (!notificationForm.studentId) {
+      alert('Please select a student to send the message to.');
+      return;
+    }
+
+    if (!notificationForm.title.trim()) {
+      alert('Please enter a title for your message.');
+      return;
+    }
+
+    if (!notificationForm.message.trim()) {
+      alert('Please enter a message to send to the student.');
+      return;
+    }
+
+    if (notificationForm.message.trim().length < 10) {
+      alert('Message must be at least 10 characters long.');
+      return;
+    }
+
+    if (notificationForm.message.trim().length > 500) {
+      alert('Message cannot exceed 500 characters.');
+      return;
+    }
+
+    if (!user?.id) {
+      alert('Coach information not found. Please refresh the page and try again.');
+      return;
+    }
+
+    try {
+      setSendingNotification(true);
+      
+      // Verify coach-student relationship first
+      const student = students.find(s => s.id === notificationForm.studentId);
+      if (!student) {
+        alert('You can only send messages to your assigned students.');
+        return;
+      }
+
+      // In UserManagement, the studentId is already the Student table ID
+      // No need to convert from User ID to Student ID
+      const studentId = notificationForm.studentId;
+
+      // Create the notification
+      console.log('🚀 Creating personalized notification:', {
+        studentId: studentId,
+        title: notificationForm.title.trim(),
+        message: notificationForm.message.trim(),
+        priority: notificationForm.priority,
+        type: 'COACH_MESSAGE',
+        coachId: user.id
+      });
+
+      const notification = await eightbaseService.createPersonalizedNotification({
+        studentId: studentId,
+        title: notificationForm.title.trim(),
+        message: notificationForm.message.trim(),
+        priority: notificationForm.priority,
+        type: 'COACH_MESSAGE',
+        coachId: user.id
+      });
+
+      console.log('✅ Notification created successfully:', notification);
+
+      // Reset form and close modal
+      setNotificationForm({
+        studentId: '',
+        title: '',
+        message: '',
+        priority: 'medium'
+      });
+      setShowNotificationModal(false);
+      
+      // Show success message
+      alert(`Message sent successfully to ${student.firstName} ${student.lastName}!`);
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      if (error instanceof Error) {
+        alert(`Failed to send notification: ${error.message}`);
+      } else {
+        alert('Failed to send notification. Please try again.');
+      }
+    } finally {
+      setSendingNotification(false);
+    }
+  };
+
+  const openNotificationModal = (student: StudentData) => {
+    setNotificationForm({
+      studentId: student.id,
+      title: `Message from ${user?.firstName} ${user?.lastName}`,
+      message: '',
+      priority: 'medium'
+    });
+    setShowNotificationModal(true);
   };
 
   const openDeleteConfirm = (userToDelete: any) => {
@@ -1084,26 +1197,10 @@ export function UserManagement() {
 
   // Debug logging for coach lookup
   if (user && (user as any).role === "coach") {
-    console.log("=== COACH LOOKUP DEBUG ===");
-    console.log("Current user:", user);
-    console.log("All coaches:", coaches);
-    console.log("Current user coach record:", currentUserCoachRecord);
-    console.log("Looking for coach with ID:", user?.id, "or email:", user?.email);
-    console.log("Coach matching logic:");
     coaches.forEach(c => {
       const matchesUserId = c.users?.id === user?.id;
       const matchesEmail = c.email === user?.email;
       const matchesId = c.id === user?.id;
-      console.log(`Coach ${c.id}:`, {
-        coachId: c.id,
-        coachEmail: c.email,
-        matchesUserId,
-        matchesEmail,
-        matchesId,
-        hasUsers: !!c.users,
-        usersId: c.users?.id,
-        usersEmail: c.users?.email
-      });
     });
   }
 
@@ -1143,24 +1240,7 @@ export function UserManagement() {
     );
 
     // Debug assigned students filtering
-    console.log("=== ASSIGNED STUDENTS FILTERING DEBUG ===");
-    console.log("Current user coach record:", currentUserCoachRecord);
-    console.log("Current user coach record ID:", currentUserCoachRecord?.id);
-    console.log("Total students:", students.length);
-    console.log("Students with coach data:");
-    students.forEach(student => {
-      console.log(`Student ${student.id} (${student.firstName} ${student.lastName}):`, {
-        studentCoachId: student.coach?.id,
-        studentCoachName: student.coach?.firstName,
-        matches: student.coach?.id === currentUserCoachRecord?.id
-      });
-    });
-    console.log("Assigned students count:", assignedStudents.length);
-    console.log("Assigned students:", assignedStudents.map(s => ({
-      id: s.id,
-      name: `${s.firstName} ${s.lastName}`,
-      email: s.email || s.user?.email
-    })));
+  
 
 
     return (
@@ -1205,13 +1285,22 @@ export function UserManagement() {
                         {student.firstName} {student.lastName}
                       </div>
                       <div className="text-sm text-muted-foreground truncate">
-                        {student.email || student.user?.email || "No email"}
+                        {student.email || "No email"}
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
                         Coach: {student.coach?.firstName || "Unassigned"}{student.coach?.lastName || "Unassigned"}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openNotificationModal(student)}
+                        className="h-8 px-3"
+                      >
+                        <Bell className="h-4 w-4 mr-1" />
+                        Send Message
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -1539,6 +1628,148 @@ export function UserManagement() {
             )}
           </DialogContent>
         </Dialog>
+
+        <Dialog open={showNotificationModal} onOpenChange={setShowNotificationModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Bell className="h-5 w-5 text-blue-600" />
+              Send Message to Student
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Send a personalized notification to your assigned student. The message will appear in their notification list and dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Student Selection */}
+            <div>
+              <Label htmlFor="student-select" className="text-sm font-medium">Student *</Label>
+              <Select 
+                value={notificationForm.studentId} 
+                onValueChange={(value) => setNotificationForm({...notificationForm, studentId: value})}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a student to send message to" />
+                </SelectTrigger>
+                <SelectContent>
+                  {students
+                    .filter(student => 
+                      currentUserCoachRecord && 
+                      student.coach?.id === currentUserCoachRecord.id
+                    )
+                    .map((student) => (
+                    <SelectItem key={student.id} value={student.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{student.firstName} {student.lastName}</span>
+                        <span className="text-xs text-muted-foreground">{student.email}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Only your assigned students are shown</p>
+            </div>
+
+            {/* Title */}
+            <div>
+              <Label htmlFor="notification-title" className="text-sm font-medium">Title *</Label>
+              <Input
+                id="notification-title"
+                value={notificationForm.title}
+                onChange={(e) => setNotificationForm({...notificationForm, title: e.target.value})}
+                placeholder="e.g., Weekly Check-in, Important Update, etc."
+                className="bg-background border-border text-foreground mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">A clear, descriptive title for your message</p>
+            </div>
+
+            {/* Message */}
+            <div>
+              <Label htmlFor="notification-message" className="text-sm font-medium">Message *</Label>
+              <textarea
+                id="notification-message"
+                value={notificationForm.message}
+                onChange={(e) => setNotificationForm({...notificationForm, message: e.target.value})}
+                placeholder="Write your personalized message to the student. Be encouraging and specific about what you'd like them to focus on..."
+                className="w-full min-h-[120px] p-3 border border-border rounded-md bg-background text-foreground placeholder:text-muted-foreground resize-none mt-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                maxLength={500}
+              />
+              <div className={`text-xs mt-1 ${notificationForm.message.length > 500 ? 'text-red-500' : notificationForm.message.length < 10 ? 'text-orange-500' : 'text-muted-foreground'}`}>
+                {notificationForm.message.length}/500 characters
+                {notificationForm.message.length < 10 && notificationForm.message.length > 0 && (
+                  <span className="ml-2">(Minimum 10 characters required)</span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">This message will be delivered instantly to the student's notification center</p>
+            </div>
+
+            {/* Priority */}
+            <div>
+              <Label htmlFor="notification-priority" className="text-sm font-medium">Priority</Label>
+              <Select 
+                value={notificationForm.priority} 
+                onValueChange={(value: 'high' | 'medium' | 'low') => setNotificationForm({...notificationForm, priority: value})}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span>Low - General information</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="medium">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                      <span>Medium - Important update</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="high">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                      <span>High - Urgent attention needed</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Higher priority messages will be more prominent in the student's notification list</p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-6 border-t border-border">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowNotificationModal(false)}
+                disabled={sendingNotification}
+                className="px-6"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSendNotification}
+                disabled={sendingNotification || !notificationForm.studentId || !notificationForm.title.trim() || !notificationForm.message.trim() || notificationForm.message.trim().length < 10}
+                className="bg-blue-600 hover:bg-blue-700 px-6"
+              >
+                {sendingNotification ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Send Message
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
     );
   }
@@ -1722,6 +1953,11 @@ export function UserManagement() {
                               {coach.firstName} {coach.lastName}
                             </SelectItem>
                           ))}
+                          {coachManagers.map((coachManager) => (
+                            <SelectItem key={coachManager.id} value={coachManager.id}>
+                              {coachManager.firstName} {coachManager.lastName} (Manager)
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1787,7 +2023,7 @@ export function UserManagement() {
           )}
 
           {/* Create Test Students Button - Super Admin Only */}
-          {user?.role === "super_admin" && (
+          {/* {user?.role === "super_admin" && (
             <Button
               variant="outline"
               onClick={handleCreateTestStudents}
@@ -1796,7 +2032,7 @@ export function UserManagement() {
               <GraduationCap className="h-4 w-4 mr-2" />
               {testStudentLoading ? "Creating..." : "Create Test Students"}
             </Button>
-          )}
+          )} */}
 
           {/* Legacy Add User Modal (keeping for compatibility) */}
           {/* {(user?.role === 'super_admin' || user?.role === 'coach_manager') && (
@@ -2841,7 +3077,7 @@ export function UserManagement() {
                   <Input
                     id="edit-email"
                     type="email"
-                      value={editingUser.email || (editingUser as StudentData).user?.email || ""}
+                      value={editingUser.email || ""}
                       onChange={(e) =>
                         setEditingUser({ ...editingUser, email: e.target.value })
                       }
@@ -2915,6 +3151,8 @@ export function UserManagement() {
                           } else {
                             const selectedCoach = coaches.find(
                               (c) => c.id === value
+                            ) || coachManagers.find(
+                              (cm) => cm.id === value
                             );
                             setEditingUser({
                               ...editingUser,
@@ -2940,6 +3178,11 @@ export function UserManagement() {
                           {coaches.map((coach) => (
                             <SelectItem key={coach.id} value={coach.id}>
                               {coach.firstName} {coach.lastName}
+                            </SelectItem>
+                          ))}
+                          {coachManagers.map((coachManager) => (
+                            <SelectItem key={coachManager.id} value={coachManager.id}>
+                              {coachManager.firstName} {coachManager.lastName} (Manager)
                             </SelectItem>
                           ))}
                         </SelectContent>

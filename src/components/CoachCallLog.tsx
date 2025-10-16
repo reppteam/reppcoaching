@@ -206,7 +206,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
   };
 
   const filteredCallLogs = callLogs.filter(call => {
-    const matchesStudent = filterStudent === 'all' || call.student_id === filterStudent;
+    const matchesStudent = filterStudent === 'all' || call.student?.id === filterStudent;
     const matchesType = filterType === 'all' || call.call_type === filterType;
     return matchesStudent && matchesType;
   });
@@ -261,7 +261,7 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
                       <SelectContent>
                         {assignedStudents.map((student) => (
                           <SelectItem key={student.id} value={student.id}>
-                            {student.user?.firstName || student.firstName} {student.user?.lastName || student.lastName}
+                            {student.firstName} {student.lastName}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -395,11 +395,20 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Students</SelectItem>
-                {assignedStudents.map((student) => (
-                  <SelectItem key={student.id} value={student.id}>
-                    {student.firstName} {student.lastName}
-                  </SelectItem>
-                ))}
+                {callLogs
+                  .filter(call => call.student) // Only include calls with student data
+                  .reduce((unique, call) => {
+                    // Get unique students from call logs
+                    if (!unique.find(s => s.id === call.student?.id)) {
+                      unique.push(call.student!);
+                    }
+                    return unique;
+                  }, [] as any[])
+                  .map((student) => (
+                    <SelectItem key={student.id} value={student.id}>
+                      {student.firstName} {student.lastName}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             <Select value={filterType} onValueChange={setFilterType}>
@@ -440,7 +449,8 @@ export const CoachCallLog: React.FC<CoachCallLogProps> = ({ coachId }) => {
             </TableHeader>
             <TableBody>
               {filteredCallLogs.map((call) => {
-                const student = assignedStudents.find(s => s.id === call.student_id);
+                // Use the student data that's already included in the call log
+                const student = call.student;
                 
                 return (
                   <TableRow key={call.id}>

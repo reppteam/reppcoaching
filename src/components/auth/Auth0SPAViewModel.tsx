@@ -15,7 +15,6 @@ export const Auth0SPAViewModel: React.FC<Auth0SPAViewModelProps> = ({ children }
         redirect_uri: `${window.location.origin}/auth/callback`,
       }}
       onRedirectCallback={(appState) => {
-        console.log('Auth0 Redirect Callback:', appState);
         // Handle redirect after successful authentication
         if (appState?.returnTo) {
           window.history.replaceState(

@@ -9,9 +9,9 @@ import { gql } from '@apollo/client';
 // ============================================================================
 
 export const GET_USER_NOTIFICATIONS = gql`
-  query GetUserNotifications($userId: ID!) {
+  query GetUserNotifications($studentId: ID!) {
     notificationsList(
-      filter: { user: { id: { equals: $userId } } }
+      filter: { student: { id: { equals: $studentId } } }
       sort: { createdAt: DESC }
     ) {
       items {
@@ -66,9 +66,9 @@ export const DELETE_NOTIFICATION = gql`
 `;
 
 export const BULK_MARK_NOTIFICATIONS_READ = gql`
-  mutation BulkMarkNotificationsRead($userId: ID!) {
+  mutation BulkMarkNotificationsRead($studentId: ID!) {
     notificationUpdateByFilter(
-      filter: { user: { id: { equals: $userId } }, isRead: { equals: false } }
+      filter: { student: { id: { equals: $studentId } }, isRead: { equals: false } }
       data: { isRead: true }
     ) {
       items {
@@ -84,9 +84,9 @@ export const BULK_MARK_NOTIFICATIONS_READ = gql`
 // ============================================================================
 
 export const GET_USER_ACTIVITY_LOGS = gql`
-  query GetUserActivityLogs($userId: ID!, $limit: Int) {
+  query GetUserActivityLogs($studentId: ID!, $limit: Int) {
     activityLogsList(
-      filter: { user: { id: { equals: $userId } } }
+      filter: { student: { id: { equals: $studentId } } }
       sort: { createdAt: DESC }
       first: $limit
     ) {
@@ -114,10 +114,10 @@ export const CREATE_ACTIVITY_LOG = gql`
 `;
 
 export const GET_ACTIVITY_SUMMARY = gql`
-  query GetActivitySummary($userId: ID!, $startDate: DateTime, $endDate: DateTime) {
+  query GetActivitySummary($studentId: ID!, $startDate: DateTime, $endDate: DateTime) {
     activityLogsList(
       filter: {
-        user: { id: { equals: $userId } }
+        student: { id: { equals: $studentId } }
         createdAt: { gte: $startDate, lte: $endDate }
       }
     ) {
@@ -136,10 +136,10 @@ export const GET_ACTIVITY_SUMMARY = gql`
 // ============================================================================
 
 export const GET_DASHBOARD_METRICS = gql`
-  query GetDashboardMetrics($userId: ID!) {
+  query GetDashboardMetrics($studentId: ID!) {
     # Weekly Reports
     weeklyReportsList(
-      filter: { weekly_Report: { id: { equals: $userId } } }
+      filter: { student: { id: { equals: $studentId } } }
       sort: { createdAt: DESC }
     ) {
       items {
@@ -154,7 +154,7 @@ export const GET_DASHBOARD_METRICS = gql`
 
     # Leads
     leadsList(
-      filter: { user: { id: { equals: $userId } } }
+      filter: { student: { id: { equals: $studentId } } }
       sort: { createdAt: DESC }
     ) {
       items {
@@ -167,7 +167,7 @@ export const GET_DASHBOARD_METRICS = gql`
 
     # Goals
     goalsList(
-      filter: { student: { id: { equals: $userId } } }
+      filter: { student: { id: { equals: $studentId } } }
       sort: { createdAt: DESC }
     ) {
       items {
@@ -183,10 +183,10 @@ export const GET_DASHBOARD_METRICS = gql`
 `;
 
 export const GET_WEEKLY_ACTIVITY_SUMMARY = gql`
-  query GetWeeklyActivitySummary($userId: ID!, $weekStart: DateTime!) {
+  query GetWeeklyActivitySummary($studentId: ID!, $weekStart: DateTime!) {
     weeklyReportsList(
       filter: {
-        weekly_Report: { id: { equals: $userId } }
+        student: { id: { equals: $studentId } }
         createdAt: { gte: $weekStart }
       }
     ) {
@@ -200,7 +200,7 @@ export const GET_WEEKLY_ACTIVITY_SUMMARY = gql`
 
     leadsList(
       filter: {
-        user: { id: { equals: $userId } }
+        student: { id: { equals: $studentId } }
         createdAt: { gte: $weekStart }
       }
     ) {
@@ -209,7 +209,7 @@ export const GET_WEEKLY_ACTIVITY_SUMMARY = gql`
 
     activityLogsList(
       filter: {
-        user: { id: { equals: $userId } }
+        student: { id: { equals: $studentId } }
         createdAt: { gte: $weekStart }
       }
     ) {
@@ -283,6 +283,66 @@ export const UPDATE_NOTIFICATION_PREFERENCES = gql`
       leadReminders
       weeklyDigest
       reminderThreshold
+    }
+  }
+`;
+
+// ============================================================================
+// PERSONALIZED COACH NOTIFICATIONS
+// ============================================================================
+
+export const CREATE_PERSONALIZED_NOTIFICATION = gql`
+  mutation CreatePersonalizedNotification($data: NotificationCreateInput!) {
+    notificationCreate(data: $data) {
+      id
+      type
+      title
+      message
+      priority
+      isRead
+      createdAt
+      updatedAt
+      student {
+        id
+        firstName
+        lastName
+        email
+      }
+      coach {
+        id
+        firstName
+        lastName
+        email
+      }
+    }
+  }
+`;
+
+export const GET_COACH_NOTIFICATIONS = gql`
+  query GetCoachNotifications($coachId: ID!) {
+    notificationsList(
+      filter: { 
+        coach: { id: { equals: $coachId } }
+        type: { equals: "COACH_MESSAGE" }
+      }
+      sort: { createdAt: DESC }
+    ) {
+      items {
+        id
+        type
+        title
+        message
+        priority
+        isRead
+        createdAt
+        updatedAt
+        student {
+          id
+          firstName
+          lastName
+          email
+        }
+      }
     }
   }
 `;

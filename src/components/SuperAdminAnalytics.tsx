@@ -126,16 +126,16 @@ export function SuperAdminAnalytics() {
     const freeStudents = students.filter(s => !s.has_paid);
     const totalRevenue = reports.reduce((sum, report) => sum + report.revenue, 0);
     const activeStudents = students.filter(student => {
-      const hasRecentReport = reports.some(r => r.user_id === student.id);
-      const hasRecentActivity = leads.some(l => l.user_id === student.id);
+      const hasRecentReport = reports.some(r => r.student_id === student.id);
+      const hasRecentActivity = leads.some(l => l.student_id === student.id);
       return hasRecentReport || hasRecentActivity;
     }).length;
 
     // Calculate top performing coaches
     const coachPerformance = coaches.map(coach => {
       const coachStudents = students.filter(s => s.assigned_admin_id === coach.id);
-      const coachReports = reports.filter(r => coachStudents.some(s => s.id === r.user_id));
-      const coachLeads = leads.filter(l => coachStudents.some(s => s.id === l.user_id));
+      const coachReports = reports.filter(r => coachStudents.some(s => s.id === r.student_id));
+      const coachLeads = leads.filter(l => coachStudents.some(s => s.id === l.student_id));
       const coachRevenue = coachReports.reduce((sum, r) => sum + r.revenue, 0);
       const conversionRate = coachLeads.length > 0 ? 
         (coachLeads.filter(l => l.status === 'converted').length / coachLeads.length) * 100 : 0;
@@ -152,9 +152,9 @@ export function SuperAdminAnalytics() {
 
     // Calculate top performing students
     const studentPerformance = students.map(student => {
-      const studentReports = reports.filter(r => r.user_id === student.id);
-      const studentLeads = leads.filter(l => l.user_id === student.id);
-      const studentGoals = goals.filter(g => g.user_id === student.id);
+      const studentReports = reports.filter(r => r.student_id === student.id);
+      const studentLeads = leads.filter(l => l.student_id === student.id);
+      const studentGoals = goals.filter(g => g.student_id === student.id);
       const studentRevenue = studentReports.reduce((sum, r) => sum + r.revenue, 0);
 
       return {

@@ -67,9 +67,17 @@ export function Pricing() {
         const updated = await eightbaseService.updatePricing(editingId, packageFormData);
         console.log('Updated pricing:', updated);
       } else {
+        // Get the Student ID from User ID for student users
+        const studentId = await eightbaseService.getStudentIdFromUserId(user.id);
+        if (!studentId) {
+          console.error('No student record found for user:', user.id);
+          alert('Student profile not found. Please contact support.');
+          return;
+        }
+
         const newPricing = await eightbaseService.createPricing({
           ...packageFormData,
-          user_id: user.id
+          student_id: studentId
         });
         console.log('Created pricing:', newPricing);
       }

@@ -18,20 +18,29 @@ export interface Notification {
 export class NotificationService {
 
   /**
-   * Get notifications from database (created by automated task)
+   * Get notifications from database (created by automated task and personalized coach messages)
    */
   async getStoredNotifications(userId: string): Promise<Notification[]> {
     try {
+      // Convert User ID to Student ID
+      const studentId = await eightbaseService.getStudentIdFromUserId(userId);
+      if (!studentId) {
+        console.error('No student record found for user:', userId);
+        return [];
+      }
+
+      console.log('🔍 Notifications - Using Student ID:', studentId, 'for User ID:', userId);
+
       const { data } = await client.query({
         query: gql`
-          query GetUserNotifications($userId: ID!) {
+          query GetUserNotifications($studentId: ID!) {
             notificationsList(
               filter: { 
-                user: { id: { equals: $userId } }
+                student: { id: { equals: $studentId } }
                 isRead: { equals: false }
               }
               sort: { createdAt: DESC }
-              first: 10
+              first: 20
             ) {
               items {
                 id
@@ -42,11 +51,17 @@ export class NotificationService {
                 isRead
                 priority
                 createdAt
+                coach {
+                  id
+                  firstName
+                  lastName
+                  email
+                }
               }
             }
           }
         `,
-        variables: { userId },
+        variables: { studentId: studentId },
       });
 
       return data?.notificationsList?.items?.map((n: any) => ({
@@ -54,7 +69,7 @@ export class NotificationService {
         type: this.mapTypeToNotificationType(n.type),
         title: n.title,
         message: n.message,
-        actionText: 'Take Action',
+        actionText: n.type === 'COACH_MESSAGE' ? 'View Message' : 'Take Action',
         actionLink: n.actionLink,
         createdAt: new Date(n.createdAt),
         isRead: n.isRead,
@@ -99,6 +114,8 @@ export class NotificationService {
       case 'NO_COACH_CALL_14_DAYS':
       case 'STAY_FOCUSED':
         return 'info';
+      case 'COACH_MESSAGE':
+        return 'info';
       default:
         return 'info';
     }
@@ -125,7 +142,7 @@ export class NotificationService {
    * Get dashboard stats - simplified version without database queries
    * Returns default stats since we removed the complex data fetching
    */
-  async getDashboardStats(userId: string): Promise<{
+  async getDashboardStats(studentId: string): Promise<{
     totalReports: number;
     totalLeads: number;
     reportsThisWeek: number;

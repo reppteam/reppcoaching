@@ -250,9 +250,22 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
     if (!targetUserId || !formData.lead_name) return;
 
     try {
+      // Get the Student ID from User ID for student users
+      let actualStudentId = targetUserId;
+      if (!isCoachView && user?.id) {
+        const studentIdFromUser = await eightbaseService.getStudentIdFromUserId(user.id);
+        if (studentIdFromUser) {
+          actualStudentId = studentIdFromUser;
+        } else {
+          console.error('No student record found for user:', user.id);
+          alert('Student profile not found. Please contact support.');
+          return;
+        }
+      }
+
       const leadData = {
         ...formData,
-        user_id: targetUserId,
+        student_id: actualStudentId,
         engagementTag: formData.engagementTag || [],
       } as Omit<Lead, 'id' | 'created_at' | 'updated_at'>;
 
@@ -497,10 +510,23 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
           return;
         }
 
+        // Get the Student ID from User ID for student users
+        let actualStudentId = targetUserId;
+        if (!isCoachView && user?.id) {
+          const studentIdFromUser = await eightbaseService.getStudentIdFromUserId(user.id);
+          if (studentIdFromUser) {
+            actualStudentId = studentIdFromUser;
+          } else {
+            console.error('No student record found for user:', user.id);
+            alert('Student profile not found. Please contact support.');
+            return;
+          }
+        }
+
         const leadsToCreate: Omit<Lead, 'id' | 'created_at' | 'updated_at'>[] = importedLeads
           .filter(leadData => leadData.name || leadData.lead_name) // Only include leads with names
           .map(leadData => ({
-            user_id: targetUserId,
+            student_id: actualStudentId,
             lead_name: leadData.name || leadData.lead_name || '',
             email: leadData.email || '',
             phone: leadData.phone || '',

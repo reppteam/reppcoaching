@@ -46,20 +46,6 @@ export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [coachTableId, setCoachTableId] = useState<string>('');
 
-  // Helper function to determine if KPI tab should be shown
-  const shouldShowKPITab = (user: any) => {
-    // Show KPI for coach_manager and super_admin roles
-    // Hide KPI for coach role only
-    return user?.role === 'coach_manager' || user?.role === 'super_admin';
-  };
-
-  // Reset active tab if user doesn't have permission for KPIs
-  useEffect(() => {
-    if (activeTab === 'kpis' && !shouldShowKPITab(authState?.user)) {
-      setActiveTab('overview');
-    }
-  }, [activeTab, authState?.user]);
-
   // Call log state
   const [callLogDialogOpen, setCallLogDialogOpen] = useState(false);
   const [callLogForm, setCallLogForm] = useState({
@@ -83,34 +69,50 @@ export function AdminDashboard() {
     visibility: 'public'
   });
 
+  // Helper function to determine if KPI tab should be shown
+  const shouldShowKPITab = (user: any) => {
+    // Show KPI for super_admin role only (admin dashboard)
+    return user?.role === 'super_admin';
+  };
+
+  // Reset active tab if user doesn't have permission for KPIs
+  useEffect(() => {
+    if (activeTab === 'kpis' && !shouldShowKPITab(authState?.user)) {
+      setActiveTab('overview');
+    }
+  }, [activeTab, authState?.user]);
+
   useEffect(() => {
     if (authState.user) {
       loadData();
     }
   }, [authState.user]);
 
+  // Only show for admin roles
+  if (!authState?.user || (authState.user.role !== 'super_admin')) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Shield className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Access Denied</h2>
+          <p className="text-gray-600 dark:text-gray-400">This dashboard is only available for administrators.</p>
+        </div>
+      </div>
+    );
+  }
+
   const loadData = async () => {
     if (!authState.user) return;
     
     setLoading(true);
     try {
-      // Get coach table ID if user is a coach or coach manager
-      if (authState.user.role === 'coach' || authState.user.role === 'coach_manager') {
-        try {
-          const coachTableId = await eightbaseService.getCoachRecordIdByUserId(authState.user.id);
-          setCoachTableId(coachTableId || '');
-          console.log('AdminDashboard - Coach table ID for note creation:', coachTableId);
-        } catch (error) {
-          console.error('Error getting coach record ID:', error);
-        }
-      }
-      
+      // Admin dashboard loads all data (not filtered by coach)
       const [usersData, reportsData, goalsData, leadsData, callLogsData, studentsData] = await Promise.all([
         eightbaseService.getAllUsersWithDetails(),
-        eightbaseService.getWeeklyReportsByCoach(authState.user.id),
-        eightbaseService.getGoalsByCoach(authState.user.id),
-        eightbaseService.getLeadsByCoach(authState.user.id),
-        eightbaseService.getCallLogs(undefined, authState.user.id),
+        eightbaseService.getWeeklyReports(), // All reports, not filtered by coach
+        eightbaseService.getGoals(), // All goals, not filtered by coach
+        eightbaseService.getLeads(), // All leads, not filtered by coach
+        eightbaseService.getCallLogs(), // All call logs, not filtered by coach
         eightbaseService.getAllStudents()
       ]);
       
@@ -131,7 +133,7 @@ export function AdminDashboard() {
     try {
       await eightbaseService.createCallLog({
         ...callLogForm,
-        coach_id: authState.user!.id,
+        coach_id: authState.user!.id, // Admin user ID
         call_type: callLogForm.call_type as 'scheduled' | 'follow_up' | 'emergency',
         student_mood: callLogForm.student_mood as 'positive' | 'neutral' | 'frustrated' | 'motivated'
       });
@@ -146,6 +148,7 @@ export function AdminDashboard() {
         next_steps: '',
         student_mood: 'positive'
       });
+      loadData(); // Refresh data after creating call log
     } catch (error) {
       console.error('Failed to create call log:', error);
     }
@@ -153,18 +156,10 @@ export function AdminDashboard() {
 
   const handleCreateNote = async () => {
     try {
-      if (!coachTableId && (authState.user!.role === 'coach' || authState.user!.role === 'coach_manager')) {
-        console.error('No coach table ID found for note creation');
-        return;
-      }
-
-      console.log('AdminDashboard - Creating note with coach table ID:', coachTableId);
-      console.log('AdminDashboard - Creating note with student table ID:', noteForm.target_id);
-      
       await eightbaseService.createNote({
         ...noteForm,
-        user_id: coachTableId || authState.user!.id, // Use coach table ID if available, fallback to user ID
-        created_by: coachTableId || authState.user!.id, // Use coach table ID if available, fallback to user ID
+        student_id: noteForm.target_id, // Use the selected target ID
+        created_by: authState.user!.id, // Admin user ID
         created_by_name: `${authState.user!.firstName} ${authState.user!.lastName}`,
         visibility: noteForm.visibility as 'public' | 'private'
       });
@@ -176,6 +171,7 @@ export function AdminDashboard() {
         content: '',
         visibility: 'public'
       });
+      loadData(); // Refresh data after creating note
     } catch (error) {
       console.error('Failed to create note:', error);
     }
@@ -192,16 +188,8 @@ export function AdminDashboard() {
     );
   }
 
-  // Calculate metrics - get students from Student table instead of User table
-
-  // For Coach Managers, get students assigned to their managed coaches
-  const assignedStudents = authState.user?.role === 'coach_manager' 
-    ? students.filter((student: any) => {
-        // Get all coaches managed by this coach manager
-        const managedCoaches = users.filter(u => u.role === 'coach' && u.assigned_admin_id === authState.user?.id);
-        return managedCoaches.some(coach => student.coach?.id === coach.id);
-      })
-    : students.filter((student: any) => student.user?.assigned_admin_id === authState.user?.id);
+  // Calculate metrics - admin sees all students
+  const assignedStudents = students; // Admin sees all students
   
   const activeStudents = assignedStudents.filter((s: any) => s.is_active !== false);
   const paidStudents = assignedStudents.filter((s: any) => s.has_paid);
@@ -217,7 +205,7 @@ export function AdminDashboard() {
           Admin Dashboard
         </h1>
         <p className="text-muted-foreground">
-          Manage your assigned students and track their progress
+          Manage all users, students, and system data
         </p>
       </div>
 
@@ -227,7 +215,7 @@ export function AdminDashboard() {
           <CardContent className="pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Assigned Students</p>
+                <p className="text-xs text-muted-foreground">Total Students</p>
                 <p className="text-2xl font-bold text-foreground">{assignedStudents.length}</p>
               </div>
               <Users className="h-8 w-8 text-blue-600 opacity-60" />
@@ -314,15 +302,15 @@ export function AdminDashboard() {
               <CardHeader>
                 <CardTitle>Student Progress</CardTitle>
                 <CardDescription>
-                  Overview of your assigned students' progress
+                  Overview of all students' progress
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {assignedStudents.map((student: any) => {
-                    const studentReports = reports.filter(r => r.user_id === student.id);
-                    const studentLeads = leads.filter(l => l.user_id === student.id);
-                    const studentGoals = goals.filter(g => g.user_id === student.id);
+                    const studentReports = reports.filter(r => r.student_id === student.id);
+                    const studentLeads = leads.filter(l => l.student_id === student.id);
+                    const studentGoals = goals.filter(g => g.student_id === student.id);
                     const recentCallLog = callLogs
                       .filter(c => c.student_id === student.id)
                       .sort((a, b) => new Date(b.call_date).getTime() - new Date(a.call_date).getTime())[0];
@@ -384,7 +372,7 @@ export function AdminDashboard() {
                           <div>
                             <div className="text-sm font-medium">
                               {(() => {
-                                const user = users.find(u => u.id === report.user_id);
+                                const user = users.find(u => u.id === report.student_id);
                                 return user ? `${user.firstName} ${user.lastName}` : 'Unknown Student';
                               })()}
                             </div>

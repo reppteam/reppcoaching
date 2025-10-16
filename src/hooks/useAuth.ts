@@ -4,7 +4,6 @@ import { User } from '../types';
 
 // Helper function to map 8base roles to application roles
 const mapRole = (roleName: string): 'user' | 'coach' | 'coach_manager' | 'super_admin' => {
-  console.log('Mapping role:', roleName);
   switch (roleName.toLowerCase()) {
     case 'superadmin':
     case 'administrator':
@@ -29,8 +28,6 @@ export function useAuth() {
   const convertedUser: User | null = useMemo(() => {
     if (!user) return null;
     
-    console.log('Original user object:', user);
-    console.log('User roles:', user.roles);
     
     const converted: User = {
       id: user.id,
@@ -45,8 +42,6 @@ export function useAuth() {
       coaching_term_start: null,
       coaching_term_end: null
     };
-
-    console.log('Converted user:', converted);
     return converted;
   }, [user?.id, user?.firstName, user?.lastName, user?.email, user?.roles, user?.createdAt]);
 

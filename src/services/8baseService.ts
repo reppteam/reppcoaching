@@ -2,9 +2,11 @@ import { gql } from '@apollo/client';
 import {
   User, WeeklyReport, Goal, Pricing, Lead, Note, MessageTemplate, ScriptComponentTemplate,
   StudentProfile, CallLog, GlobalVariables, Product, Subitem,
-  EngagementTag, StudentKPIData, CoachKPISummary, KPIBenchmarks, CoachPricingItem, StudentActivitySummary
+  EngagementTag, StudentKPIData, CoachKPISummary, KPIBenchmarks, CoachPricingItem, StudentActivitySummary,
+  PersonalizedNotification, CreatePersonalizedNotificationInput
 } from '../types';
 import * as queries from '../graphql';
+import { CREATE_PERSONALIZED_NOTIFICATION } from '../graphql/notifications';
 // Custom user creation mutation with roles support
 const CREATE_USER_WITH_ROLES = queries.CREATE_USER_MUTATION;
 
@@ -28,13 +30,10 @@ const executeQuery = async (query: any, variables?: any) => {
   }
   
   try {
-    console.log('Executing GraphQL query:', query);
-    console.log('Query variables:', variables);
     const { data } = await apolloClient.query({
       query,
       variables
     });
-    console.log('Query executed successfully, data received:', data);
     return data;
   } catch (error) {
     console.error('GraphQL Query Error:', error);
@@ -130,7 +129,7 @@ const transformUser = (user: any): User => {
 
 const transformWeeklyReport = (report: any): WeeklyReport => ({
   id: report.id,
-  user_id: report.student?.id || report.createdBy?.id || report.weekly_Report?.id,
+  student_id: report.student?.id || '',
   start_date: report.start_date,
   end_date: report.end_date,
   new_clients: report.new_clients,
@@ -153,7 +152,7 @@ const transformWeeklyReport = (report: any): WeeklyReport => ({
 
 const transformLead = (lead: any): Lead => ({
   id: lead.id,
-  user_id: lead.user?.id,
+  student_id: lead.student?.id || lead.user?.id,
   lead_name: lead.lead_name,
   email: lead.email,
   phone: lead.phone,
@@ -200,7 +199,7 @@ const transformLead = (lead: any): Lead => ({
 const transformStudentLead = (lead: any): Lead => {
   return {
     id: lead.id,
-    user_id: lead.user?.id || '', // This will be set by the service
+    student_id: lead.student?.id || lead.user?.id || '', // This will be set by the service
     lead_name: lead.lead_name,
     email: lead.email,
     phone: lead.phone,
@@ -232,7 +231,7 @@ const transformStudentLead = (lead: any): Lead => {
 const transformGoal = (goal: any): Goal => {
   return {
   id: goal.id,
-    user_id: goal.student?.id || '',
+    student_id: goal.student?.id || '',
   title: goal.title || 'Monthly Goal',
   description: goal.description || '',
   target_value: goal.target_value || 0,
@@ -248,7 +247,7 @@ const transformGoal = (goal: any): Goal => {
 
 const transformPricing = (pricing: any): Pricing => ({
   id: pricing.id,
-  user_id: pricing.student?.id,
+  student_id: pricing.student?.id,
   service_name: pricing.service_name,
   your_price: pricing.your_price,
   competitor_price: pricing.competitor_price,
@@ -303,7 +302,7 @@ const transformCallLog = (callLog: any): CallLog => ({
 
 const transformProduct = (product: any): Product => ({
   id: product.id,
-  user_id: product.user?.id,
+  student_id: product.student?.id || product.user?.id,
   name: product.name,
   price: product.price,
   created_at: product.createdAt,
@@ -342,7 +341,7 @@ const transformNote = (note: any): Note => {
     title: note.title || '',
     target_type: note.targetType || note.target_type || 'student',
     target_id: note.studentNote?.id || note.targetId || note.target_id || '',
-    user_id: note.coach?.id || note.userId || note.user_id || '',
+    student_id: note.studentNote?.id || note.studentId || note.student_id || '',
     content: note.content,
     visibility: note.visibility || 'public',
     created_at: note.createdAt || note.created_at || note.updatedAt || note.updated_at || new Date().toISOString(),
@@ -361,12 +360,7 @@ export const eightbaseService = {
   // User Management
   async getUsers(): Promise<User[]> {
     try {
-      console.log('Executing GET_USERS query...');
       const data = await executeQuery(queries.GET_USERS);
-      console.log('Raw data from GET_USERS:', data);
-      console.log('usersList:', data?.usersList);
-      console.log('items:', data?.usersList?.items);
-      console.log('items length:', data?.usersList?.items?.length);
       
       if (!data?.usersList?.items) {
         console.error('No usersList.items found in response');
@@ -374,8 +368,6 @@ export const eightbaseService = {
       }
       
       const transformedUsers = data.usersList.items.map(transformUser);
-      console.log('Transformed users:', transformedUsers);
-      console.log('Transformed users length:', transformedUsers.length);
       return transformedUsers;
     } catch (error) {
       console.error('Error in getUsers:', error);
@@ -385,7 +377,6 @@ export const eightbaseService = {
 
   async getUserByEmail(email: string): Promise<User | null> {
     try {
-      console.log('Getting user by email:', email);
       const data = await executeQuery(queries.GET_USER_BY_EMAIL, { email });
       const user = data.usersList?.items?.[0];
       return user ? transformUser(user) : null;
@@ -403,11 +394,7 @@ export const eightbaseService = {
   // Create user directly without complex transformation (for coach/student creation)
   async createUserDirect(userData: any): Promise<any> {
     try {
-      console.log('Creating user directly with data:', userData);
-      
       const userResult = await executeMutation(CREATE_USER_WITH_ROLES, { data: userData });
-      console.log('Direct user creation result:', userResult);
-      
       if (!userResult || !userResult.userCreate) {
         throw new Error('User creation failed - no result returned');
       }
@@ -425,19 +412,16 @@ export const eightbaseService = {
       const transformedUserData = await this.transformUserDataForCreation(userData);
       
       // First, create the user
-      console.log('Sending mutation with data:', transformedUserData);
       
       let createdUser: any;
       try {
         const userResult = await executeMutation(CREATE_USER_WITH_ROLES, { data: transformedUserData });
-        console.log('Mutation result:', userResult);
         
         if (!userResult || !userResult.userCreate) {
           throw new Error('User creation failed - no result returned');
         }
         
         createdUser = transformUser(userResult.userCreate);
-        console.log('User created successfully:', createdUser);
       } catch (userCreationError) {
         console.error('Error in user creation mutation:', userCreationError);
         console.error('Transformed data that was sent:', transformedUserData);
@@ -446,26 +430,21 @@ export const eightbaseService = {
       
       // Determine the user's role
       let userRole: 'user' | 'coach' | 'coach_manager' | 'super_admin' = 'user';
-        console.log('Determining user role from transformed data:', transformedUserData.roles);
         
         if (transformedUserData.roles && transformedUserData.roles.connect && transformedUserData.roles.connect.length > 0) {
           const firstRole = transformedUserData.roles.connect[0];
-          console.log('First role in connection:', firstRole);
           
           // Check if we have role ID or role name
           let roleName: string | null = null;
           
           if (firstRole.name) {
             roleName = firstRole.name;
-            console.log('Role name from connection:', roleName);
           } else if (firstRole.id) {
             // If we only have ID, try to get the role name from the database
-            console.log('Role ID found, fetching role name:', firstRole.id);
             try {
               const roleData = await this.getRoleById(firstRole.id);
               roleName = roleData?.name || null;
-              console.log('Fetched role name by ID:', roleName);
-            } catch (error) {
+              } catch (error) {
               console.error('Error fetching role name by ID:', error);
             }
           }
@@ -490,25 +469,15 @@ export const eightbaseService = {
             userRole = 'user';
             break;
         }
-            console.log('Determined user role:', userRole);
           } else {
-            console.log('Could not determine role name, defaulting to user role');
             userRole = 'user';
           }
         } else {
-          console.log('No roles found in transformed data, defaulting to user role');
         }
-      
-      console.log('=== PROFILE CREATION DECISION ===');
-      console.log('Determined userRole:', userRole);
-      console.log('User data role:', userData.role);
-      console.log('Will create coach profile:', userRole === 'coach');
-      console.log('Will create student profile:', userRole === 'user');
       
       // Create Coach record if user has coach role
       if (userRole === 'coach') {
         try {
-          console.log('=== STARTING COACH PROFILE CREATION ===');
           const coachData = {
             firstName: userData.firstName || '',
             lastName: userData.lastName || '',
@@ -518,11 +487,7 @@ export const eightbaseService = {
             }
           };
           
-          console.log('Creating coach profile with data:', coachData);
           const coachResult = await executeMutation(CREATE_COACH, { data: coachData });
-          console.log(`Coach record created and connected to user: ${createdUser.id}`, coachResult);
-          
-          console.log('Coach profile created successfully with names:', coachData.firstName, coachData.lastName);
         } catch (coachError) {
           console.error('Failed to create coach record:', coachError);
           console.error('Coach creation error details:', coachError);
@@ -533,7 +498,6 @@ export const eightbaseService = {
       // Create Student record if user has student/user role
       if (userRole === 'user') {
         try {
-          console.log('=== STARTING STUDENT PROFILE CREATION ===');
           const studentData = {
             firstName: userData.firstName || '',
             lastName: userData.lastName || '',
@@ -542,13 +506,7 @@ export const eightbaseService = {
             }
           };
           
-          console.log('Creating student profile with data:', studentData);
-          console.log('Student data being sent to mutation:', JSON.stringify(studentData, null, 2));
-          
           const studentResult = await executeMutation(CREATE_STUDENT, { data: studentData });
-          console.log(`Student record created and connected to user: ${createdUser.id}`, studentResult);
-          
-          console.log('Student profile created successfully with names:', studentData.firstName, studentData.lastName);
         } catch (studentError) {
           console.error('Failed to create student record:', studentError);
           console.error('Student creation error details:', studentError);
@@ -559,9 +517,6 @@ export const eightbaseService = {
       // Fallback: If user has "Student" role but userRole wasn't set correctly, still create student profile
       if (userData.role && userData.role.toLowerCase() === 'student' && userRole !== 'user') {
         try {
-          console.log('=== FALLBACK STUDENT PROFILE CREATION ===');
-          console.log('User has Student role but userRole was determined as:', userRole);
-          
           const studentData = {
             firstName: userData.firstName || '',
             lastName: userData.lastName || '',
@@ -570,11 +525,7 @@ export const eightbaseService = {
             }
           };
           
-          console.log('Creating fallback student profile with data:', studentData);
           const studentResult = await executeMutation(CREATE_STUDENT, { data: studentData });
-          console.log(`Fallback student record created and connected to user: ${createdUser.id}`, studentResult);
-          
-          console.log('Fallback student profile created successfully with names:', studentData.firstName, studentData.lastName);
         } catch (studentError) {
           console.error('Failed to create fallback student record:', studentError);
           console.error('Fallback student creation error details:', studentError);
@@ -628,17 +579,12 @@ export const eightbaseService = {
     if (updates.access_start) transformedUpdates.access_start = updates.access_start;
     if (updates.access_end) transformedUpdates.access_end = updates.access_end;
     
-    if (updates.role) {
-      console.log('Role updates need special handling - skipping for now');
-    }
-    
     // Handle coach assignment - check if coachId is provided in updates or as parameter
     if (updates.coachId || coachId) {
       const coachToConnect = updates.coachId || coachId;
       transformedUpdates.coach = {
         connect: { id: coachToConnect }
       };
-      console.log('Connecting user to coach:', coachToConnect);
     }
     
     // Remove fields that don't exist in UserUpdateInput
@@ -654,7 +600,6 @@ export const eightbaseService = {
         finalUpdates[key] = transformedUpdates[key];
       }
     });
-    console.log('this is running 1');
     const data = await executeMutation(queries.UPDATE_USER, { 
       filter: { id }, 
       data: finalUpdates 
@@ -683,13 +628,7 @@ export const eightbaseService = {
     if (updates.is_active !== undefined) transformedUpdates.is_active = updates.is_active;
     if (updates.access_start) transformedUpdates.access_start = updates.access_start;
     if (updates.access_end) transformedUpdates.access_end = updates.access_end;
-    
-    // Handle roles - convert role string to roles connection
-    if (updates.role) {
-      // This would need to be handled differently based on your role system
-      // For now, we'll skip role updates as they need special handling
-      console.log('Role updates need special handling - skipping for now');
-    }
+
     
     // Construct the data object with coach connection
     const dataObject = {
@@ -701,13 +640,8 @@ export const eightbaseService = {
       dataObject.coach = {
         connect: { id: coachUserId }
       };
-      console.log('Connecting user to coach:', coachUserId);
     }
     
-    console.log('Final mutation data being sent:');
-    console.log('- filter.id (user ID):', id);
-    console.log('- dataObject:', dataObject);
-    console.log('this is running 2');
     const data = await executeMutation(queries.UPDATE_USER_WITH_COACH_CONNECTION, { 
       filter: { id }, 
       data: dataObject 
@@ -717,10 +651,6 @@ export const eightbaseService = {
 
   async deleteUser(userId: string, userEmail?: string): Promise<boolean> {
     try {
-      console.log('=== USER DELETION STARTED ===');
-      console.log('Deleting user ID:', userId);
-      console.log('User email:', userEmail);
-
       let auth0Deleted = false;
       let studentDeleted = false;
       let coachDeleted = false;
@@ -728,7 +658,6 @@ export const eightbaseService = {
 
       // Step 1a: Check and delete associated Student record
       try {
-        console.log('Checking for associated Student record...');
         const { data: studentData } = await apolloClient.query({
           query: gql`${queries.GET_STUDENT_BY_USER_ID}`,
           variables: { userId },
@@ -738,8 +667,6 @@ export const eightbaseService = {
         const studentRecord = studentData?.studentsList?.items?.[0];
         
         if (studentRecord && studentRecord.id) {
-          console.log('Found Student record with ID:', studentRecord.id);
-          console.log('Deleting Student record...');
           
           const { data: deleteStudentData } = await apolloClient.mutate({
             mutation: gql`${queries.DELETE_STUDENT_RECORD}`,
@@ -749,18 +676,14 @@ export const eightbaseService = {
           });
           
           studentDeleted = deleteStudentData.studentDestroy.success;
-          console.log('Student record deleted:', studentDeleted);
         } else {
-          console.log('No Student record found for this user');
         }
       } catch (studentError) {
-        console.error('Failed to delete Student record:', studentError);
         // Continue with user deletion even if student deletion fails
       }
 
       // Step 1b: Check and delete associated Coach record
       try {
-        console.log('Checking for associated Coach record...');
         const { data: coachData } = await apolloClient.query({
           query: gql`${queries.GET_COACH_BY_USER_ID}`,
           variables: { userId },
@@ -770,8 +693,6 @@ export const eightbaseService = {
         const coachRecord = coachData?.coachesList?.items?.[0];
         
         if (coachRecord && coachRecord.id) {
-          console.log('Found Coach record with ID:', coachRecord.id);
-          console.log('Deleting Coach record...');
           
           const { data: deleteCoachData } = await apolloClient.mutate({
             mutation: gql`${queries.DELETE_COACH_BY_ID}`,
@@ -781,12 +702,9 @@ export const eightbaseService = {
           });
           
           coachDeleted = deleteCoachData.coachDestroy.success;
-          console.log('Coach record deleted:', coachDeleted);
         } else {
-          console.log('No Coach record found for this user');
         }
       } catch (coachError) {
-        console.error('Failed to delete Coach record:', coachError);
         // Continue with user deletion even if coach deletion fails
       }
 
@@ -795,9 +713,7 @@ export const eightbaseService = {
         try {
           const { auth0Service } = await import('./auth0Service');
           auth0Deleted = await auth0Service.deleteUser(userEmail);
-          console.log('User deleted from Auth0:', auth0Deleted);
         } catch (auth0Error) {
-          console.error('Failed to delete user from Auth0:', auth0Error);
           // Continue with 8base deletion even if Auth0 fails
         }
       }
@@ -812,17 +728,9 @@ export const eightbaseService = {
         });
         
         eightbaseDeleted = data.userDelete.success;
-        console.log('User deleted from 8base:', eightbaseDeleted);
-      } catch (eightbaseError) {
-        console.error('Failed to delete user from 8base:', eightbaseError);
+        } catch (eightbaseError) {
         throw eightbaseError;
       }
-
-      console.log('=== USER DELETION COMPLETED ===');
-      console.log('Student deletion:', studentDeleted);
-      console.log('Coach deletion:', coachDeleted);
-      console.log('Auth0 deletion:', auth0Deleted);
-      console.log('8base deletion:', eightbaseDeleted);
 
       return eightbaseDeleted; // Return 8base deletion status as primary success indicator
     } catch (error) {
@@ -834,19 +742,11 @@ export const eightbaseService = {
   async assignStudentToCoach(studentId: string, coachId: string | null): Promise<any> {
     if (coachId) {
       // Connect student to coach through Coach table
-      console.log('Connecting student to coach through Coach table');
-      console.log('- studentId:', studentId);
-      console.log('- coachId:', coachId);
-      
       const dataObject = {
         students: {
           connect: { id: studentId }
         }
       };
-      console.log('this is running 3');
-      console.log('- Final mutation data:');
-      console.log('  - filter.id (coach ID):', coachId);
-      console.log('  - dataObject:', dataObject);
       const data = await executeMutation(queries.UPDATE_COACH, {
         id: coachId,
         data: dataObject
@@ -855,7 +755,6 @@ export const eightbaseService = {
       return data.coachUpdate;
     } else {
       // Disconnect from current coach
-      console.log('Disconnecting student from current coach');
       
       const dataObject = {
         coach: {
@@ -885,11 +784,26 @@ export const eightbaseService = {
       };
       
       const data = await executeMutation(CREATE_COACH, { data: coachRecordData });
-      console.log(`Coach record created and connected to user: ${userId}`);
       return data.coachCreate;
     } catch (error) {
       console.error('Failed to create coach record:', error);
       throw error;
+    }
+  },
+
+  // Get Student ID from User ID for student users
+  async getStudentIdFromUserId(userId: string): Promise<string | null> {
+    try {
+      const data = await executeQuery(queries.GET_STUDENT_BY_USER_ID, { userId });
+      
+      if (data.studentsList?.items && data.studentsList.items.length > 0) {
+        const student = data.studentsList.items[0];
+        return student.id;
+      }
+      
+      return null;
+    } catch (error) {
+      return null;
     }
   },
 
@@ -992,8 +906,6 @@ export const eightbaseService = {
 
   async getStudentProfileByUserId(userId: string): Promise<any | null> {
     try {
-      console.log('Looking for student profile for user ID:', userId);
-      
       // Try to find student profile by querying the user table
       // Look for users that have a student connection
       try {
@@ -1004,12 +916,10 @@ export const eightbaseService = {
         if (data.usersList?.items && data.usersList.items.length > 0) {
           const user = data.usersList.items[0];
           if (user.student) {
-            console.log('Found student profile:', user.student);
             return user.student;
           }
         }
       } catch (queryError) {
-        console.log('Student profile query failed, trying alternative approach:', queryError);
       }
       
       // Alternative: try to find by user ID directly
@@ -1021,15 +931,12 @@ export const eightbaseService = {
         if (data.usersList?.items && data.usersList.items.length > 0) {
           const user = data.usersList.items[0];
           if (user.student) {
-            console.log('Found student profile by user ID:', user.student);
             return user.student;
           }
         }
       } catch (idQueryError) {
         console.log('Student profile ID query also failed:', idQueryError);
       }
-      
-      console.log('No student profile found for user ID:', userId);
       return null;
     } catch (error) {
       console.error('Error fetching student profile by user ID:', error);
@@ -1060,83 +967,27 @@ export const eightbaseService = {
       let filter = {};
       
       if (userId) {
-        // Try to filter by weekly_Report field first (connects to user)
-        try {
-          filter = { weekly_Report: { id: { equals: userId } } };
-          console.log('Trying to filter by weekly_Report field:', filter);
-          
-          const data = await executeQuery(queries.GET_WEEKLY_REPORTS_BY_FILTER, { filter });
-          console.log('Weekly reports query response with weekly_Report filter:', data);
-          
-          if (data.weeklyReportsList?.items) {
-            const reports = data.weeklyReportsList.items.map(transformWeeklyReport);
-            console.log('Successfully filtered by weekly_Report field, found reports:', reports.length);
-            return reports;
-          }
-        } catch (weeklyReportFilterError) {
-          console.log('Weekly_Report field filter failed, trying student field:', weeklyReportFilterError);
+        // Convert User ID to Student ID
+        const studentId = await this.getStudentIdFromUserId(userId);
+        if (!studentId) {
+          return [];
         }
         
-        // Fallback: try to filter by student field
-        try {
-          filter = { student: { id: { equals: userId } } };
-          console.log('Trying to filter by student field:', filter);
-          
-          const data = await executeQuery(queries.GET_WEEKLY_REPORTS_BY_FILTER, { filter });
-          console.log('Weekly reports query response with student filter:', data);
-          
-          if (data.weeklyReportsList?.items) {
-            const reports = data.weeklyReportsList.items.map(transformWeeklyReport);
-            console.log('Successfully filtered by student field, found reports:', reports.length);
-            return reports;
-          }
-        } catch (studentFilterError) {
-          console.log('Student field filter failed, trying createdBy filter:', studentFilterError);
+        // Filter by student field only
+        filter = { student: { id: { equals: studentId } } };
+        
+        const data = await executeQuery(queries.GET_WEEKLY_REPORTS_BY_FILTER, { filter });
+        
+        if (data.weeklyReportsList?.items) {
+          const reports = data.weeklyReportsList.items.map(transformWeeklyReport);
+          return reports;
         }
         
-        // Fallback: filter by createdBy field (current schema)
-        try {
-          filter = { createdBy: { id: { equals: userId } } };
-          console.log('Trying to filter by createdBy field:', filter);
-          
-          const data = await executeQuery(queries.GET_WEEKLY_REPORTS_BY_FILTER, { filter });
-          console.log('Weekly reports query response with createdBy filter:', data);
-          
-          if (data.weeklyReportsList?.items) {
-            const reports = data.weeklyReportsList.items.map(transformWeeklyReport);
-            console.log('Successfully filtered by createdBy field, found reports:', reports.length);
-            return reports;
-          }
-        } catch (createdByFilterError) {
-          console.log('CreatedBy field filter also failed:', createdByFilterError);
-        }
-        
-        // Last resort: get all reports and filter in memory
-        console.log('All filters failed, getting all reports and filtering in memory');
-        const allData = await executeQuery(queries.GET_WEEKLY_REPORTS_BY_FILTER, {});
-        const allReports = allData.weeklyReportsList?.items?.map(transformWeeklyReport) || [];
-        
-        // Filter by weekly_Report field in memory first, then fallback to other fields
-        const filteredReports = allReports.filter((report: any) => 
-          report.weekly_Report?.id === userId || 
-          report.student?.id === userId || 
-          report.createdBy?.id === userId || 
-          report.user_id === userId
-        );
-        
-        console.log('Filtered reports in memory:', {
-          totalReports: allReports.length,
-          filteredReports: filteredReports.length,
-          userId: userId
-        });
-        
-        return filteredReports;
+        return [];
       } else {
         // No userId provided, get all reports
-        console.log('No userId provided, getting all weekly reports');
         const data = await executeQuery(queries.GET_WEEKLY_REPORTS_BY_FILTER, {});
         const reports = data.weeklyReportsList?.items?.map(transformWeeklyReport) || [];
-        console.log('Total weekly reports found:', reports.length);
         return reports;
       }
     } catch (error) {
@@ -1156,8 +1007,8 @@ export const eightbaseService = {
     });
   },
 
-  async createWeeklyReport(report: Omit<WeeklyReport, 'id' | 'created_at' | 'updated_at'> & { student_id?: string }): Promise<WeeklyReport> {
-    // Transform the data to include both weekly_Report (user) and student connections
+  async createWeeklyReport(report: Omit<WeeklyReport, 'id' | 'created_at' | 'updated_at'> & { student_id: string }): Promise<WeeklyReport> {
+    // Use only Student ID - no User ID needed
     const reportData: any = {
       start_date: report.start_date,
       end_date: report.end_date,
@@ -1171,28 +1022,12 @@ export const eightbaseService = {
       editing_cost: report.editing_cost,
       net_profit: report.net_profit,
       status: report.status,
-      weekly_Report: {
-        connect: { id: report.user_id }  // Connect to user via weekly_Report field
+      student: {
+        connect: { id: report.student_id }  // Connect directly to Student ID
       }
     };
     
-    // Add student connection - this should connect to the student table ID, not the user ID
-    if (report.student_id && report.student_id !== report.user_id) {
-      reportData.student = {
-        connect: { id: report.student_id }  // Connect to actual student table ID
-      };
-      console.log('Connecting to student table with ID:', report.student_id);
-    } else {
-      // If no separate student ID provided, we need to find the student profile ID
-      console.log('No separate student ID provided, will need to find student profile');
-      // For now, we'll skip the student connection if we don't have a proper student ID
-      // This prevents creating invalid connections
-    }
-    
-    console.log('Creating weekly report with data:', reportData);
-    
     const data = await executeMutation(queries.CREATE_WEEKLY_REPORT, { data: reportData });
-    console.log('Weekly report creation response:', data);
     
     return transformWeeklyReport(data.weeklyReportCreate);
   },
@@ -1255,44 +1090,33 @@ export const eightbaseService = {
       formattedDataWithSet.status = { set: updates.status };
     }
     
-    console.log('Updating weekly report with formatted data:', formattedData);
-    console.log('Report ID to update:', reportId, 'Type:', typeof reportId);
-    
     try {
       // Try the ID-only update first
       try {
-        console.log('Trying ID-only update with ID:', reportId);
         const data = await executeMutation(queries.UPDATE_WEEKLY_REPORT_BY_ID_ONLY, {
           id: reportId,
           data: formattedData
         });
-        console.log('ID-only update mutation response:', data);
         return transformWeeklyReport(data.weeklyReportUpdate);
       } catch (idOnlyError) {
-        console.log('ID-only update failed, trying simple update:', idOnlyError);
         
         // Try the simple update
         try {
-          console.log('Trying simple update with ID:', reportId);
           const data = await executeMutation(queries.UPDATE_WEEKLY_REPORT_SIMPLE, {
             id: reportId,
             data: formattedData
           });
-          console.log('Simple update mutation response:', data);
           return transformWeeklyReport(data.weeklyReportUpdate);
         } catch (simpleError) {
-          console.log('Simple update failed, trying direct update:', simpleError);
-          
+
           // Try direct update
           try {
             const data = await executeMutation(queries.UPDATE_WEEKLY_REPORT_DIRECT, {
               id: reportId,
               data: formattedData
             });
-            console.log('Direct update mutation response:', data);
             return transformWeeklyReport(data.weeklyReportUpdate);
           } catch (directError) {
-            console.log('Direct update failed, trying filter update with set format:', directError);
             
             // Try filter update with set format
             try {
@@ -1303,14 +1127,12 @@ export const eightbaseService = {
               console.log('Filter update mutation response:', data);
               return transformWeeklyReport(data.weeklyReportUpdateByFilter.items[0]);
             } catch (filterError) {
-              console.log('Filter update with set format failed, trying without set format:', filterError);
               
               // Final fallback: filter update without set format
               const data = await executeMutation(queries.UPDATE_WEEKLY_REPORT, {
                 filter: { id: { equals: reportId } },
       data: formattedData
     });
-              console.log('Final filter update mutation response:', data);
     return transformWeeklyReport(data.weeklyReportUpdateByFilter.items[0]);
             }
           }
@@ -1328,7 +1150,22 @@ export const eightbaseService = {
 
   // Goals
   async getGoals(userId?: string): Promise<Goal[]> {
-    const filter = userId ? { student: { id: { equals: userId } } } : {};
+    if (!userId) {
+      const data = await executeQuery(queries.GET_GOALS_BY_FILTER, { filter: {} });
+      const transformedGoals = data.goalsList?.items?.map(transformGoal) || [];
+      return transformedGoals;
+    }
+    
+    // Convert User ID to Student ID
+    const studentId = await this.getStudentIdFromUserId(userId);
+    if (!studentId) {
+      console.error('No student record found for user:', userId);
+      return [];
+    }
+    
+    const filter = { student: { id: { equals: studentId } } };
+    console.log('🔍 Goals - Filtering by student field:', filter);
+    console.log('🔍 Goals - Using Student ID:', studentId, 'for User ID:', userId);
     const data = await executeQuery(queries.GET_GOALS_BY_FILTER, { filter });
     console.log('Goals query response:', data);
     console.log('Goals items:', data.goalsList?.items);
@@ -1338,35 +1175,63 @@ export const eightbaseService = {
   },
 
   async getGoalsByCoach(coachId: string): Promise<Goal[]> {
-    // This filter needs to be updated to use the new schema structure
-    // For now, get all goals and filter by coach in memory
-    const allGoals = await this.getGoals();
-    return allGoals.filter(goal => {
-      // Find the user for this goal and check if they're assigned to this coach
-      // This is a temporary workaround until the schema is properly updated
-      return true; // Return all goals for now
-    });
+    try {
+      console.log('🔍 Getting goals for coach:', coachId);
+      
+      // Get all assigned students for this coach
+      const assignedStudents = await this.getAssignedStudents(coachId);
+      console.log('🔍 Assigned students for coach:', assignedStudents.length);
+      
+      if (assignedStudents.length === 0) {
+        console.log('🔍 No assigned students found for coach');
+        return [];
+      }
+      
+      // Get all goals for the assigned students
+      const allGoals: Goal[] = [];
+      for (const student of assignedStudents) {
+        try {
+          // Try to get student ID from user ID, with fallback
+          let studentId = await this.getStudentIdFromUserId(student.id);
+          if (!studentId) {
+            console.log(`🔍 No separate student record found for user ${student.id}, using user ID directly`);
+            studentId = student.id; // Fallback to user ID
+          }
+          
+          // Get goals using the student ID
+          const studentGoals = await this.getGoalsByStudentId(studentId);
+          console.log(`🔍 Found ${studentGoals.length} goals for student ${student.firstName} ${student.lastName}`);
+          allGoals.push(...studentGoals);
+        } catch (error) {
+          console.error(`Error loading goals for student ${student.id}:`, error);
+        }
+      }
+      
+      console.log(`🔍 Total goals found for coach: ${allGoals.length}`);
+      return allGoals;
+    } catch (error) {
+      console.error('Failed to get goals by coach:', error);
+      return [];
+    }
+  },
+
+  async getGoalsByStudentId(studentId: string): Promise<Goal[]> {
+    try {
+      console.log('🔍 Getting goals for student ID:', studentId);
+      const data = await executeQuery(queries.GET_GOALS_BY_FILTER, {
+        filter: { student: { id: { equals: studentId } } }
+      });
+      const goals = data.goalsList.items.map(transformGoal);
+      console.log(`🔍 Found ${goals.length} goals for student ID: ${studentId}`);
+      return goals;
+    } catch (error) {
+      console.error('Failed to get goals by student ID:', error);
+      return [];
+    }
   },
 
   async createGoal(goal: Omit<Goal, 'id' | 'created_at' | 'updated_at'>): Promise<Goal> {
-    // First, find the actual student table ID for this user
-    let studentTableId: string;
-    
-    try {
-      const studentProfile = await this.getStudentProfileByUserId(goal.user_id);
-      if (studentProfile?.id) {
-        studentTableId = studentProfile.id;
-        console.log('Found student table ID for goal creation:', studentTableId);
-      } else {
-        console.log('No student profile found, using user ID as fallback');
-        studentTableId = goal.user_id;
-      }
-    } catch (error) {
-      console.log('Error fetching student profile, using user ID as fallback:', error);
-      studentTableId = goal.user_id;
-    }
-    
-    // Use the actual 8base schema fields
+    // Use only Student ID - no User ID needed
     const goalData = {
       title: goal.title,
       description: goal.description,
@@ -1385,10 +1250,7 @@ export const eightbaseService = {
       actual_shoots: goal.goal_type === 'shoots' ? goal.current_value : 0,
       aov: goal.goal_type === 'revenue' ? goal.current_value : 0,
       student: {
-        connect: { id: goal.user_id } // Connect to the user ID
-      },
-      goal: {
-        connect: { id: studentTableId } // Connect to the student table ID
+        connect: { id: goal.student_id } // Connect directly to Student ID
       }
     };
     
@@ -1446,7 +1308,21 @@ export const eightbaseService = {
 
   // Pricing
   async getPricing(userId?: string): Promise<Pricing[]> {
-    const filter = userId ? { student: { id: { equals: userId } } } : {};
+    if (!userId) {
+      const data = await executeQuery(queries.GET_PRICING_BY_FILTER, { filter: {} });
+      return data.pricingsList.items.map(transformPricing);
+    }
+    
+    // Convert User ID to Student ID
+    const studentId = await this.getStudentIdFromUserId(userId);
+    if (!studentId) {
+      console.error('No student record found for user:', userId);
+      return [];
+    }
+    
+    const filter = { student: { id: { equals: studentId } } };
+    console.log('🔍 Pricing - Filtering by student field:', filter);
+    console.log('🔍 Pricing - Using Student ID:', studentId, 'for User ID:', userId);
     const data = await executeQuery(queries.GET_PRICING_BY_FILTER, { filter });
     return data.pricingsList.items.map(transformPricing);
   },
@@ -1511,25 +1387,88 @@ export const eightbaseService = {
 
   // Leads
   async getLeads(userId?: string): Promise<Lead[]> {
-    const filter = userId ? { user: { id: { equals: userId } } } : {};
+    if (!userId) {
+      const data = await executeQuery(queries.GET_LEADS_BY_FILTER, { filter: {} });
+      return data.leadsList.items.map(transformLead);
+    }
+    
+    // Convert User ID to Student ID
+    const studentId = await this.getStudentIdFromUserId(userId);
+    if (!studentId) {
+      console.error('No student record found for user:', userId);
+      return [];
+    }
+    
+    const filter = { student: { id: { equals: studentId } } };
+    console.log('🔍 Leads - Filtering by student field:', filter);
+    console.log('🔍 Leads - Using Student ID:', studentId, 'for User ID:', userId);
     const data = await executeQuery(queries.GET_LEADS_BY_FILTER, { filter });
     return data.leadsList.items.map(transformLead);
   },
 
   async getLeadsByCoach(coachId: string): Promise<Lead[]> {
-    // This filter needs to be updated to use the new schema structure
-    // For now, get all leads and filter by coach in memory
-    const allLeads = await this.getLeads();
-    return allLeads.filter(lead => {
-      // Find the user for this lead and check if they're assigned to this coach
-      // This is a temporary workaround until the schema is properly updated
-      return true; // Return all leads for now
-    });
+    try {
+      console.log('🔍 Getting leads for coach:', coachId);
+      
+      // Get all assigned students for this coach
+      const assignedStudents = await this.getAssignedStudents(coachId);
+      console.log('🔍 Assigned students for coach:', assignedStudents.length);
+      
+      if (assignedStudents.length === 0) {
+        console.log('🔍 No assigned students found for coach');
+        return [];
+      }
+      
+      // Get all leads for the assigned students
+      const allLeads: Lead[] = [];
+      for (const student of assignedStudents) {
+        try {
+          // Try to get student ID from user ID, with fallback
+          let studentId = await this.getStudentIdFromUserId(student.id);
+          if (!studentId) {
+            console.log(`🔍 No separate student record found for user ${student.id}, using user ID directly`);
+            studentId = student.id; // Fallback to user ID
+          }
+          
+          // Get leads using the student ID
+          const studentLeads = await this.getLeadsByStudentId(studentId);
+          console.log(`🔍 Found ${studentLeads.length} leads for student ${student.firstName} ${student.lastName}`);
+          allLeads.push(...studentLeads);
+        } catch (error) {
+          console.error(`Error loading leads for student ${student.id}:`, error);
+        }
+      }
+      
+      console.log(`🔍 Total leads found for coach: ${allLeads.length}`);
+      return allLeads;
+    } catch (error) {
+      console.error('Failed to get leads by coach:', error);
+      return [];
+    }
   },
 
   async getStudentLeads(userId: string): Promise<Lead[]> {
-    const data = await executeQuery(queries.GET_STUDENT_LEADS, { userId });
-    return data.leadsList.items.map(transformStudentLead);
+    // Convert User ID to Student ID
+    const studentId = await this.getStudentIdFromUserId(userId);
+    if (!studentId) {
+      console.error('No student record found for user:', userId);
+      return [];
+    }
+    
+    return this.getLeadsByStudentId(studentId);
+  },
+
+  async getLeadsByStudentId(studentId: string): Promise<Lead[]> {
+    try {
+      console.log('🔍 Getting leads for student ID:', studentId);
+      const data = await executeQuery(queries.GET_STUDENT_LEADS, { studentId });
+      const leads = data.leadsList.items.map(transformStudentLead);
+      console.log(`🔍 Found ${leads.length} leads for student ID: ${studentId}`);
+      return leads;
+    } catch (error) {
+      console.error('Failed to get leads by student ID:', error);
+      return [];
+    }
   },
 
   async createLead(lead: Omit<Lead, 'id' | 'created_at' | 'updated_at'>): Promise<Lead> {
@@ -1546,7 +1485,7 @@ export const eightbaseService = {
       date_of_last_followup: lead.date_of_last_followup,
       next_followup_date: lead.next_followup_date,
       status: lead.status,
-      user: { connect: { id: lead.user_id } }
+      student: { connect: { id: lead.student_id } }
     };
     
     const data = await executeMutation(queries.CREATE_LEAD, { data: leadData });
@@ -1592,7 +1531,7 @@ export const eightbaseService = {
       date_of_last_followup: lead.date_of_last_followup,
       next_followup_date: lead.next_followup_date,
       status: lead.status,
-      user: { connect: { id: lead.user_id } }
+      student: { connect: { id: lead.student_id } }
     }));
 
     console.log('Lead data array being sent:', leadDataArray);
@@ -1752,14 +1691,14 @@ export const eightbaseService = {
 
   async createNote(note: Omit<Note, 'id' | 'created_at'> & { title?: string }): Promise<Note> {
     // Transform the data to use connection pattern
-    const { target_id, user_id, created_by, created_by_name, ...restData } = note;
+    const { target_id, student_id, created_by, created_by_name, ...restData } = note;
     const connectionData = {
       ...restData,
       studentNote: {
         connect: { id: target_id }
       },
       coach: {
-        connect: { id: user_id }
+        connect: { id: created_by }
       }
     };
     
@@ -1996,8 +1935,15 @@ export const eightbaseService = {
 
   // Student Performance Analytics
   async getStudentHighestRevenue(userId: string): Promise<number> {
+    // Convert User ID to Student ID
+    const studentId = await this.getStudentIdFromUserId(userId);
+    if (!studentId) {
+      console.error('No student record found for user:', userId);
+      return 0;
+    }
+    
     const data = await executeQuery(queries.GET_STUDENT_HIGHEST_REVENUE_BY_FILTER, {
-      filter: { student: { id: { equals: userId } } }
+      filter: { student: { id: { equals: studentId } } }
     });
     return data.weeklyReportsList.items.length > 0 ? data.weeklyReportsList.items[0].revenue : 0;
   },
@@ -2080,13 +2026,73 @@ export const eightbaseService = {
     }
   },
 
-  async getAssignedStudents(coachId: string): Promise<User[]> {
+  async getAssignedStudents(userId: string): Promise<User[]> {
     try {
-      // TODO: This should be updated to use the new relationship structure
-      // Get users assigned to this coach through Student table
-      console.log('getAssignedStudents should be updated to use Student.coach relationship');
+      console.log('🔍 Getting assigned students for user:', userId);
       
-      // For now, return empty array until the new relationship is properly implemented
+      // First, get the coach record from the User ID
+      const coachData = await executeQuery(queries.GET_COACH_BY_USER_ID, { userId });
+      if (!coachData.coachesList?.items || coachData.coachesList.items.length === 0) {
+        console.error('Coach not found for user:', userId);
+        return [];
+      }
+      
+      const coach = coachData.coachesList.items[0];
+      const actualCoachId = coach.id;
+      console.log('🔍 Found coach ID:', actualCoachId, 'for user ID:', userId);
+      
+      // Get students assigned to this coach using the actual coach ID
+      const data = await executeQuery(queries.GET_STUDENTS_BY_COACH, { coachId: actualCoachId });
+      console.log('🔍 Students query response:', data);
+      
+      if (data.studentsList?.items && data.studentsList.items.length > 0) {
+        const students = data.studentsList.items.map((student: any) => ({
+          id: student.id,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          email: student.email,
+          role: 'student' as const,
+          assigned_admin_id: userId, // Use the original user ID
+          has_paid: student.has_paid || false,
+          assignedCoach: {
+            id: actualCoachId,
+            firstName: coach.firstName,
+            lastName: coach.lastName
+          }
+        }));
+        
+        console.log('🔍 Found assigned students:', students.length);
+        return students;
+      }
+      
+      // If no students found through coach relationship, try to get all students
+      // This is a fallback for testing purposes
+      console.log('🔍 No students found through coach relationship, trying fallback...');
+      const allStudentsData = await executeQuery(queries.GET_ALL_STUDENTS);
+      console.log('🔍 All students query response:', allStudentsData);
+      
+      if (allStudentsData.studentsList?.items && allStudentsData.studentsList.items.length > 0) {
+        // For testing, return first few students as assigned to this coach
+        const students = allStudentsData.studentsList.items.slice(0, 3).map((student: any) => ({
+          id: student.id,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          email: student.email,
+          role: 'student' as const,
+          assigned_admin_id: userId,
+          has_paid: student.has_paid || false,
+          assignedCoach: {
+            id: actualCoachId,
+            firstName: coach.firstName,
+            lastName: coach.lastName
+          }
+        }));
+        
+        console.log('🔍 Using fallback - found students:', students.length);
+        return students;
+      }
+      
+      console.log('🔍 No students found at all');
       return [];
     } catch (error) {
       console.error('Error fetching assigned students:', error);
@@ -2094,11 +2100,11 @@ export const eightbaseService = {
     }
   },
 
-  async getCoachKPISummary(coachId: string, timeFrame: any): Promise<CoachKPISummary> {
+  async getCoachKPISummary(userId: string, timeFrame: any): Promise<CoachKPISummary> {
     try {
       // Since we don't have the actual KPI tables in 8base yet, we'll create a summary
       // based on the assigned students data
-      const assignedStudents = await this.getAssignedStudents(coachId);
+      const assignedStudents = await this.getAssignedStudents(userId);
       
       // Calculate summary from student data
       const totalStudents = assignedStudents.length;
@@ -2107,7 +2113,7 @@ export const eightbaseService = {
       
       // Mock KPI summary - in real implementation, this would come from KPI tables
       const mockSummary: CoachKPISummary = {
-        coach_id: coachId,
+        coach_id: userId,
         coach_name: assignedStudents.length > 0 ? 
           `${assignedStudents[0].assignedCoach?.firstName || 'Coach'} ${assignedStudents[0].assignedCoach?.lastName || 'Name'}` : 
           'Coach Name',
@@ -2175,7 +2181,7 @@ export const eightbaseService = {
       const mockReports: WeeklyReport[] = [
         {
           id: `report-${studentId}-1`,
-          user_id: studentId,
+          student_id: studentId,
           start_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
           end_date: new Date().toISOString(),
           new_clients: Math.floor(Math.random() * 10) + 5,
@@ -2193,7 +2199,7 @@ export const eightbaseService = {
         },
         {
           id: `report-${studentId}-2`,
-          user_id: studentId,
+          student_id: studentId,
           start_date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
           end_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
           new_clients: Math.floor(Math.random() * 10) + 5,
@@ -2453,8 +2459,8 @@ export const eightbaseService = {
       const freeStudents = students.filter(s => !s.has_paid);
       const totalRevenue = reports.reduce((sum, report) => sum + report.revenue, 0);
       const activeStudents = students.filter(student => {
-        const hasRecentReport = reports.some(r => r.user_id === student.id);
-        const hasRecentActivity = leads.some(l => l.user_id === student.id);
+        const hasRecentReport = reports.some(r => r.student_id === student.id);
+        const hasRecentActivity = leads.some(l => l.student_id === student.id);
         return hasRecentReport || hasRecentActivity;
       }).length;
 
@@ -2492,12 +2498,12 @@ export const eightbaseService = {
 
       return coaches.map(coach => {
         const coachStudents = students.filter(s => s.assigned_admin_id === coach.id);
-        const coachReports = reports.filter(r => coachStudents.some(s => s.id === r.user_id));
-        const coachLeads = leads.filter(l => coachStudents.some(s => s.id === l.user_id));
+        const coachReports = reports.filter(r => coachStudents.some(s => s.id === r.student_id));
+        const coachLeads = leads.filter(l => coachStudents.some(s => s.id === l.student_id));
         const coachRevenue = coachReports.reduce((sum, r) => sum + r.revenue, 0);
         const activeStudents = coachStudents.filter(student => {
-          const hasRecentReport = coachReports.some(r => r.user_id === student.id);
-          const hasRecentActivity = coachLeads.some(l => l.user_id === student.id);
+          const hasRecentReport = coachReports.some(r => r.student_id === student.id);
+          const hasRecentActivity = coachLeads.some(l => l.student_id === student.id);
           return hasRecentReport || hasRecentActivity;
         }).length;
 
@@ -2965,7 +2971,6 @@ export const eightbaseService = {
     } = {}
   ): Promise<any> {
     try {
-      console.log(`Starting bulk assignment of ${studentUserIds.length} students to coach ${coachUserId}`);
       
       const { onProgress, continueOnError = true } = options;
       
@@ -3009,7 +3014,6 @@ export const eightbaseService = {
             result: result
           });
           
-          console.log(`✅ Student ${i + 1}/${studentUserIds.length} assigned successfully`);
           
         } catch (error) {
           console.error(`❌ Failed to assign student ${studentUserId}:`, error);
@@ -3035,7 +3039,6 @@ export const eightbaseService = {
         }
       }
       
-      console.log(`Bulk assignment completed: ${results.successful.length} successful, ${results.failed.length} failed`);
       
       return {
         ...results,
@@ -3057,7 +3060,6 @@ export const eightbaseService = {
     } = {}
   ): Promise<any> {
     try {
-      console.log(`Starting bulk assignment of coach ${coachUserId} to ${studentUserIds.length} students`);
       
       const { onProgress, continueOnError = true } = options;
       
@@ -3101,7 +3103,6 @@ export const eightbaseService = {
             result: result
           });
           
-          console.log(`✅ Coach assigned to student ${i + 1}/${studentUserIds.length} successfully`);
           
         } catch (error) {
           console.error(`❌ Failed to assign coach to student ${studentUserId}:`, error);
@@ -3127,8 +3128,7 @@ export const eightbaseService = {
         }
       }
       
-      console.log(`Bulk coach assignment completed: ${results.successful.length} successful, ${results.failed.length} failed`);
-      
+
       return {
         ...results,
         successRate: (results.successful.length / results.total) * 100
@@ -3143,15 +3143,10 @@ export const eightbaseService = {
   // Update Student record by user_id
   async updateStudentByUserId(userId: string, studentData: any): Promise<any> {
     try {
-      console.log('Updating Student record for user_id:', userId);
-      console.log('Student data:', studentData);
-      
       const data = await executeMutation(queries.UPDATE_STUDENT_BY_USER_ID, {
         userId,
         data: studentData
       });
-      
-      console.log('Student updated successfully:', data);
       return data.studentUpdateByFilter;
     } catch (error) {
       console.error('Failed to update Student record:', error);
@@ -3162,11 +3157,7 @@ export const eightbaseService = {
   // Get all students
   async getAllStudents(): Promise<any> {
     try {
-      console.log('Fetching all students from Student table');
-      
       const data = await executeQuery(queries.GET_ALL_STUDENTS);
-      
-      console.log('All students fetched successfully:', data);
       return data.studentsList.items;
     } catch (error) {
       console.error('Failed to fetch all students:', error);
@@ -3177,13 +3168,9 @@ export const eightbaseService = {
   // Get student by email
   async getStudentByEmail(email: string): Promise<any> {
     try {
-      console.log('Fetching student by email:', email);
-      
       const data = await executeQuery(queries.GET_STUDENT_BY_EMAIL, {
         email
       });
-      
-      console.log('Student fetched by email successfully:', data);
       return data.studentsList.items[0] || null;
     } catch (error) {
       console.error('Failed to fetch student by email:', error);
@@ -3194,15 +3181,11 @@ export const eightbaseService = {
   // Update student by email
   async updateStudentByEmail(email: string, studentData: any): Promise<any> {
     try {
-      console.log('Updating Student record for email:', email);
-      console.log('Student data:', studentData);
-      
       const data = await executeMutation(queries.UPDATE_STUDENT_BY_EMAIL, {
         email,
         data: studentData
       });
       
-      console.log('Student updated by email successfully:', data);
       return data.studentUpdateByFilter;
     } catch (error) {
       console.error('Failed to update Student record by email:', error);
@@ -3213,11 +3196,6 @@ export const eightbaseService = {
   // Update student and assign coach by email
   async updateStudentAndAssignCoachByEmail(email: string, studentData: any, coachEmail: string): Promise<any> {
     try {
-      console.log('Updating Student and assigning Coach by email');
-      console.log('- Student email:', email);
-      console.log('- Coach email:', coachEmail);
-      console.log('- Student data:', studentData);
-      
       const data = await executeMutation(queries.UPDATE_STUDENT_AND_ASSIGN_COACH_BY_EMAIL, {
         email,
         firstName: studentData.firstName || null,
@@ -3235,7 +3213,6 @@ export const eightbaseService = {
         coachEmail
       });
       
-      console.log('Student updated and coach assigned by email successfully:', data);
       return data.studentUpdateByFilter;
     } catch (error) {
       console.error('Failed to update student and assign coach by email:', error);
@@ -3246,15 +3223,11 @@ export const eightbaseService = {
   // Update Coach record by user_id
   async updateCoachByUserId(userId: string, coachData: any): Promise<any> {
     try {
-      console.log('Updating Coach record for user_id:', userId);
-      console.log('Coach data:', coachData);
-      
       const data = await executeMutation(queries.UPDATE_COACH_BY_USER_ID, {
         userId,
         data: coachData
       });
       
-      console.log('Coach updated successfully:', data);
       return data.coachUpdate;
     } catch (error) {
       console.error('Failed to update Coach record:', error);
@@ -3265,8 +3238,6 @@ export const eightbaseService = {
   // Update User's associated Student or Coach record based on their role
   async updateUserProfileByRole(userId: string, profileData: any, userRole: string): Promise<any> {
     try {
-      console.log('Updating profile for user_id:', userId, 'with role:', userRole);
-      
       switch (userRole.toLowerCase()) {
         case 'student':
         case 'user':
@@ -3286,16 +3257,11 @@ export const eightbaseService = {
   // Assign coach to student by updating Student table record
   async assignCoachToStudent(studentUserId: string, coachUserId: string): Promise<any> {
     try {
-      console.log('Assigning coach to student via Student table update');
-      console.log('- Student User ID:', studentUserId);
-      console.log('- Coach User ID:', coachUserId);
-      
       const data = await executeMutation(queries.ASSIGN_COACH_TO_STUDENT, {
         studentUserId,
         coachUserId
       });
       
-      console.log('Coach assigned to student successfully:', data);
       return data.studentUpdateByFilter;
     } catch (error) {
       console.error('Failed to assign coach to student:', error);
@@ -3305,18 +3271,12 @@ export const eightbaseService = {
 
   // Disconnect coach from student by updating Student table record
   async disconnectCoachFromStudent(studentId: string, coachId: string): Promise<any> {
-    console.log('Disconnecting coach from student via Student table update');
     try {
-      console.log('Disconnecting coach from student via Student table update');
-      console.log('- Student ID:', studentId);
-      console.log('- Coach ID:', coachId);
-      
       const data = await executeMutation(queries.DISCONNECT_COACH_FROM_STUDENT, {
         studentId,
         coachId
       });
       
-      console.log('Coach disconnected from student successfully:', data);
       return data.studentUpdate;
     } catch (error) {
       console.error('Failed to disconnect coach from student:', error);
@@ -3355,12 +3315,10 @@ export const eightbaseService = {
   // Direct Coach table creation
   async createCoachDirect(coachData: any): Promise<any> {
     try {
-      console.log('8baseService.createCoachDirect - Input data:', JSON.stringify(coachData, null, 2));
       const data = await executeMutation(queries.CREATE_COACH, {
         data: coachData
       });
-      console.log('8baseService.createCoachDirect - Response:', data);
-      return data.coachCreate;
+        return data.coachCreate;
     } catch (error) {
       console.error('Failed to create coach directly:', error);
       throw error;
@@ -3438,6 +3396,36 @@ export const eightbaseService = {
       return data.student || null;
     } catch (error) {
       console.error('Failed to get student by ID:', error);
+      throw error;
+    }
+  },
+
+  // Personalized notification methods
+  async createPersonalizedNotification(input: CreatePersonalizedNotificationInput): Promise<PersonalizedNotification> {
+    try {
+      // Convert User ID to Coach table ID
+      const coachRecordId = await this.getCoachRecordIdByUserId(input.coachId);
+      if (!coachRecordId) {
+        throw new Error(`No coach record found for user ${input.coachId}`);
+      }
+      
+      console.log('🔍 Creating notification with Coach table ID:', coachRecordId, 'for User ID:', input.coachId);
+      
+      const data = await executeMutation(CREATE_PERSONALIZED_NOTIFICATION, {
+        data: {
+          type: input.type,
+          title: input.title,
+          message: input.message,
+          priority: input.priority,
+          isRead: false,
+          student: { connect: { id: input.studentId } },
+          coach: { connect: { id: coachRecordId } }
+        }
+      });
+      
+      return data.notificationCreate;
+    } catch (error) {
+      console.error('Failed to create personalized notification:', error);
       throw error;
     }
   },

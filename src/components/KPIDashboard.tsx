@@ -190,7 +190,7 @@ export function KPIDashboard({showCoachSummary = true}: {showCoachSummary?: bool
         
         // Get coach's weekly reports
         const coachReports = weeklyReports.filter(report => {
-          const student = students.find(s => s.id === report.user_id);
+          const student = students.find(s => s.id === report.student_id);
           return student && student.assigned_admin_id === coach.id;
         });
         
@@ -205,7 +205,7 @@ export function KPIDashboard({showCoachSummary = true}: {showCoachSummary?: bool
         const completionPercentage = assignedStudents.length > 0 ? Math.round((paidAssigned.length / assignedStudents.length) * 100) : 0;
         
         // Calculate engagement based on students with recent reports
-        const studentsWithReports = new Set(coachReports.map(r => r.user_id)).size;
+        const studentsWithReports = new Set(coachReports.map(r => r.student_id)).size;
         const engagementPercentage = assignedStudents.length > 0 ? Math.round((studentsWithReports / assignedStudents.length) * 100) : 0;
         
         return {

@@ -152,7 +152,7 @@ let mockUsers: User[] = [
 let mockStudentProfiles: StudentProfile[] = [
   {
     id: '1',
-    user_id: '1',
+    student_id: '1',
     business_name: 'John\'s Real Estate Photography',
     location: 'Austin, TX',
     target_market: 'Luxury homes and commercial properties',
@@ -167,7 +167,7 @@ let mockStudentProfiles: StudentProfile[] = [
   },
   {
     id: '2',
-    user_id: '4',
+    student_id: '4',
     business_name: 'Rodriguez Photography Solutions',
     location: 'Miami, FL',
     target_market: 'High-end residential and vacation rentals',
@@ -182,7 +182,7 @@ let mockStudentProfiles: StudentProfile[] = [
   },
   {
     id: '3',
-    user_id: '7',
+    student_id: '7',
     business_name: 'MJ Photography Studio',
     location: 'Denver, CO',
     target_market: 'Mid-range residential properties',
@@ -197,7 +197,7 @@ let mockStudentProfiles: StudentProfile[] = [
   },
   {
     id: '4',
-    user_id: '8',
+    student_id: '8',
     business_name: 'Wilson Real Estate Visuals',
     location: 'Seattle, WA',
     target_market: 'Urban condos and apartments',
@@ -212,7 +212,7 @@ let mockStudentProfiles: StudentProfile[] = [
   },
   {
     id: '5',
-    user_id: '10',
+    student_id: '10',
     business_name: 'Martinez Creative Studios',
     location: 'Phoenix, AZ',
     target_market: 'New construction and model homes',
@@ -320,7 +320,7 @@ let mockCallLogs: CallLog[] = [
 let mockGlobalVariables: GlobalVariables[] = [
   {
     id: '1',
-    user_id: '1',
+    student_id: '1',
     hourly_pay: 50,
     cost_per_photo: 1.25,
     target_profit_margin: 40,
@@ -329,7 +329,7 @@ let mockGlobalVariables: GlobalVariables[] = [
   },
   {
     id: '2',
-    user_id: '4',
+    student_id: '4',
     hourly_pay: 45,
     cost_per_photo: 1.50,
     target_profit_margin: 35,
@@ -338,7 +338,7 @@ let mockGlobalVariables: GlobalVariables[] = [
   },
   {
     id: '3',
-    user_id: '7',
+    student_id: '7',
     hourly_pay: 30,
     cost_per_photo: 1.00,
     target_profit_margin: 30,
@@ -350,7 +350,7 @@ let mockGlobalVariables: GlobalVariables[] = [
 let mockProducts: Product[] = [
   {
     id: '1',
-    user_id: '1',
+    student_id: '1',
     name: 'Standard Photo Shoot',
     price: 250,
     created_at: '2024-07-01T00:00:00Z',
@@ -358,7 +358,7 @@ let mockProducts: Product[] = [
   },
   {
     id: '2',
-    user_id: '1',
+    student_id: '1',
     name: 'Luxury Property Package',
     price: 450,
     created_at: '2024-07-01T00:00:00Z',
@@ -366,7 +366,7 @@ let mockProducts: Product[] = [
   },
   {
     id: '3',
-    user_id: '4',
+    student_id: '4',
     name: 'Basic Real Estate Photos',
     price: 200,
     created_at: '2024-07-01T00:00:00Z',
@@ -374,7 +374,7 @@ let mockProducts: Product[] = [
   },
   {
     id: '4',
-    user_id: '7',
+    student_id: '7',
     name: 'Starter Package',
     price: 150,
     created_at: '2024-07-01T00:00:00Z',
@@ -510,7 +510,7 @@ let mockSubitems: Subitem[] = [
 // let mockLeads: Lead[] = [
 //   {
 //     id: '1',
-//     user_id: '1',
+//     student_id: '1',
 //     lead_name: 'Jennifer Martinez',
 //     email: 'jennifer.martinez@coldwellbanker.com',
 //     phone: '(555) 123-4567',
@@ -564,7 +564,7 @@ let mockSubitems: Subitem[] = [
 //   },
 //   {
 //     id: '2',
-//     user_id: '1',
+//     student_id: '1',
 //     lead_name: 'Michael Brown',
 //     email: 'mike@premierhomes.com',
 //     phone: '(555) 987-6543',
@@ -624,7 +624,7 @@ let mockSubitems: Subitem[] = [
 //   // More leads for KPI testing
 //   {
 //     id: '3',
-//     user_id: '1',
+//     student_id: '1',
 //     lead_name: 'Sarah Johnson',
 //     email: 'sarah.johnson@century21.com',
 //     phone: '(555) 246-8135',
@@ -662,7 +662,7 @@ let mockSubitems: Subitem[] = [
 //   // User 4 (Emily) leads
 //   {
 //     id: '4',
-//     user_id: '4',
+//     student_id: '4',
 //     lead_name: 'David Rodriguez',
 //     email: 'drodriguez@remax.com',
 //     phone: '',
@@ -695,7 +695,7 @@ let mockSubitems: Subitem[] = [
 //   },
 //   {
 //     id: '5',
-//     user_id: '4',
+//     student_id: '4',
 //     lead_name: 'Lisa Chen',
 //     email: '',
 //     phone: '(555) 555-0123',
@@ -726,7 +726,7 @@ let mockSubitems: Subitem[] = [
 //   // User 7 (Marcus - free user) leads
 //   {
 //     id: '6',
-//     user_id: '7',
+//     student_id: '7',
 //     lead_name: 'Tom Wilson',
 //     email: 'tom@wilsonrealty.com',
 //     phone: '(555) 123-9999',
@@ -761,7 +761,7 @@ let mockSubitems: Subitem[] = [
 let mockLeads: Lead[] = [
   {
     id: '1',
-    user_id: 'user1',
+    student_id: 'user1',
     lead_name: 'John Smith',
     email: 'john@example.com',
     phone: '+1234567890',
@@ -799,7 +799,7 @@ let mockLeads: Lead[] = [
   },
   {
     id: '2',
-    user_id: 'user1',
+    student_id: 'user1',
     lead_name: 'Sarah Johnson',
     email: 'sarah@example.com',
     phone: '+1234567891',
@@ -1100,7 +1100,7 @@ let mockMessageTemplates: MessageTemplate[] = [
 // let mockWeeklyReports: WeeklyReport[] = [
 //   {
 //     id: '1',
-//     user_id: '1',
+//     student_id: '1',
 //     start_date: '2024-06-24',
 //     end_date: '2024-06-30',
 //     new_clients: 3,
@@ -1118,7 +1118,7 @@ let mockMessageTemplates: MessageTemplate[] = [
 //   },
 //   {
 //     id: '2',
-//     user_id: '4',
+//     student_id: '4',
 //     start_date: '2024-06-24',
 //     end_date: '2024-06-30',
 //     new_clients: 2,
@@ -1155,7 +1155,7 @@ let mockMessageTemplates: MessageTemplate[] = [
 //   // Free user reports
 //   {
 //     id: '6',
-//     user_id: '7',
+//     student_id: '7',
 //     start_date: '2024-06-24',
 //     end_date: '2024-06-30',
 //     new_clients: 1,
@@ -1173,7 +1173,7 @@ let mockMessageTemplates: MessageTemplate[] = [
 //   },
 //   {
 //     id: '7',
-//     user_id: '10',
+//     student_id: '10',
 //     start_date: '2024-07-01',
 //     end_date: '2024-07-07',
 //     new_clients: 2,
@@ -1192,7 +1192,7 @@ let mockMessageTemplates: MessageTemplate[] = [
 //   // Additional historical data for highest revenue tracking
 //   {
 //     id: '4',
-//     user_id: '1',
+//     student_id: '1',
 //     start_date: '2024-05-27',
 //     end_date: '2024-06-02',
 //     new_clients: 5,
@@ -1210,7 +1210,7 @@ let mockMessageTemplates: MessageTemplate[] = [
 //   },
 //   {
 //     id: '5',
-//     user_id: '4',
+//     student_id: '4',
 //     start_date: '2024-06-03',
 //     end_date: '2024-06-09',
 //     new_clients: 3,
@@ -1234,7 +1234,7 @@ let mockWeeklyReports: WeeklyReport[] = []
 // let mockGoals: Goal[] = [
 //   {
 //     id: '1',
-//     user_id: '1',
+//     student_id: '1',
 //     month_start: '2024-07-01',
 //     low_goal_shoots: 15,
 //     success_goal_shoots: 25,
@@ -1249,7 +1249,7 @@ let mockWeeklyReports: WeeklyReport[] = []
 //   },
 //   {
 //     id: '2',
-//     user_id: '4',
+//     student_id: '4',
 //     month_start: '2024-07-01',
 //     low_goal_shoots: 12,
 //     success_goal_shoots: 20,
@@ -1264,7 +1264,7 @@ let mockWeeklyReports: WeeklyReport[] = []
 //   },
 //   {
 //     id: '3',
-//     user_id: '7',
+//     student_id: '7',
 //     month_start: '2024-07-01',
 //     low_goal_shoots: 5,
 //     success_goal_shoots: 10,
@@ -1279,7 +1279,7 @@ let mockWeeklyReports: WeeklyReport[] = []
 //   },
 //   {
 //     id: '4',
-//     user_id: '10',
+//     student_id: '10',
 //     month_start: '2024-07-01',
 //     low_goal_shoots: 8,
 //     success_goal_shoots: 15,
@@ -1297,7 +1297,7 @@ let mockWeeklyReports: WeeklyReport[] = []
 let mockPricing: Pricing[] = [
   {
     id: '1',
-    user_id: '1',
+    student_id: '1',
     service_name: 'Real Estate Photography',
     your_price: 450,
     competitor_price: 400,
@@ -1315,7 +1315,7 @@ let mockNotes: Note[] = [
     title: 'Pricing Strategy Progress',
     target_type: 'student',
     target_id: '1',
-    user_id: '1',
+    student_id: '1',
     content: 'John is making excellent progress with his pricing strategy. He\'s gained confidence in charging premium rates.',
     visibility: 'public',
     created_at: '2024-06-25T15:00:00Z',
@@ -1327,7 +1327,7 @@ let mockNotes: Note[] = [
     title: 'Lead Generation Discussion',
     target_type: 'call',
     target_id: '1',
-    user_id: '1',
+    student_id: '1',
     content: 'Student seemed a bit overwhelmed with lead generation tactics. Need to break it down into smaller steps.',
     visibility: 'private',
     created_at: '2024-06-25T15:30:00Z',
@@ -1394,18 +1394,18 @@ export const mockApi = {
   // Student Profiles (existing methods)
   async getStudentProfile(userId: string): Promise<StudentProfile | null> {
     await delay(300);
-    return mockStudentProfiles.find(p => p.user_id === userId) || null;
+    return mockStudentProfiles.find(p => p.student_id === userId) || null;
   },
 
   async updateStudentProfile(userId: string, updates: Partial<StudentProfile>): Promise<StudentProfile> {
     await delay(300);
-    const index = mockStudentProfiles.findIndex(p => p.user_id === userId);
+    const index = mockStudentProfiles.findIndex(p => p.student_id === userId);
     
     if (index === -1) {
       // Create new profile
       const newProfile: StudentProfile = {
         id: Date.now().toString(),
-        user_id: userId,
+        student_id: userId,
         business_name: '',
         location: '',
         target_market: '',
@@ -1485,7 +1485,7 @@ export const mockApi = {
   // Student Performance Analytics (existing methods)
   async getStudentHighestRevenue(userId: string): Promise<number> {
     await delay(300);
-    const userReports = mockWeeklyReports.filter(r => r.user_id === userId);
+    const userReports = mockWeeklyReports.filter(r => r.student_id === userId);
     return userReports.length > 0 ? Math.max(...userReports.map(r => r.revenue)) : 0;
   },
 
@@ -1494,7 +1494,7 @@ export const mockApi = {
     const students = mockUsers.filter(u => u.role === 'user');
     
     return students.map(student => {
-      const reports = mockWeeklyReports.filter(r => r.user_id === student.id);
+      const reports = mockWeeklyReports.filter(r => r.student_id === student.id);
       const highestRevenue = reports.length > 0 ? Math.max(...reports.map(r => r.revenue)) : 0;
       const lastReportDate = reports.length > 0 
         ? Math.max(...reports.map(r => new Date(r.created_at).getTime()))
@@ -1517,14 +1517,14 @@ export const mockApi = {
   // Weekly Reports (existing methods)
   async getWeeklyReports(userId?: string): Promise<WeeklyReport[]> {
     await delay(300);
-    return userId ? mockWeeklyReports.filter(r => r.user_id === userId) : mockWeeklyReports;
+    return userId ? mockWeeklyReports.filter(r => r.student_id === userId) : mockWeeklyReports;
   },
 
   async getWeeklyReportsByCoach(coachId: string): Promise<WeeklyReport[]> {
     await delay(300);
     const coachStudents = mockUsers.filter(u => u.assigned_admin_id === coachId);
     const studentIds = coachStudents.map(s => s.id);
-    return mockWeeklyReports.filter(r => studentIds.includes(r.user_id));
+    return mockWeeklyReports.filter(r => studentIds.includes(r.student_id));
   },
 
   async createWeeklyReport(report: Omit<WeeklyReport, 'id' | 'created_at' | 'updated_at'>): Promise<WeeklyReport> {
@@ -1586,7 +1586,7 @@ export const mockApi = {
   // Pricing (existing methods)
   async getPricing(userId?: string): Promise<Pricing[]> {
     await delay(300);
-    return userId ? mockPricing.filter(p => p.user_id === userId) : mockPricing;
+    return userId ? mockPricing.filter(p => p.student_id === userId) : mockPricing;
   },
 
   async createPricing(pricing: Omit<Pricing, 'id' | 'created_at' | 'updated_at'>): Promise<Pricing> {
@@ -1620,14 +1620,14 @@ export const mockApi = {
   // Enhanced Leads with engagement tracking (existing methods)
   async getLeads(userId?: string): Promise<Lead[]> {
     await delay(300);
-    return userId ? mockLeads.filter(l => l.user_id === userId) : mockLeads;
+    return userId ? mockLeads.filter(l => l.student_id === userId) : mockLeads;
   },
 
   async getLeadsByCoach(coachId: string): Promise<Lead[]> {
     await delay(300);
     const coachStudents = mockUsers.filter(u => u.assigned_admin_id === coachId);
     const studentIds = coachStudents.map(s => s.id);
-    return mockLeads.filter(l => studentIds.includes(l.user_id));
+    return mockLeads.filter(l => studentIds.includes(l.student_id));
   },
 
   async createLead(lead: Omit<Lead, 'id' | 'created_at' | 'updated_at'>): Promise<Lead> {
@@ -1754,18 +1754,18 @@ export const mockApi = {
   // Global Variables
   async getGlobalVariables(userId: string): Promise<GlobalVariables | null> {
     await delay(300);
-    return mockGlobalVariables.find(g => g.user_id === userId) || null;
+    return mockGlobalVariables.find(g => g.student_id === userId) || null;
   },
 
-  async updateGlobalVariables(userId: string, updates: Partial<Omit<GlobalVariables, 'id' | 'user_id' | 'created_at'>>): Promise<GlobalVariables> {
+  async updateGlobalVariables(userId: string, updates: Partial<Omit<GlobalVariables, 'id' | 'student_id' | 'created_at'>>): Promise<GlobalVariables> {
     await delay(300);
-    const index = mockGlobalVariables.findIndex(g => g.user_id === userId);
+    const index = mockGlobalVariables.findIndex(g => g.student_id === userId);
     
     if (index === -1) {
       // Create new global variables
       const newGlobalVars: GlobalVariables = {
         id: Date.now().toString(),
-        user_id: userId,
+        student_id: userId,
         hourly_pay: 50,
         cost_per_photo: 1.25,
         target_profit_margin: 40,
@@ -1788,7 +1788,7 @@ export const mockApi = {
   // Products (existing methods)
   async getProducts(userId: string): Promise<Product[]> {
     await delay(300);
-    return mockProducts.filter(p => p.user_id === userId);
+    return mockProducts.filter(p => p.student_id === userId);
   },
 
   async createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product> {
@@ -1878,7 +1878,7 @@ export const mockApi = {
     if (!student) throw new Error('Student not found');
     
     const coach = student.assigned_admin_id ? mockUsers.find(u => u.id === student.assigned_admin_id) : null;
-    const leads = mockLeads.filter(l => l.user_id === studentId);
+    const leads = mockLeads.filter(l => l.student_id === studentId);
     const calls = mockCallLogs.filter(c => c.student_id === studentId);
     
     // Filter data within time frame
@@ -2022,7 +2022,7 @@ export const mockApi = {
     const students = mockUsers.filter(u => u.assigned_admin_id === coachId);
     const studentIds = students.map(s => s.id);
     
-    const allLeads = mockLeads.filter(l => studentIds.includes(l.user_id));
+    const allLeads = mockLeads.filter(l => studentIds.includes(l.student_id));
     const allCalls = mockCallLogs.filter(c => c.coach_id === coachId);
     
     // Filter data within time frame
@@ -2031,7 +2031,7 @@ export const mockApi = {
     
     // Calculate metrics
     const activeStudents = students.filter(student => {
-      const studentLeads = leadsInPeriod.filter(l => l.user_id === student.id);
+      const studentLeads = leadsInPeriod.filter(l => l.student_id === student.id);
       const studentCalls = callsInPeriod.filter(c => c.student_id === student.id);
       return studentLeads.length > 0 || studentCalls.length > 0;
     }).length;
@@ -2048,7 +2048,7 @@ export const mockApi = {
     
     // Calculate average conversion rate across students
     const studentConversionRates = students.map(student => {
-      const studentLeads = leadsInPeriod.filter(l => l.user_id === student.id);
+      const studentLeads = leadsInPeriod.filter(l => l.student_id === student.id);
       if (studentLeads.length === 0) return 0;
       const converted = studentLeads.filter(l => l.status === 'converted').length;
       return (converted / studentLeads.length) * 100;
@@ -2059,7 +2059,7 @@ export const mockApi = {
     
     // Calculate average engagement completion rate
     const studentEngagementRates = students.map(student => {
-      const studentLeads = leadsInPeriod.filter(l => l.user_id === student.id);
+      const studentLeads = leadsInPeriod.filter(l => l.student_id === student.id);
       if (studentLeads.length === 0) return 0;
       const completedEngagements = studentLeads.filter(lead => {
         const requiredTags: string[] = ['follow_day_engagement', 'engagement_day_1', 'dm_sent'];
@@ -2080,7 +2080,7 @@ export const mockApi = {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const studentsNeedingAttention = students.filter(student => {
-      const studentLeads = allLeads.filter(l => l.user_id === student.id);
+      const studentLeads = allLeads.filter(l => l.student_id === student.id);
       const studentCalls = allCalls.filter(c => c.student_id === student.id);
       const lastActivity = [
         ...studentLeads.map(l => l.updated_at),
@@ -2133,7 +2133,7 @@ export const mockApi = {
       const student = mockUsers.find(u => u.id === studentId);
       if (!student) throw new Error(`Student ${studentId} not found`);
       
-      const leads = mockLeads.filter(l => l.user_id === studentId);
+      const leads = mockLeads.filter(l => l.student_id === studentId);
       const calls = mockCallLogs.filter(c => c.student_id === studentId);
       
       const recentLeads = leads.filter(l => isWithinTimeFrame(l.created_at, timeFrame)).length;
@@ -2214,12 +2214,12 @@ export const mockApi = {
       const dateStr = date.toISOString().split('T')[0];
       
       const dayLeads = mockLeads.filter(l => 
-        studentIds.includes(l.user_id) && 
+        studentIds.includes(l.student_id) && 
         l.created_at.startsWith(dateStr)
       ).length;
       
       const dayDMs = mockLeads
-        .filter(l => studentIds.includes(l.user_id))
+        .filter(l => studentIds.includes(l.student_id))
         .reduce((count, lead) => {
           return count + lead.engagementTag.filter(tag => 
             (tag.type === 'dm_sent' || tag.type === 'follow_up_dm_sent') && 
@@ -2233,7 +2233,7 @@ export const mockApi = {
       ).length;
       
       const dayConversions = mockLeads.filter(l => 
-        studentIds.includes(l.user_id) && 
+        studentIds.includes(l.student_id) && 
         l.status === 'converted' && 
         l.updated_at.startsWith(dateStr)
       ).length;

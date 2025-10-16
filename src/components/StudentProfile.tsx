@@ -189,7 +189,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student }) => {
       const newNote = await eightbaseService.createNote({
         target_type: 'student',
         target_id: student.id, // This should be the student table ID
-        user_id: coachTableId || currentUser?.id || '', // Use coach table ID if available, fallback to user ID
+        student_id: coachTableId || currentUser?.id || '', // Use coach table ID if available, fallback to user ID
         title: noteForm.title,
         content: noteForm.content,
         visibility: noteForm.visibility,

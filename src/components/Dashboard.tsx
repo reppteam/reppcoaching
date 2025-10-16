@@ -14,6 +14,7 @@ import { KPIDashboard } from "./KPIDashboard";
 import { Leads } from "./Leads";
 import { StudentLead } from "./StudentLead";
 import { ProfitMarginCalculator } from "./ProfitMarginCalculator";
+import ProfitCalculator from "./ProfitCalculator";
 import { AdminDashboard } from "./AdminDashboard";
 import { SuperAdminDashboard } from "./SuperAdminDashboard";
 import { CoachManagerDashboard } from "./CoachManagerDashboard";
@@ -90,9 +91,7 @@ export function Dashboard() {
   const userRole = user?.role || 'user';
   
   // Debug logging to help identify role issues
-  console.log('User object:', user);
-  console.log('User role:', userRole);
-  console.log('User role display:', userRoleDisplay);
+
 
   const loadStudent = useCallback(async (studentId: string) => {
     try {
@@ -149,6 +148,7 @@ export function Dashboard() {
     if (userRole === "coach") {
       return [
         ...baseItems,
+        { id: "goals", label: "Goals", icon: Target },
         { id: "leads", label: "Leads", icon: Users },
         {
           id: "calculator",
@@ -187,6 +187,7 @@ export function Dashboard() {
           label: "Coach Dashboard",
           icon: Shield,
         },
+        { id: "goals", label: "Goals", icon: Target },
         { id: "leads", label: "All Leads", icon: Users },
         {
           id: "coach-calls",
@@ -294,16 +295,12 @@ export function Dashboard() {
     switch (activeTab) {
       case "home":
         if (userRole === "super_admin") {
-          console.log("Rendering SuperAdminDashboard")
           return <SuperAdminDashboard />;
         } else if (userRole === "coach_manager") {
-          console.log("Rendering CoachManagerDashboard")
           return <CoachManagerDashboard />;
         } else if (userRole === "coach") {
-          console.log("Rendering AdminDashboard")
-          return <AdminDashboard />;
+          return <EnhancedCoachDashboard />;
         } else {
-          console.log("Rendering Enhanced Student Dashboard - user role:", userRole)
           return (
             <EnhancedStudentDashboard
               onEditProfile={() => setEditProfileOpen(true)}
@@ -327,8 +324,8 @@ export function Dashboard() {
         } else {
           return <Leads />;
         }
-      // case "calculator":
-      //   return <ProfitMarginCalculator />;
+      case "calculator":
+        return <ProfitCalculator />;
       case "kpis":
         return <KPIDashboard />;
       case "user-management":
@@ -352,7 +349,12 @@ export function Dashboard() {
       case "super-admin-list":
         return <SuperAdminList />;
       case "admin-dashboard":
-        return <AdminDashboard />;
+        // Only allow super_admin to access AdminDashboard
+        if (userRole === "super_admin") {
+          return <AdminDashboard />;
+        } else {
+          return <div>Access denied. Admin dashboard is only available for administrators.</div>;
+        }
       case "role-permissions":
         return <RolePermissionsManager />;
       case "user-types":
