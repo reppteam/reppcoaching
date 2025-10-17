@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Phone, X } from 'lucide-react';
@@ -15,6 +15,7 @@ interface LogCallModalProps {
   onClose: () => void;
   students: Student[];
   onLogCall: (callData: CallData) => Promise<void>;
+  preselectedStudentId?: string;
 }
 
 interface CallData {
@@ -29,7 +30,7 @@ interface CallData {
   recordingUrl?: string;
 }
 
-export function LogCallModal({ isOpen, onClose, students, onLogCall }: LogCallModalProps) {
+export function LogCallModal({ isOpen, onClose, students, onLogCall, preselectedStudentId }: LogCallModalProps) {
   const [formData, setFormData] = useState<CallData>({
     studentId: '',
     date: new Date().toISOString().split('T')[0],
@@ -43,6 +44,16 @@ export function LogCallModal({ isOpen, onClose, students, onLogCall }: LogCallMo
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Set preselected student when modal opens
+  useEffect(() => {
+    if (isOpen && preselectedStudentId) {
+      setFormData(prev => ({
+        ...prev,
+        studentId: preselectedStudentId
+      }));
+    }
+  }, [isOpen, preselectedStudentId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { FileText, X } from 'lucide-react';
@@ -15,6 +15,7 @@ interface CreateNoteModalProps {
   onClose: () => void;
   students: Student[];
   onCreateNote: (noteData: NoteData) => Promise<void>;
+  preselectedStudentId?: string;
 }
 
 interface NoteData {
@@ -25,7 +26,13 @@ interface NoteData {
   visibility: string;
 }
 
-export function CreateNoteModal({ isOpen, onClose, students, onCreateNote }: CreateNoteModalProps) {
+export function CreateNoteModal({ 
+  isOpen, 
+  onClose, 
+  students, 
+  onCreateNote, 
+  preselectedStudentId 
+}: CreateNoteModalProps) {
   const [formData, setFormData] = useState<NoteData>({
     target: 'student',
     studentId: '',
@@ -35,6 +42,16 @@ export function CreateNoteModal({ isOpen, onClose, students, onCreateNote }: Cre
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Set preselected student when modal opens
+  useEffect(() => {
+    if (isOpen && preselectedStudentId) {
+      setFormData(prev => ({
+        ...prev,
+        studentId: preselectedStudentId
+      }));
+    }
+  }, [isOpen, preselectedStudentId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

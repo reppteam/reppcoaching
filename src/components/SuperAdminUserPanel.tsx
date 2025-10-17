@@ -8,6 +8,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -73,7 +74,22 @@ export function SuperAdminUserPanel() {
     role: '',
     is_active: true,
     has_paid: false,
-    assignedCoachId: ''
+    assignedCoachId: '',
+    startDate: '',
+    endDate: '',
+    programs: [] as string[],
+    phoneNumber: '',
+    location: {
+      city: '',
+      state: '',
+      country: ''
+    },
+    salesperson: '',
+    guaranteeStatus: '',
+    paymentType: '',
+    guaranteeAmount: '',
+    contractValue: '',
+    adminNotes: ''
   });
 
   // Delete confirmation dialog states
@@ -210,7 +226,22 @@ export function SuperAdminUserPanel() {
       role: 'user', // All are students now
       is_active: user.is_active !== false,
       has_paid: user.has_paid || false,
-      assignedCoachId: user.coach?.id || 'none'
+      assignedCoachId: user.coach?.id || 'none',
+      startDate: (user as any).access_start || '',
+      endDate: (user as any).access_end || '',
+      programs: (user as any).programs || [],
+      phoneNumber: (user as any).phone || '',
+      location: {
+        city: (user as any).location?.city || '',
+        state: (user as any).location?.state || '',
+        country: (user as any).location?.country || ''
+      },
+      salesperson: (user as any).salesperson || '',
+      guaranteeStatus: (user as any).guaranteeStatus || '',
+      paymentType: (user as any).paymentType || '',
+      guaranteeAmount: (user as any).guaranteeAmount || '',
+      contractValue: (user as any).contractValue || '',
+      adminNotes: (user as any).adminNotes || ''
     });
     setEditDialogOpen(true);
   };
@@ -290,7 +321,22 @@ export function SuperAdminUserPanel() {
         role: '',
         is_active: true,
         has_paid: false,
-        assignedCoachId: ''
+        assignedCoachId: '',
+        startDate: '',
+        endDate: '',
+        programs: [],
+        phoneNumber: '',
+        location: {
+          city: '',
+          state: '',
+          country: ''
+        },
+        salesperson: '',
+        guaranteeStatus: '',
+        paymentType: '',
+        guaranteeAmount: '',
+        contractValue: '',
+        adminNotes: ''
       });
       await loadUsers();
     } catch (error) {
@@ -732,7 +778,7 @@ export function SuperAdminUserPanel() {
                       ) : (
                         <>
                           <Calendar className="h-3 w-3" />
-                          Free
+                          Coaching
                         </>
                       )}
                     </Badge>
@@ -1045,23 +1091,186 @@ export function SuperAdminUserPanel() {
                 </Select>
               </div>
             
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="has_paid"
+                checked={editForm.has_paid}
+                onCheckedChange={(checked) => setEditForm({...editForm, has_paid: checked as boolean})}
+              />
+              <Label htmlFor="has_paid" className="text-foreground">Paid Account</Label>
+            </div>
+
+            {/* Access Start and End Date */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="is_active"
-                  checked={editForm.is_active}
-                  onCheckedChange={(checked) => setEditForm({...editForm, is_active: checked as boolean})}
+              <div>
+                <Label htmlFor="startDate" className="text-foreground">Access Start Date</Label>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={editForm.startDate}
+                  onChange={(e) => setEditForm({...editForm, startDate: e.target.value})}
+                  className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
                 />
-                <Label htmlFor="is_active" className="text-foreground">Active</Label>
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="has_paid"
-                  checked={editForm.has_paid}
-                  onCheckedChange={(checked) => setEditForm({...editForm, has_paid: checked as boolean})}
+              <div>
+                <Label htmlFor="endDate" className="text-foreground">Access End Date</Label>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={editForm.endDate}
+                  onChange={(e) => setEditForm({...editForm, endDate: e.target.value})}
+                  className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
                 />
-                <Label htmlFor="has_paid" className="text-foreground">Paid Account</Label>
               </div>
+            </div>
+
+            {/* Programs */}
+            <div>
+              <Label className="text-foreground">Programs</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {['LAUNCH', 'FRWRD', 'ORBIT', 'ENGINE', 'TALENT'].map(program => (
+                  <div key={program} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`program-${program}`}
+                      checked={editForm.programs.includes(program)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setEditForm({...editForm, programs: [...editForm.programs, program]});
+                        } else {
+                          setEditForm({...editForm, programs: editForm.programs.filter(p => p !== program)});
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`program-${program}`} className="text-foreground">{program}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Phone Number */}
+            <div>
+              <Label htmlFor="phoneNumber" className="text-foreground">Phone Number</Label>
+              <Input
+                id="phoneNumber"
+                value={editForm.phoneNumber}
+                onChange={(e) => setEditForm({...editForm, phoneNumber: e.target.value})}
+                className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
+              />
+            </div>
+
+            {/* Location */}
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="city" className="text-foreground">City</Label>
+                <Input
+                  id="city"
+                  value={editForm.location.city}
+                  onChange={(e) => setEditForm({...editForm, location: {...editForm.location, city: e.target.value}})}
+                  className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="state" className="text-foreground">State</Label>
+                <Input
+                  id="state"
+                  value={editForm.location.state}
+                  onChange={(e) => setEditForm({...editForm, location: {...editForm.location, state: e.target.value}})}
+                  className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="country" className="text-foreground">Country</Label>
+                <Input
+                  id="country"
+                  value={editForm.location.country}
+                  onChange={(e) => setEditForm({...editForm, location: {...editForm.location, country: e.target.value}})}
+                  className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
+                />
+              </div>
+            </div>
+
+            {/* Salesperson */}
+            <div>
+              <Label htmlFor="salesperson" className="text-foreground">Salesperson</Label>
+              <Input
+                id="salesperson"
+                value={editForm.salesperson}
+                onChange={(e) => setEditForm({...editForm, salesperson: e.target.value})}
+                className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
+              />
+            </div>
+
+            {/* Guarantee Status and Payment Type */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="guaranteeStatus" className="text-foreground">Guarantee Status</Label>
+                <Select value={editForm.guaranteeStatus} onValueChange={(value) => setEditForm({...editForm, guaranteeStatus: value})}>
+                  <SelectTrigger className="bg-background border border-gray-300 dark:border-gray-600 text-foreground">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Hit Guarantee">Hit Guarantee</SelectItem>
+                    <SelectItem value="Eligible">Eligible</SelectItem>
+                    <SelectItem value="Ineligible">Ineligible</SelectItem>
+                    <SelectItem value="Final Ineligible">Final Ineligible</SelectItem>
+                    <SelectItem value="Re-eligible">Re-eligible</SelectItem>
+                    <SelectItem value="Newly Ineligible">Newly Ineligible</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="paymentType" className="text-foreground">Payment Type</Label>
+                <Select value={editForm.paymentType} onValueChange={(value) => setEditForm({...editForm, paymentType: value})}>
+                  <SelectTrigger className="bg-background border border-gray-300 dark:border-gray-600 text-foreground">
+                    <SelectValue placeholder="Select payment type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="REPP Finance">REPP Finance</SelectItem>
+                    <SelectItem value="True Heroes">True Heroes</SelectItem>
+                    <SelectItem value="ShiFi">ShiFi</SelectItem>
+                    <SelectItem value="Elective">Elective</SelectItem>
+                    <SelectItem value="Cash">Cash</SelectItem>
+                    <SelectItem value="Affirm">Affirm</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Guarantee Amount and Contract Value */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="guaranteeAmount" className="text-foreground">Guarantee Amount</Label>
+                <Input
+                  id="guaranteeAmount"
+                  type="number"
+                  value={editForm.guaranteeAmount}
+                  onChange={(e) => setEditForm({...editForm, guaranteeAmount: e.target.value})}
+                  className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="contractValue" className="text-foreground">Contract Value</Label>
+                <Input
+                  id="contractValue"
+                  type="number"
+                  value={editForm.contractValue}
+                  onChange={(e) => setEditForm({...editForm, contractValue: e.target.value})}
+                  className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
+                />
+              </div>
+            </div>
+
+            {/* Admin Notes */}
+            <div>
+              <Label htmlFor="adminNotes" className="text-foreground">Admin/Manager Notes</Label>
+              <Textarea
+                id="adminNotes"
+                value={editForm.adminNotes}
+                onChange={(e) => setEditForm({...editForm, adminNotes: e.target.value})}
+                placeholder="Notes about the student..."
+                rows={4}
+                className="bg-background border border-gray-300 dark:border-gray-600 text-foreground dark:text-white"
+              />
             </div>
             
             <div className="flex justify-end space-x-2">

@@ -148,6 +148,11 @@ export function Dashboard() {
     if (userRole === "coach") {
       return [
         ...baseItems,
+        {
+          id: "super-admin-panel",
+          label: "Active Clients",
+          icon: Crown,
+        },
         { id: "goals", label: "Goals", icon: Target },
         { id: "leads", label: "Leads", icon: Users },
         {
@@ -181,6 +186,11 @@ export function Dashboard() {
           id: "coach-manager",
           label: "Coach Manager Panel",
           icon: ShieldCheck,
+        },
+        {
+          id: "super-admin-panel",
+          label: "Active Clients",
+          icon: Crown,
         },
         {
           id: "coach-dashboard",
@@ -224,7 +234,7 @@ export function Dashboard() {
         ...baseItems,
         {
           id: "super-admin-panel",
-          label: "Super Admin Panel",
+          label: "Active Clients",
           icon: Crown,
         },
         {
@@ -232,7 +242,6 @@ export function Dashboard() {
           label: "Coach Manager Data",
           icon: ShieldCheck,
         },
-        { id: "leads", label: "All Leads", icon: Users },
         {
           id: "coach-pricing",
           label: "Pricing Management",
@@ -245,14 +254,14 @@ export function Dashboard() {
         //   icon: Calculator,
         // },
         {
-          id: "user-management",
-          label: "User Management",
-          icon: Users,
-        },
-        {
           id: "data-management",
           label: "Data Management",
           icon: Database,
+        },
+        {
+          id: "system-settings",
+          label: "System Settings",
+          icon: Settings,
         },
         // {
         //   id: "role-permissions",
@@ -332,6 +341,8 @@ export function Dashboard() {
         return <UserManagement />;
       case "data-management":
         return <SuperAdminDataManagement />;
+      case "system-settings":
+        return <div>System Settings - Role Management and Permissions will be moved here</div>;
       case "coach-calls":
         return <CoachCallLog />;
       case "coach-notes":

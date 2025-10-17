@@ -86,6 +86,11 @@ export function EnhancedCoachDashboard({ className }: CoachDashboardProps) {
   const [recentCallLogs, setRecentCallLogs] = useState<CallLog[]>([]);
   const [recentNotes, setRecentNotes] = useState<Note[]>([]);
   const [coachRecordId, setCoachRecordId] = useState<string | null>(null);
+  
+  // Modal states for quick actions
+  const [logCallModalOpen, setLogCallModalOpen] = useState(false);
+  const [createNoteModalOpen, setCreateNoteModalOpen] = useState(false);
+  const [selectedStudentForAction, setSelectedStudentForAction] = useState<User | null>(null);
 
   // Load coach data
   useEffect(() => {
@@ -179,6 +184,43 @@ export function EnhancedCoachDashboard({ className }: CoachDashboardProps) {
       window.location.href = '/dashboard';
     } catch (error) {
       console.error("Error logging in as student:", error);
+    }
+  };
+
+  // Quick action handlers
+  const handleQuickLogCall = (student: User) => {
+    setSelectedStudentForAction(student);
+    setLogCallModalOpen(true);
+  };
+
+  const handleQuickAddNote = (student: User) => {
+    setSelectedStudentForAction(student);
+    setCreateNoteModalOpen(true);
+  };
+
+  const handleLogCall = async (callData: any) => {
+    try {
+      // TODO: Implement call logging service
+      console.log('Logging call:', callData);
+      // You'll need to implement this based on your 8base service
+      // await eightbaseService.createCallLog(callData);
+      setLogCallModalOpen(false);
+      setSelectedStudentForAction(null);
+    } catch (error) {
+      console.error('Error logging call:', error);
+    }
+  };
+
+  const handleCreateNote = async (noteData: any) => {
+    try {
+      // TODO: Implement note creation service
+      console.log('Creating note:', noteData);
+      // You'll need to implement this based on your 8base service
+      // await eightbaseService.createNote(noteData);
+      setCreateNoteModalOpen(false);
+      setSelectedStudentForAction(null);
+    } catch (error) {
+      console.error('Error creating note:', error);
     }
   };
 
@@ -322,6 +364,22 @@ export function EnhancedCoachDashboard({ className }: CoachDashboardProps) {
                         <div className="flex gap-2">
                           <Button
                             size="sm"
+                            variant="outline"
+                            onClick={() => handleQuickLogCall(student)}
+                          >
+                            <Phone className="h-4 w-4 mr-2" />
+                            Log Call
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleQuickAddNote(student)}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Add Note
+                          </Button>
+                          <Button
+                            size="sm"
                             onClick={() => handleViewStudentProfile(student.id)}
                           >
                             <Eye className="h-4 w-4 mr-2" />
@@ -352,6 +410,40 @@ export function EnhancedCoachDashboard({ className }: CoachDashboardProps) {
           activeTab={activeTab}
         />
       )}
+
+      {/* Log Call Modal */}
+      <LogCallModal
+        isOpen={logCallModalOpen}
+        onClose={() => {
+          setLogCallModalOpen(false);
+          setSelectedStudentForAction(null);
+        }}
+        students={coach?.students?.items?.map(student => ({
+          id: student.id,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          email: student.email
+        })) || []}
+        onLogCall={handleLogCall}
+        preselectedStudentId={selectedStudentForAction?.id}
+      />
+
+      {/* Create Note Modal */}
+      <CreateNoteModal
+        isOpen={createNoteModalOpen}
+        onClose={() => {
+          setCreateNoteModalOpen(false);
+          setSelectedStudentForAction(null);
+        }}
+        students={coach?.students?.items?.map(student => ({
+          id: student.id,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          email: student.email
+        })) || []}
+        onCreateNote={handleCreateNote}
+        preselectedStudentId={selectedStudentForAction?.id}
+      />
     </div>
   );
 }
