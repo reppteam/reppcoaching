@@ -99,5 +99,9 @@ export const CareersPage = Loadable(lazy(() => import("../components/Dashboard")
 // Email testing
 export const EmailTestPanel = Loadable(lazy(() => import("../components/EmailTestPanel").then(module => ({ default: module.EmailTestPanel }))));
 
+// Todo Lists and Reminders
+export const TodoListManager = Loadable(lazy(() => import("../components/TodoListManager").then(module => ({ default: module.TodoListManager }))));
+// export const ReminderManager = Loadable(lazy(() => import("../components/ReminderManager").then(module => ({ default: module.ReminderManager }))));
+
 // 404 page
 export const Page404 = Loadable(lazy(() => import("../components/Dashboard").then(module => ({ default: module.Dashboard })))); 

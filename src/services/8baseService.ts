@@ -3,7 +3,7 @@ import {
   User, WeeklyReport, Goal, Pricing, Lead, Note, MessageTemplate, ScriptComponentTemplate,
   StudentProfile, CallLog, GlobalVariables, Product, Subitem,
   EngagementTag, StudentKPIData, CoachKPISummary, KPIBenchmarks, CoachPricingItem, StudentActivitySummary,
-  PersonalizedNotification, CreatePersonalizedNotificationInput
+  PersonalizedNotification, CreatePersonalizedNotificationInput, TodoItem, Reminder, TodoList
 } from '../types';
 import * as queries from '../graphql';
 import { CREATE_PERSONALIZED_NOTIFICATION } from '../graphql/notifications';

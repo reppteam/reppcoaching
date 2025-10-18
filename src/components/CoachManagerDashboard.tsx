@@ -68,6 +68,8 @@ import {
   TrendingUp,
   Camera,
   FileText,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 export function CoachManagerDashboard() {
@@ -110,6 +112,11 @@ export function CoachManagerDashboard() {
   // Goals state
   const [goals, setGoals] = useState<any[]>([]);
   const [goalsLoading, setGoalsLoading] = useState(false);
+  
+  // Pagination states
+  const [showAllUsers, setShowAllUsers] = useState(false);
+  const [showAllGoals, setShowAllGoals] = useState(false);
+  const [showAllStudents, setShowAllStudents] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -616,7 +623,7 @@ export function CoachManagerDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((user) => (
+              {(showAllUsers ? filteredUsers : filteredUsers.slice(0, 10)).map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div>
@@ -723,6 +730,29 @@ export function CoachManagerDashboard() {
               ))}
             </TableBody>
           </Table>
+          
+          {/* Show More/Less Button for Users */}
+          {filteredUsers.length > 10 && (
+            <div className="mt-4 text-center">
+              <Button
+                variant="outline"
+                onClick={() => setShowAllUsers(!showAllUsers)}
+                className="flex items-center gap-2"
+              >
+                {showAllUsers ? (
+                  <>
+                    <ChevronUp className="h-4 w-4" />
+                    Show Less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4" />
+                    Show All {filteredUsers.length} Users
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -742,7 +772,7 @@ export function CoachManagerDashboard() {
             
             {students.length > 0 ? (
               <div className="space-y-2">
-                {students.slice(0, 10).map((student) => (
+                {(showAllStudents ? students : students.slice(0, 10)).map((student) => (
                   <div key={student.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <div className="font-medium">
@@ -765,9 +795,27 @@ export function CoachManagerDashboard() {
                     </div>
                   </div>
                 ))}
+                
+                {/* Show More/Less Button for Students */}
                 {students.length > 10 && (
-                  <div className="text-sm text-muted-foreground text-center py-2">
-                    Showing first 10 of {students.length} students
+                  <div className="mt-4 text-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAllStudents(!showAllStudents)}
+                      className="flex items-center gap-2"
+                    >
+                      {showAllStudents ? (
+                        <>
+                          <ChevronUp className="h-4 w-4" />
+                          Show Less
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-4 w-4" />
+                          Show All {students.length} Students
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>
@@ -799,7 +847,7 @@ export function CoachManagerDashboard() {
             </div>
           ) : goals.length > 0 ? (
             <div className="space-y-4">
-              {goals.slice(0, 10).map((goal) => {
+              {(showAllGoals ? goals : goals.slice(0, 3)).map((goal) => {
                 const student = students.find(s => s.id === goal.user_id);
                 const progressPercentage = goal.target_value > 0 ? Math.round((goal.current_value / goal.target_value) * 100) : 0;
                 
@@ -861,9 +909,27 @@ export function CoachManagerDashboard() {
                   </div>
                 );
               })}
-              {goals.length > 10 && (
-                <div className="text-center py-4 text-gray-500 text-sm">
-                  Showing first 10 of {goals.length} goals
+              
+              {/* Show More/Less Button for Goals */}
+              {goals.length > 3 && (
+                <div className="mt-4 text-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAllGoals(!showAllGoals)}
+                    className="flex items-center gap-2"
+                  >
+                    {showAllGoals ? (
+                      <>
+                        <ChevronUp className="h-4 w-4" />
+                        Show Less
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-4 w-4" />
+                        Show All {goals.length} Goals
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
             </div>

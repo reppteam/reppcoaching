@@ -26,6 +26,7 @@ import { CoachStudentEditProfile } from "./CoachStudentEditProfile";
 import { CompanyWeekDisplay } from "./CompanyWeekDisplay";
 import { LogCallModal } from "./LogCallModal";
 import { CreateNoteModal } from "./CreateNoteModal";
+import { TodoWidget } from "./TodoWidget";
 import {
   Users,
   TrendingUp,
@@ -226,7 +227,7 @@ export function EnhancedCoachDashboard({ className }: CoachDashboardProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white flex items-center justify-center">
+      <div className="bg-white dark:bg-black text-gray-900 dark:text-white flex items-center justify-center h-full">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p>Loading coach dashboard...</p>
@@ -237,7 +238,7 @@ export function EnhancedCoachDashboard({ className }: CoachDashboardProps) {
 
   if (!coach) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white flex items-center justify-center">
+      <div className="bg-white dark:bg-black text-gray-900 dark:text-white flex items-center justify-center h-full">
         <div className="text-center">
           <AlertCircle className="h-8 w-8 mx-auto mb-4 text-red-500" />
           <p>Coach not found</p>
@@ -247,10 +248,8 @@ export function EnhancedCoachDashboard({ className }: CoachDashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white">
-      {user?.role !== "coach_manager" && <Header />}
-      <main className="max-w-[90%] mx-auto px-4 py-6">
-        <div className="space-y-6">
+    <div className="bg-white dark:bg-black text-gray-900 dark:text-white">
+      <div className="space-y-6">
           {/* Dashboard Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -272,72 +271,78 @@ export function EnhancedCoachDashboard({ className }: CoachDashboardProps) {
             </div>
           </div>
 
-          {/* Recent Activity Section */}
-          <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                Recent Activity
-              </CardTitle>
-              <CardDescription className="text-gray-600 dark:text-gray-400">
-                Your latest interactions with students
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="calls" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-black">
-                  <TabsTrigger value="calls">Recent Calls</TabsTrigger>
-                  <TabsTrigger value="notes">Recent Notes</TabsTrigger>
-                  <TabsTrigger value="reports">Recent Reports</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="calls" className="space-y-4 mt-4">
-                  {recentCallLogs.length > 0 ? (
-                    recentCallLogs.map((call) => (
-                      <div key={call.id} className="p-4 border rounded-lg bg-white dark:bg-gray-800">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{new Date(call.call_date).toLocaleDateString()}</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {call.call_type} - {call.call_duration} minutes
-                            </p>
+          {/* Quick Overview Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Todo Widget */}
+            <TodoWidget className="h-fit" />
+            
+            {/* Recent Activity Section */}
+            <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Recent Activity
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  Your latest interactions with students
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="calls" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-black">
+                    <TabsTrigger value="calls">Recent Calls</TabsTrigger>
+                    <TabsTrigger value="notes">Recent Notes</TabsTrigger>
+                    <TabsTrigger value="reports">Recent Reports</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="calls" className="space-y-4 mt-4">
+                    {recentCallLogs.length > 0 ? (
+                      recentCallLogs.map((call) => (
+                        <div key={call.id} className="p-4 border rounded-lg bg-white dark:bg-gray-800">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{new Date(call.call_date).toLocaleDateString()}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {call.call_type} - {call.call_duration} minutes
+                              </p>
+                            </div>
+                            <Badge variant="outline">{call.student_mood}</Badge>
                           </div>
-                          <Badge variant="outline">{call.student_mood}</Badge>
                         </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">No recent call logs</p>
-                  )}
-                </TabsContent>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-center py-4">No recent call logs</p>
+                    )}
+                  </TabsContent>
 
-                <TabsContent value="notes" className="space-y-4 mt-4">
-                  {recentNotes.length > 0 ? (
-                    recentNotes.map((note) => (
-                      <div key={note.id} className="p-4 border rounded-lg bg-white dark:bg-gray-800">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{note.title}</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {new Date(note.created_at).toLocaleDateString()}
-                            </p>
+                  <TabsContent value="notes" className="space-y-4 mt-4">
+                    {recentNotes.length > 0 ? (
+                      recentNotes.map((note) => (
+                        <div key={note.id} className="p-4 border rounded-lg bg-white dark:bg-gray-800">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{note.title}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {new Date(note.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <Badge variant={note.visibility === "public" ? "default" : "secondary"}>
+                              {note.visibility}
+                            </Badge>
                           </div>
-                          <Badge variant={note.visibility === "public" ? "default" : "secondary"}>
-                            {note.visibility}
-                          </Badge>
                         </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 text-center py-4">No recent notes</p>
-                  )}
-                </TabsContent>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-center py-4">No recent notes</p>
+                    )}
+                  </TabsContent>
 
-                <TabsContent value="reports" className="space-y-4 mt-4">
-                  <p className="text-gray-500 text-center py-4">Recent reports will be shown here</p>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                  <TabsContent value="reports" className="space-y-4 mt-4">
+                    <p className="text-gray-500 text-center py-4">Recent reports will be shown here</p>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* My Students Section */}
           <Card className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700">
@@ -399,7 +404,6 @@ export function EnhancedCoachDashboard({ className }: CoachDashboardProps) {
             </CardContent>
           </Card>
         </div>
-      </main>
 
       {/* Student Edit Profile Modal */}
       {selectedStudentId && (

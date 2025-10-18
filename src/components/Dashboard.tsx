@@ -34,6 +34,8 @@ import { RoleImplementationStatus } from "./RoleImplementationStatus";
 import { SubscriptionInfo } from "./SubscriptionInfo";
 import { UserTypes } from "./UserTypes";
 import { RoleTest } from "./RoleTest";
+import { TodoListManager } from "./TodoListManager";
+// import { ReminderManager } from "./ReminderManager";
 import {
   Card,
   CardContent,
@@ -67,6 +69,8 @@ import {
   User as UserIcon,
   UserCircle2,
   Database,
+  ListTodo,
+  Bell,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -141,6 +145,16 @@ export function Dashboard() {
           label: "My Notes",
           icon: FileText,
         },
+        {
+          id: "todos",
+          label: "My Todos",
+          icon: ListTodo,
+        },
+        // {
+        //   id: "reminders",
+        //   label: "Reminders",
+        //   icon: Bell,
+        // },
       ];
     }
 
@@ -175,6 +189,16 @@ export function Dashboard() {
           label: "Notes",
           icon: FileText,
         },
+        {
+          id: "todos",
+          label: "My Todos",
+          icon: ListTodo,
+        },
+        // {
+        //   id: "reminders",
+        //   label: "Reminders",
+        //   icon: Bell,
+        // },
       ];
     }
 
@@ -225,6 +249,16 @@ export function Dashboard() {
           label: "User Management",
           icon: Users,
         },
+        {
+          id: "todos",
+          label: "My Todos",
+          icon: ListTodo,
+        },
+        // {
+        //   id: "reminders",
+        //   label: "Reminders",
+        //   icon: Bell,
+        // },
       ];
     }
 
@@ -273,6 +307,16 @@ export function Dashboard() {
           label: "User Types Overview",
           icon: Users,
         },
+        {
+          id: "todos",
+          label: "My Todos",
+          icon: ListTodo,
+        },
+        // {
+        //   id: "reminders",
+        //   label: "Reminders",
+        //   icon: Bell,
+        // },
         // {
         //   id: "role-test",
         //   label: "Role Test",
@@ -351,6 +395,10 @@ export function Dashboard() {
         return <StudentCallLog />;
       case "student-notes":
         return <StudentNotes />;
+      case "todos":
+        return <TodoListManager />;
+      // case "reminders":
+      //   return <ReminderManager />;
       case "coach-manager":
         return <CoachManagerDashboard />;
       case "coach-dashboard":
@@ -382,7 +430,7 @@ export function Dashboard() {
   // Show student profile view
   if (currentView === "student-profile" && currentStudent) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="h-screen bg-background flex flex-col">
         <Header
           showEditProfile={
             userRole === "user" &&
@@ -390,10 +438,12 @@ export function Dashboard() {
           }
           onEditProfile={() => setEditProfileOpen(true)}
         />
-        <main className="container mx-auto px-4 py-6">
-          <StudentProfile
-            student={currentStudent}
-          />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto px-4 py-6">
+            <StudentProfile
+              student={currentStudent}
+            />
+          </div>
         </main>
         {userRole === "user" &&
           user.id === currentStudent.id && (
@@ -411,71 +461,73 @@ export function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background flex flex-col">
       <Header
         showEditProfile={userRole === "user"}
         onEditProfile={() => setEditProfileOpen(true)}
       />
-      <main className="max-w-[90%] mx-auto px-4 py-6">
-        <div className="space-y-6">
-          <DateAndWeekDisplay user={user} />
+      <main className="flex-1 overflow-hidden">
+        <div className="h-full max-w-[90%] mx-auto px-4 py-6">
+          <div className="h-full flex flex-col space-y-6">
+            <DateAndWeekDisplay user={user} />
 
-          {/* Clean role-based navigation */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-black dark:text-white">
-                    <Shield className="h-5 w-5" />
-                    Navigation
-                  </CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <Badge
-                      className={
-                        userRole === "super_admin"
-                          ? "bg-purple-100 text-purple-800"
-                          : userRole === "coach_manager"
-                            ? "bg-blue-100 text-blue-800"
-                            : userRole === "coach"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-muted text-muted-foreground"
-                      }
-                    >
-                      {userRoleDisplay}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <nav className="space-y-1">
-                    {sidebarItems.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = activeTab === item.id;
+            {/* Clean role-based navigation */}
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-0">
+              {/* Sidebar */}
+              <div className="lg:col-span-1">
+                <Card className="h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-black dark:text-white">
+                      <Shield className="h-5 w-5" />
+                      Navigation
+                    </CardTitle>
+                    <div className="flex items-center space-x-2">
+                      <Badge
+                        className={
+                          userRole === "super_admin"
+                            ? "bg-purple-100 text-purple-800"
+                            : userRole === "coach_manager"
+                              ? "bg-blue-100 text-blue-800"
+                              : userRole === "coach"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-muted text-muted-foreground"
+                        }
+                      >
+                        {userRoleDisplay}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <nav className="space-y-1">
+                      {sidebarItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
 
-                      return (
-                        <Button
-                          key={item.id}
-                          variant={
-                            isActive ? "default" : "ghost"
-                          }
-                          className="w-full justify-start"
-                          onClick={() =>
-                            handleTabChange(item.id)
-                          }
-                        >
-                          <Icon className="mr-2 h-4 w-4" />
-                          {item.label}
-                        </Button>
-                      );
-                    })}
-                  </nav>
-                </CardContent>
-              </Card>
-            </div>
+                        return (
+                          <Button
+                            key={item.id}
+                            variant={
+                              isActive ? "default" : "ghost"
+                            }
+                            className="w-full justify-start"
+                            onClick={() =>
+                              handleTabChange(item.id)
+                            }
+                          >
+                            <Icon className="mr-2 h-4 w-4" />
+                            {item.label}
+                          </Button>
+                        );
+                      })}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
 
-            {/* Main Content */}
-            <div className="lg:col-span-3">
-              {renderTabContent()}
+              {/* Main Content */}
+              <div className="lg:col-span-3 overflow-y-auto">
+                {renderTabContent()}
+              </div>
             </div>
           </div>
         </div>

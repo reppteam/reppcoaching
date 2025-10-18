@@ -534,3 +534,115 @@ export interface CreatePersonalizedNotificationInput {
   type: 'COACH_MESSAGE';
   priority: 'high' | 'medium' | 'low';
 }
+
+// ============================================================================
+// TODO LISTS AND REMINDERS INTERFACES
+// ============================================================================
+
+export interface TodoItem {
+  id: string;
+  title: string;
+  description?: string;
+  assignedTo: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  assignedBy: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  category: 'onboarding' | 'new_students' | 'post_calls' | 'follow_up' | 'admin' | 'personal' | 'training' | 'other';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  dueDate?: string;
+  completedAt?: string;
+  completionNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Reminder {
+  id: string;
+  userId: string;
+  title: string;
+  description?: string;
+  reminderDate: string;
+  reminderTime: string;
+  type: 'task_reminder' | 'appointment_reminder' | 'custom' | 'deadline' | 'follow_up';
+  isActive: boolean;
+  isRecurring: boolean;
+  recurringPattern?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  relatedTodoId?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
+export interface TodoList {
+  id: string;
+  title: string;
+  description?: string;
+  ownerId: string;
+  isShared: boolean;
+  sharedWith: string[]; // User IDs
+  todos: TodoItem[];
+  createdAt: string;
+  updatedAt: string;
+  owner?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+
+export interface CreateTodoInput {
+  title: string;
+  description?: string;
+  assignedToId: string;
+  category: TodoItem['category'];
+  priority: TodoItem['priority'];
+  dueDate?: string;
+}
+
+export interface UpdateTodoInput {
+  id: string;
+  title?: string;
+  description?: string;
+  status?: TodoItem['status'];
+  priority?: TodoItem['priority'];
+  dueDate?: string;
+  completionNotes?: string;
+}
+
+export interface CreateReminderInput {
+  title: string;
+  description?: string;
+  reminderDate: string;
+  reminderTime: string;
+  type: Reminder['type'];
+  isRecurring?: boolean;
+  recurringPattern?: Reminder['recurringPattern'];
+  relatedTodoId?: string;
+}
+
+export interface UpdateReminderInput {
+  title?: string;
+  description?: string;
+  reminderDate?: string;
+  reminderTime?: string;
+  type?: Reminder['type'];
+  isActive?: boolean;
+  isRecurring?: boolean;
+  recurringPattern?: Reminder['recurringPattern'];
+  relatedTodoId?: string;
+}

@@ -15,6 +15,9 @@ import { getMainDefinition } from "@apollo/client/utilities";
 // import { WebSocketLink } from "@apollo/client/link/ws";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { onError } from "@apollo/client/link/error";
+import { setApolloClient as setTodoApolloClient } from "../../services/todoService";
+import { setApolloClient as set8baseApolloClient } from "../../services/8baseService";
+import { ProfitCalculatorService } from "../../services/profitCalculatorService";
 
 interface ApolloViewModelProps {
   children: React.ReactNode;
@@ -138,6 +141,14 @@ const ApolloViewModel: React.FC<ApolloViewModelProps> = ({ children }) => {
     connectToDevTools: process.env.REACT_APP_ENV === "local",
     defaultOptions,
   });
+
+  // Initialize the services with the Apollo Client
+  setTodoApolloClient(client.current);
+  set8baseApolloClient(client.current);
+  
+  // Initialize profit calculator service
+  const profitCalculatorService = new ProfitCalculatorService('default-user');
+  profitCalculatorService.setApolloClient(client.current);
 
   return <ApolloProvider client={client.current}>{children}</ApolloProvider>;
 };
