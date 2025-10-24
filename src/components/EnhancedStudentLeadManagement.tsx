@@ -349,16 +349,9 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
     let script = '';
     
     // Debug: Log the lead data to see what's available
-    console.log('=== DEBUG generateScript ===');
-    console.log('Lead ID:', lead.id);
-    console.log('Lead ScriptComponents:', lead.ScriptComponents);
-    console.log('ScriptComponents length:', lead.ScriptComponents?.length);
-    console.log('Lead script_components:', lead.script_components);
     
     // Check if lead has custom ScriptComponents from the table
     if (lead.ScriptComponents && lead.ScriptComponents.length > 0) {
-      console.log('Using custom ScriptComponents from table');
-      // Use custom script components from the table
       const customScript = lead.ScriptComponents[0];
       script = [
         customScript.intro,
@@ -368,12 +361,10 @@ export function EnhancedStudentLeadManagement({ studentId, isCoachView = false }
         customScript.ending
       ].filter(text => text && text.trim()).join('\n\n');
     } else {
-      console.log('No ScriptComponents found, checking script_components JSON field');
       // Check if lead has custom script components in JSON field
       const hasCustomScript = Object.values(lead.script_components).some(component => component && component.trim());
       
       if (hasCustomScript) {
-        console.log('Using custom script from JSON field');
         // Show custom script from JSON field
         script = Object.values(lead.script_components).join('\n\n');
       } else {

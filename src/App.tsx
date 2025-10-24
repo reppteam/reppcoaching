@@ -18,6 +18,9 @@ import { ApolloViewModel } from './components/apollo/ApolloViewModel';
 // Styles
 import './styles/globals.css';
 
+// Toast Notifications
+import { Toaster } from './components/ui/sonner';
+
 // ----------------------------------------------------------------------
 
 export default function App() {
@@ -40,6 +43,7 @@ export default function App() {
             <ThemeProvider>
               <BrowserRouter>
                 <Router />
+                <Toaster />
               </BrowserRouter>
             </ThemeProvider>
           </NavigationProvider>

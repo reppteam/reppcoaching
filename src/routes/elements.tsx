@@ -101,7 +101,7 @@ export const EmailTestPanel = Loadable(lazy(() => import("../components/EmailTes
 
 // Todo Lists and Reminders
 export const TodoListManager = Loadable(lazy(() => import("../components/TodoListManager").then(module => ({ default: module.TodoListManager }))));
-// export const ReminderManager = Loadable(lazy(() => import("../components/ReminderManager").then(module => ({ default: module.ReminderManager }))));
+export const ReminderManager = Loadable(lazy(() => import("../components/ReminderManager").then(module => ({ default: module.ReminderManager }))));
 
 // 404 page
 export const Page404 = Loadable(lazy(() => import("../components/Dashboard").then(module => ({ default: module.Dashboard })))); 

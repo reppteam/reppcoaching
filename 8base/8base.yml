@@ -6,6 +6,11 @@ functions:
     handler:
       code: src/tasks/checkStudentActivity/handler.ts
     schedule: cron(59 23 * * ? *)
+  processReminders:
+    type: task
+    handler:
+      code: src/tasks/processReminders/handler.ts
+    schedule: cron(* * * * ? *)
   sendNotifications:
     type: webhook
     handler:

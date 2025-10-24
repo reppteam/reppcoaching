@@ -190,7 +190,7 @@ export const DELETE_TODO = gql`
 export const GET_REMINDERS_BY_USER = gql`
   query GetRemindersByUser($userId: ID!) {
     remindersList(filter: {
-      user: { id: { equals: $userId } }
+      reminders: { id: { equals: $userId } }
     }, orderBy: [reminderDate_ASC, reminderTime_ASC]) {
       items {
         id
@@ -198,14 +198,13 @@ export const GET_REMINDERS_BY_USER = gql`
         description
         reminderDate
         reminderTime
-        type
         isActive
         isRecurring
         recurringPattern
         relatedTodoId
         createdAt
         updatedAt
-        user {
+        reminders {
           id
           firstName
           lastName
@@ -219,9 +218,8 @@ export const GET_REMINDERS_BY_USER = gql`
 export const GET_ACTIVE_REMINDERS = gql`
   query GetActiveReminders($userId: ID!) {
     remindersList(filter: {
-      user: { id: { equals: $userId } }
+      reminders: { id: { equals: $userId } }
       isActive: { equals: true }
-      reminderDate: { lte: "${new Date().toISOString().split('T')[0]}" }
     }, orderBy: [reminderDate_ASC, reminderTime_ASC]) {
       items {
         id
@@ -229,14 +227,41 @@ export const GET_ACTIVE_REMINDERS = gql`
         description
         reminderDate
         reminderTime
-        type
         isActive
         isRecurring
         recurringPattern
         relatedTodoId
         createdAt
         updatedAt
-        user {
+        reminders {
+          id
+          firstName
+          lastName
+          email
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ALL_ACTIVE_REMINDERS = gql`
+  query GetAllActiveReminders {
+    remindersList(filter: {
+      isActive: { equals: true }
+    }, orderBy: [reminderDate_ASC, reminderTime_ASC]) {
+      items {
+        id
+        title
+        description
+        reminderDate
+        reminderTime
+        isActive
+        isRecurring
+        recurringPattern
+        relatedTodoId
+        createdAt
+        updatedAt
+        reminders {
           id
           firstName
           lastName
@@ -255,14 +280,13 @@ export const CREATE_REMINDER = gql`
       description
       reminderDate
       reminderTime
-      type
       isActive
       isRecurring
       recurringPattern
       relatedTodoId
       createdAt
       updatedAt
-      user {
+      reminders {
         id
         firstName
         lastName
@@ -280,14 +304,13 @@ export const UPDATE_REMINDER = gql`
       description
       reminderDate
       reminderTime
-      type
       isActive
       isRecurring
       recurringPattern
       relatedTodoId
       createdAt
       updatedAt
-      user {
+      reminders {
         id
         firstName
         lastName

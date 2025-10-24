@@ -13,7 +13,6 @@ import { CoachPricing } from "./CoachPricing";
 import { KPIDashboard } from "./KPIDashboard";
 import { Leads } from "./Leads";
 import { StudentLead } from "./StudentLead";
-import { ProfitMarginCalculator } from "./ProfitMarginCalculator";
 import ProfitCalculator from "./ProfitCalculator";
 import { AdminDashboard } from "./AdminDashboard";
 import { SuperAdminDashboard } from "./SuperAdminDashboard";
@@ -30,16 +29,14 @@ import { CoachNotes } from "./CoachNotes";
 import { StudentCallLog } from "./StudentCallLog";
 import { StudentNotes } from "./StudentNotes";
 import { RolePermissionsManager } from "./RolePermissionsManager";
-import { RoleImplementationStatus } from "./RoleImplementationStatus";
 import { SubscriptionInfo } from "./SubscriptionInfo";
 import { UserTypes } from "./UserTypes";
 import { RoleTest } from "./RoleTest";
 import { TodoListManager } from "./TodoListManager";
-// import { ReminderManager } from "./ReminderManager";
+import { ReminderManager } from "./ReminderManager";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "./ui/card";
@@ -60,14 +57,9 @@ import {
   GraduationCap,
   ShieldCheck,
   BarChart3,
-  CheckCircle,
-  CreditCard,
   X,
   Settings,
-  Heart,
-  Quote,
   User as UserIcon,
-  UserCircle2,
   Database,
   ListTodo,
   Bell,
@@ -81,7 +73,7 @@ interface SidebarItem {
 
 export function Dashboard() {
   const { user } = useAuth();
-  const { currentView, currentStudentId, navigateToDashboard, navigateToStudentProfile } =
+  const { currentView, currentStudentId } =
     useNavigation();
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
@@ -150,11 +142,11 @@ export function Dashboard() {
           label: "My Todos",
           icon: ListTodo,
         },
-        // {
-        //   id: "reminders",
-        //   label: "Reminders",
-        //   icon: Bell,
-        // },
+        {
+          id: "reminders",
+          label: "Reminders",
+          icon: Bell,
+        },
       ];
     }
 
@@ -194,11 +186,11 @@ export function Dashboard() {
           label: "My Todos",
           icon: ListTodo,
         },
-        // {
-        //   id: "reminders",
-        //   label: "Reminders",
-        //   icon: Bell,
-        // },
+        {
+          id: "reminders",
+          label: "Reminders",
+          icon: Bell,
+        },
       ];
     }
 
@@ -254,11 +246,11 @@ export function Dashboard() {
           label: "My Todos",
           icon: ListTodo,
         },
-        // {
-        //   id: "reminders",
-        //   label: "Reminders",
-        //   icon: Bell,
-        // },
+        {
+          id: "reminders",
+          label: "Reminders",
+          icon: Bell,
+        },
       ];
     }
 
@@ -312,11 +304,11 @@ export function Dashboard() {
           label: "My Todos",
           icon: ListTodo,
         },
-        // {
-        //   id: "reminders",
-        //   label: "Reminders",
-        //   icon: Bell,
-        // },
+        {
+          id: "reminders",
+          label: "Reminders",
+          icon: Bell,
+        },
         // {
         //   id: "role-test",
         //   label: "Role Test",
@@ -397,8 +389,8 @@ export function Dashboard() {
         return <StudentNotes />;
       case "todos":
         return <TodoListManager />;
-      // case "reminders":
-      //   return <ReminderManager />;
+      case "reminders":
+        return <ReminderManager />;
       case "coach-manager":
         return <CoachManagerDashboard />;
       case "coach-dashboard":

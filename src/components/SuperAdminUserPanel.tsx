@@ -370,7 +370,6 @@ export function SuperAdminUserPanel() {
         return;
       }
       
-      console.log('Deleting user with User ID:', userId, 'Student ID:', userToDelete.id, 'Email:', userEmail);
       
       const success = await eightbaseService.deleteUser(userId, userEmail);
       if (success) {

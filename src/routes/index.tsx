@@ -58,7 +58,7 @@ import {
   CareersPage,
   EmailTestPanel,
   TodoListManager,
-  // ReminderManager,
+  ReminderManager,
 } from "./elements";
 
 // ----------------------------------------------------------------------
@@ -370,14 +370,10 @@ export default function Router() {
             </ProtectedRoute>
           ),
         },
-        // {
-        //   path: "reminders",
-        //   element: (
-        //     <ProtectedRoute requiredRole="Coach">
-        //       <ReminderManager />
-        //     </ProtectedRoute>
-        //   ),
-        // },
+        {
+          path: "reminders",
+          element: <ReminderManager />,
+        },
       ],
     },
 

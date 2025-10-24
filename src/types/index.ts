@@ -572,14 +572,13 @@ export interface Reminder {
   description?: string;
   reminderDate: string;
   reminderTime: string;
-  type: 'task_reminder' | 'appointment_reminder' | 'custom' | 'deadline' | 'follow_up';
   isActive: boolean;
   isRecurring: boolean;
   recurringPattern?: 'daily' | 'weekly' | 'monthly' | 'yearly';
   relatedTodoId?: string;
   createdAt: string;
   updatedAt: string;
-  user?: {
+  reminders?: {
     id: string;
     firstName: string;
     lastName: string;
@@ -629,7 +628,6 @@ export interface CreateReminderInput {
   description?: string;
   reminderDate: string;
   reminderTime: string;
-  type: Reminder['type'];
   isRecurring?: boolean;
   recurringPattern?: Reminder['recurringPattern'];
   relatedTodoId?: string;
@@ -640,7 +638,6 @@ export interface UpdateReminderInput {
   description?: string;
   reminderDate?: string;
   reminderTime?: string;
-  type?: Reminder['type'];
   isActive?: boolean;
   isRecurring?: boolean;
   recurringPattern?: Reminder['recurringPattern'];

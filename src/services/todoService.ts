@@ -19,6 +19,7 @@ import {
   DELETE_TODO,
   GET_REMINDERS_BY_USER,
   GET_ACTIVE_REMINDERS,
+  GET_ALL_ACTIVE_REMINDERS,
   CREATE_REMINDER,
   UPDATE_REMINDER,
   DELETE_REMINDER,
@@ -213,20 +214,29 @@ class TodoService {
 
   async createReminder(input: CreateReminderInput, userId: string): Promise<Reminder> {
     try {
+      // Validate reminder input
+      this.validateReminderInput(input);
+
+      // Combine date and time into proper DateTime format with timezone indicator
+      const reminderDateTime = `${input.reminderDate}T${input.reminderTime}:00Z`;
+      
       const reminderData = {
         title: input.title,
         description: input.description,
         reminderDate: input.reminderDate,
-        reminderTime: input.reminderTime,
-        type: input.type,
+        reminderTime: reminderDateTime,
         isActive: true,
         isRecurring: input.isRecurring || false,
         recurringPattern: input.recurringPattern,
         relatedTodoId: input.relatedTodoId,
-        user: { connect: { id: userId } }
+        reminders: { connect: { id: userId } }
       };
 
       const data = await executeMutation(CREATE_REMINDER, { data: reminderData });
+      
+      // Schedule notification for the reminder
+      await this.scheduleReminderNotification(data.reminderCreate);
+      
       return data.reminderCreate;
     } catch (error) {
       console.error('Error creating reminder:', error);
@@ -236,6 +246,8 @@ class TodoService {
 
   async updateReminder(id: string, updateData: UpdateReminderInput): Promise<Reminder> {
     try {
+      // The updateData should already have the properly formatted reminderTime
+      // No need to format it again here
       const data = await executeMutation(UPDATE_REMINDER, { 
         id, 
         data: updateData
@@ -378,6 +390,189 @@ class TodoService {
       console.error('Error fetching upcoming todos:', error);
       throw error;
     }
+  }
+
+  // ============================================================================
+  // REMINDER VALIDATION AND NOTIFICATION METHODS
+  // ============================================================================
+
+  private validateReminderInput(input: CreateReminderInput): void {
+    if (!input.title || input.title.trim().length === 0) {
+      throw new Error('Reminder title is required');
+    }
+
+    if (!input.reminderDate) {
+      throw new Error('Reminder date is required');
+    }
+
+    if (!input.reminderTime) {
+      throw new Error('Reminder time is required');
+    }
+
+    // Validate date format and ensure it's not in the past
+    const reminderDateTime = new Date(`${input.reminderDate}T${input.reminderTime}`);
+    const now = new Date();
+    
+    if (reminderDateTime <= now) {
+      throw new Error('Reminder date and time must be in the future');
+    }
+
+    // Validate recurring pattern if recurring is enabled
+    if (input.isRecurring && !input.recurringPattern) {
+      throw new Error('Recurring pattern is required when reminder is set to recurring');
+    }
+
+    // Validate title length
+    if (input.title.length > 100) {
+      throw new Error('Reminder title must be less than 100 characters');
+    }
+
+    // Validate description length
+    if (input.description && input.description.length > 500) {
+      throw new Error('Reminder description must be less than 500 characters');
+    }
+  }
+
+  private async scheduleReminderNotification(reminder: Reminder): Promise<void> {
+    try {
+      const reminderDateTime = new Date(`${reminder.reminderDate}T${reminder.reminderTime}`);
+      const now = new Date();
+      
+      // Only schedule if the reminder is in the future
+      if (reminderDateTime > now) {
+        // In a real implementation, you would integrate with a job scheduler
+        // For now, we'll use the existing notification system
+        console.log(`Scheduling reminder notification for ${reminderDateTime.toISOString()}`);
+        
+        // You could integrate with your existing CRON job system here
+        // or use a service like Bull Queue, Agenda.js, or similar
+      }
+    } catch (error) {
+      console.error('Error scheduling reminder notification:', error);
+      // Don't throw error here as the reminder was created successfully
+    }
+  }
+
+  // Get reminders due for notification (for CRON job integration)
+  async getRemindersDueForNotification(): Promise<Reminder[]> {
+    try {
+      const now = new Date();
+      const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes buffer
+      
+      // Use a simpler approach - get all active reminders and filter in memory
+      // This avoids complex GraphQL date filtering
+      const data = await executeQuery(GET_ALL_ACTIVE_REMINDERS, {});
+      const allReminders = data.remindersList?.items || [];
+      
+      // Filter reminders that are due within the next 5 minutes
+      const dueReminders = allReminders.filter((reminder: Reminder) => {
+        // Handle both old time format and new DateTime format
+        let reminderDateTime: Date;
+        if (reminder.reminderTime.includes('T')) {
+          // New DateTime format
+          reminderDateTime = new Date(reminder.reminderTime);
+        } else {
+          // Old time format - combine with date
+          reminderDateTime = new Date(`${reminder.reminderDate}T${reminder.reminderTime}`);
+        }
+        return reminderDateTime <= fiveMinutesFromNow && reminderDateTime > now;
+      });
+      
+      return dueReminders;
+    } catch (error) {
+      console.error('Error fetching reminders due for notification:', error);
+      return [];
+    }
+  }
+
+  // Process recurring reminders (for CRON job integration)
+  async processRecurringReminders(): Promise<void> {
+    try {
+      const recurringReminders = await this.getRecurringRemindersToProcess();
+      
+      for (const reminder of recurringReminders) {
+        await this.createNextRecurringReminder(reminder);
+      }
+    } catch (error) {
+      console.error('Error processing recurring reminders:', error);
+    }
+  }
+
+  private async getRecurringRemindersToProcess(): Promise<Reminder[]> {
+    try {
+      const now = new Date();
+      // Get all active reminders and filter for recurring ones that are due
+      const data = await executeQuery(GET_ALL_ACTIVE_REMINDERS, {});
+      const allReminders = data.remindersList?.items || [];
+      
+      // Filter for recurring reminders that are due
+      const recurringDueReminders = allReminders.filter((reminder: Reminder) => {
+        const reminderDateTime = new Date(`${reminder.reminderDate}T${reminder.reminderTime}`);
+        return reminder.isRecurring && reminderDateTime <= now;
+      });
+      
+      return recurringDueReminders;
+    } catch (error) {
+      console.error('Error fetching recurring reminders to process:', error);
+      return [];
+    }
+  }
+
+  private async createNextRecurringReminder(originalReminder: Reminder): Promise<void> {
+    try {
+      // Handle both old time format and new DateTime format
+      let currentDateTime: Date;
+      if (originalReminder.reminderTime.includes('T')) {
+        // New DateTime format
+        currentDateTime = new Date(originalReminder.reminderTime);
+      } else {
+        // Old time format - combine with date
+        currentDateTime = new Date(`${originalReminder.reminderDate}T${originalReminder.reminderTime}`);
+      }
+      const nextDateTime = this.calculateNextRecurrence(currentDateTime, originalReminder.recurringPattern!);
+      
+      const nextReminderInput: CreateReminderInput = {
+        title: originalReminder.title,
+        description: originalReminder.description,
+        reminderDate: nextDateTime.toISOString().split('T')[0],
+        reminderTime: nextDateTime.toTimeString().split(' ')[0].substring(0, 5),
+        isRecurring: true,
+        recurringPattern: originalReminder.recurringPattern
+      };
+
+      await this.createReminder(nextReminderInput, originalReminder.userId);
+      
+      // Mark original reminder as completed or update its next occurrence
+      await this.updateReminder(originalReminder.id, {
+        reminderDate: nextDateTime.toISOString().split('T')[0],
+        reminderTime: nextDateTime.toTimeString().split(' ')[0].substring(0, 5)
+      });
+    } catch (error) {
+      console.error('Error creating next recurring reminder:', error);
+    }
+  }
+
+  private calculateNextRecurrence(currentDateTime: Date, pattern: string): Date {
+    const nextDateTime = new Date(currentDateTime);
+    
+    switch (pattern) {
+      case 'daily':
+        nextDateTime.setDate(nextDateTime.getDate() + 1);
+        break;
+      case 'weekly':
+        nextDateTime.setDate(nextDateTime.getDate() + 7);
+        break;
+      case 'monthly':
+        nextDateTime.setMonth(nextDateTime.getMonth() + 1);
+        break;
+      case 'yearly':
+        nextDateTime.setFullYear(nextDateTime.getFullYear() + 1);
+        break;
+      default:
+        nextDateTime.setDate(nextDateTime.getDate() + 1); // Default to daily
+    }
+    
+    return nextDateTime;
   }
 
   // Get todo statistics for dashboard (optimized to use single query)
