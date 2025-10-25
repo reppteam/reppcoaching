@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { convertLocalToUTC, debugTimezoneInfo } from '../utils/timezoneUtils';
 import {
   TodoItem,
   Reminder,
@@ -217,8 +218,11 @@ class TodoService {
       // Validate reminder input
       this.validateReminderInput(input);
 
-      // Combine date and time into proper DateTime format with timezone indicator
-      const reminderDateTime = `${input.reminderDate}T${input.reminderTime}:00Z`;
+      // Use timezone utilities for proper conversion
+      const reminderDateTime = convertLocalToUTC(input.reminderDate, input.reminderTime);
+      
+      // Debug timezone conversion
+      debugTimezoneInfo(input.reminderDate, input.reminderTime);
       
       const reminderData = {
         title: input.title,

@@ -3418,7 +3418,7 @@ export const eightbaseService = {
           message: input.message,
           priority: input.priority,
           isRead: false,
-          student: { connect: { id: input.studentId } },
+          user: { connect: { id: input.studentId } }, // Use user instead of userId
           coach: { connect: { id: coachRecordId } }
         }
       });

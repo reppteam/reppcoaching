@@ -323,7 +323,7 @@ class UserInvitationService {
             resetError: auth0User.resetError
           }
         }],
-        from: { email: process.env.REACT_APP_SENDGRID_FROM_EMAIL || 'noreply@yourdomain.com', name: 'Real Estate Photographer Pro' },
+        from: { email: "hello@repplaunch.com", name: 'Real Estate Photographer Pro' },
         template_id: this.getTemplateId(invitationData.role)
       };
 

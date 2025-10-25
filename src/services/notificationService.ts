@@ -22,21 +22,14 @@ export class NotificationService {
    */
   async getStoredNotifications(userId: string): Promise<Notification[]> {
     try {
-      // Convert User ID to Student ID
-      const studentId = await eightbaseService.getStudentIdFromUserId(userId);
-      if (!studentId) {
-        console.error('No student record found for user:', userId);
-        return [];
-      }
-
-      console.log('🔍 Notifications - Using Student ID:', studentId, 'for User ID:', userId);
+      console.log('🔍 Notifications - Using User ID:', userId);
 
       const { data } = await client.query({
         query: gql`
-          query GetUserNotifications($studentId: ID!) {
+          query GetUserNotifications($userId: ID!) {
             notificationsList(
               filter: { 
-                student: { id: { equals: $studentId } }
+                user: { id: { equals: $userId } }
                 isRead: { equals: false }
               }
               sort: { createdAt: DESC }
@@ -61,7 +54,7 @@ export class NotificationService {
             }
           }
         `,
-        variables: { studentId: studentId },
+        variables: { userId: userId },
       });
 
       return data?.notificationsList?.items?.map((n: any) => ({
@@ -142,7 +135,7 @@ export class NotificationService {
    * Get dashboard stats - simplified version without database queries
    * Returns default stats since we removed the complex data fetching
    */
-  async getDashboardStats(studentId: string): Promise<{
+  async getDashboardStats(userId: string): Promise<{
     totalReports: number;
     totalLeads: number;
     reportsThisWeek: number;
